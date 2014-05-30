@@ -93,7 +93,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			File imagesFolder = new File(userHome + File.separator + ".gp2srv" + File.separator + "img");
 			imagesFolder.mkdirs();
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
-			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this)), "/static/*");
+			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
 			context.addServlet(new ServletHolder(new AdminServlet(this)), "/admin/*");
 			context.setErrorHandler(new ErrorHandler() {
 				private AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
