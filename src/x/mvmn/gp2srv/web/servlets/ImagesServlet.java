@@ -17,8 +17,6 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 
 	private static final long serialVersionUID = -2923068775778250752L;
 
-	private static final String DEFAULT_CONTENT_TYPE = "image/jpeg";
-
 	// private final File imagesFolder;
 	private final String imagesFolderCanonicalPath;
 
@@ -50,12 +48,11 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 			} else {
 				result = targetFile;
 				response.setStatus(HttpServletResponse.SC_OK);
-				response.setContentType(DEFAULT_CONTENT_TYPE);
+				MimeTypesHelper.setContentType(response, path);
 			}
 		} catch (Exception e) {
 			result = null;
-			// TODO: logging
-			e.printStackTrace();
+			logger.error(e);
 			returnInternalError(request, response);
 		}
 		return result;
@@ -76,8 +73,7 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 			try {
 				serveFile(result, request, response);
 			} catch (Exception e) {
-				// TODO: logging
-				e.printStackTrace();
+				logger.error(e);
 				returnInternalError(request, response);
 			}
 		}

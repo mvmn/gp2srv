@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>${errorCode}: ${errorMessage}.</title>
+		<title>Error ${errorCode} $!{errorMessage}.</title>
 		<link rel="stylesheet" type="text/css" href="/static/default.css">
 	</head>
 	<body class="errorPage">

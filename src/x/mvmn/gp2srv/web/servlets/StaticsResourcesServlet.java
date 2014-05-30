@@ -31,9 +31,11 @@ public class StaticsResourcesServlet extends AbstractErrorHandlingServlet {
 			if (resourceInputStream == null) {
 				returnNotFound(request, response);
 			} else {
+				MimeTypesHelper.setContentType(response, path);
 				IOUtils.copy(resourceInputStream, response.getOutputStream());
 			}
 		} catch (Exception e) {
+			logger.error(e);
 			returnInternalError(request, response);
 		}
 	}

@@ -56,6 +56,7 @@ public abstract class HttpServletWithTemplates extends HttpServlet {
 	}
 
 	public void serveTempalteUTF8(String tempalteName, Context context, HttpServletResponse response) throws IOException {
+		response.setContentType("text/html");
 		Writer writer = new OutputStreamWriter(response.getOutputStream(), "UTF-8");
 		getTemplateEngine().renderTemplate(tempalteName, "UTF-8", context, writer);
 		writer.flush();
@@ -75,6 +76,7 @@ public abstract class HttpServletWithTemplates extends HttpServlet {
 	}
 
 	public void serveTempalte(String tempalteName, String encoding, Context context, HttpServletResponse response) throws IOException {
+		response.setContentType("text/html");
 		Writer writer = new OutputStreamWriter(response.getOutputStream(), encoding);
 		getTemplateEngine().renderTemplate(tempalteName, encoding, context, writer);
 		writer.flush();
