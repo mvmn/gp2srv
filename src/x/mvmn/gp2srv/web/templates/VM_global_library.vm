@@ -1,0 +1,3 @@
+#macro(testGlobalMacro)
+	Hi there from testGlobalMacro. 
+#end

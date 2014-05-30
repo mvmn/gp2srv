@@ -1,0 +1,27 @@
+body {
+	font-family: Helvetica, Sans-Serif;
+}
+
+*, *:before, *:after {
+	-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+ 
+.fullWidth {
+	width: 100%;
+}
+
+.httpErrorHead {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+	font-size: 30pt;
+	padding: 14pt;
+}
+
+.httpErrorText {
+	border: solid 1px black;
+	background-color: white;
+	color: black;
+	padding: 10pt;
+	font-size: 16pt;
+}

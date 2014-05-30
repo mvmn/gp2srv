@@ -1,0 +1,12 @@
+<html>
+	<head>
+		<title>${errorCode}: ${errorMessage}.</title>
+		<link rel="stylesheet" type="text/css" href="/static/default.css">
+	</head>
+	<body class="gp2srvHttpError">
+		<div class="fullWidth">
+			<div class="httpErrorHead">ERROR $errorCode</div>
+			<div class="httpErrorText"><b>$!{request.contextPath}$!{request.servletPath}$!{request.pathInfo}</b> $!{errorMessage}.</div>
+		</div>
+	</body>
+</html>

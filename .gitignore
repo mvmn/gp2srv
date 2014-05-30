@@ -1,0 +1,23 @@
+.classpath
+.project
+.settings/
+bin/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Submodules #
+##############
+MvmnJavaLangUtil/
+SimpleEventBus-API/
+SimpleEventBus/
+
+/target
