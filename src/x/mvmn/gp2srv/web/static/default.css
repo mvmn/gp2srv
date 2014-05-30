@@ -2,26 +2,38 @@ body {
 	font-family: Helvetica, Sans-Serif;
 }
 
-*, *:before, *:after {
-	-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+*,*:before,*:after {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 }
- 
+
 .fullWidth {
 	width: 100%;
 }
 
-.httpErrorHead {
+.pageHead {
 	background-color: black;
 	color: white;
 	font-weight: bold;
 	font-size: 30pt;
 	padding: 14pt;
+	text-transform:uppercase;
 }
 
-.httpErrorText {
+.pageSubHead {
 	border: solid 1px black;
 	background-color: white;
 	color: black;
 	padding: 10pt;
 	font-size: 16pt;
+}
+
+.errorPage .pageHead {
+	background-color: red;
+}
+
+.errorPage .pageSubHead {
+	border: solid 1px red;
+	color: red;
 }

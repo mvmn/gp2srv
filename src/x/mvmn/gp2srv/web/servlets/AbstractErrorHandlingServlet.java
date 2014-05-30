@@ -25,17 +25,35 @@ public abstract class AbstractErrorHandlingServlet extends HttpServletWithTempla
 
 	protected void returnForbidden(HttpServletRequest request, HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-		serveTempalteUTF8Safely("forbidden.vm", request, response, logger);
+		serveGenericErrorPage(request, response, HttpServletResponse.SC_FORBIDDEN, "forbidden");
 	}
 
 	protected void returnInternalError(HttpServletRequest request, HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		serveTempalteUTF8Safely("internalerror.vm", request, response, logger);
+		serveGenericErrorPage(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal server error");
 	}
 
 	protected void returnNotFound(HttpServletRequest request, HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-		serveTempalteUTF8Safely("notfound.vm", request, response, logger);
+		serveGenericErrorPage(request, response, HttpServletResponse.SC_NOT_FOUND, "not found");
+	}
+
+	public void serveGenericErrorPage(HttpServletRequest request, HttpServletResponse response, int errorCode, String errorMessage) {
+		VelocityContext context = new VelocityContext();
+		if (errorMessage == null && errorCode == 404) {
+			errorMessage = "not found";
+		}
+		context.put("request", request);
+		context.put("response", response);
+		context.put("errorCode", errorCode);
+		context.put("errorMessage", errorMessage);
+		try {
+			Writer writer = response.getWriter();
+			getTemplateEngine().renderTemplate("error.vm", "UTF-8", context, writer);
+			writer.flush();
+		} catch (IOException e) {
+			logger.error(e);
+		}
 	}
 
 	public void serveGenericErrorPage(HttpServletRequest request, Writer writer, int errorCode, String errorMessage) {

@@ -1,0 +1,12 @@
+<html>
+	<head>
+		<title>GP2Srv Admin.</title>
+		<link rel="stylesheet" type="text/css" href="/static/default.css">
+	</head>
+	<body class="adminPage">
+		<div class="fullWidth">
+			<div class="pageHead">Success</div>
+			<div class="pageSubHead">$!{timestamp} - <b>$!{message}</b></div>
+		</div>
+	</body>
+</html>

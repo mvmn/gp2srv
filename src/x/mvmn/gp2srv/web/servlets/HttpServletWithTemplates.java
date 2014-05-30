@@ -47,6 +47,14 @@ public abstract class HttpServletWithTemplates extends HttpServlet {
 		serveTempalteUTF8(tempalteName, createContext(request, response), response);
 	}
 
+	public void serveTempalteUTF8Safely(String tempalteName, Context context, HttpServletResponse response, Logger logger) {
+		try {
+			serveTempalteUTF8(tempalteName, context, response);
+		} catch (Exception e) {
+			logger.error("Error rendering template " + tempalteName, e);
+		}
+	}
+
 	public void serveTempalteUTF8(String tempalteName, Context context, HttpServletResponse response) throws IOException {
 		Writer writer = new OutputStreamWriter(response.getOutputStream(), "UTF-8");
 		getTemplateEngine().renderTemplate(tempalteName, "UTF-8", context, writer);
