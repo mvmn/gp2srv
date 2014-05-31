@@ -1,5 +1,6 @@
 body {
 	font-family: Helvetica, Sans-Serif;
+	font-size: 16pt;
 }
 
 *,*:before,*:after {
@@ -36,4 +37,9 @@ body {
 .errorPage .pageSubHead {
 	border: solid 1px red;
 	color: red;
+}
+
+.adminPage .actionLink {
+	font-size: 14pt;
+	line-height: 30pt;	
 }

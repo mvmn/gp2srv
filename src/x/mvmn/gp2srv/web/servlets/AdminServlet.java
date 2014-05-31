@@ -21,12 +21,12 @@ public class AdminServlet extends AbstractErrorHandlingServlet {
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+		Context context = createContext(request, response);
 		if ("/rst".equals(request.getPathInfo())) {
 			gPhoto2Server.reReadTemplates();
-			Context context = createContext(request, response);
-			context.put("timestamp", DateHelper.getDateSortFriendlyStr());
+			context.put("commandSuccess", true);
 			context.put("message", "Templates reloaded");
-			serveTempalteUTF8Safely("admin.vm", context, response, logger);
 		}
+		serveTempalteUTF8Safely("admin.vm", context, response, logger);
 	}
 }

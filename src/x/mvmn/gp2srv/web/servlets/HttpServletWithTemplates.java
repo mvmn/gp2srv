@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 
+import x.mvmn.gp2srv.web.service.velocity.StaticToolsHelper;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
@@ -30,6 +31,7 @@ public abstract class HttpServletWithTemplates extends HttpServlet {
 
 	public Context createContext(HttpServletRequest request, HttpServletResponse response) {
 		Context result = new VelocityContext();
+		StaticToolsHelper.populateTools(result);
 		result.put("request", request);
 		result.put("response", response);
 		return result;
