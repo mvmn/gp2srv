@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import x.mvmn.gp2srv.GPhoto2Server;
-import x.mvmn.lang.util.DateHelper;
 
 public class AdminServlet extends AbstractErrorHandlingServlet {
 
