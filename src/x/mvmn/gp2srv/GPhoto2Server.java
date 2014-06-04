@@ -15,6 +15,10 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import x.mvmn.gp2srv.service.ExecService;
+import x.mvmn.gp2srv.service.PathFinderHelper;
+import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
+import x.mvmn.gp2srv.service.gphoto2.GPhoto2ExecService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
@@ -46,32 +50,53 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 				throw new RuntimeException("Unable to parse port parameter as integer: '" + portOptionVal + "'");
 			}
 		}
-		new GPhoto2Server(port).start().join();
+		final String gphoto2path;
+		if (cliOptions.hasOption("gphoto2path") && cliOptions.getOption("gphoto2path").getValue() != null
+				&& cliOptions.getOption("gphoto2path").getValue().trim().length() > 0) {
+			gphoto2path = cliOptions.getOption("gphoto2path").getValue().trim();
+		} else {
+			gphoto2path = PathFinderHelper.findInPath("gphoto2", true).getAbsolutePath();
+		}
+		new GPhoto2Server(gphoto2path, port).start().join();
+	}
+
+	public GPhoto2Server(String pathToGphoto2) {
+		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT);
 	}
 
 	public GPhoto2Server() {
-		this(DEFAULT_CONTEXT_PATH, DEFAULT_PORT);
+		this(null, DEFAULT_CONTEXT_PATH, DEFAULT_PORT);
 	}
 
-	public GPhoto2Server(String contextPath) {
-		this(contextPath, DEFAULT_PORT);
+	public GPhoto2Server(String pathToGphoto2, Integer port) {
+		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, port);
 	}
 
 	public GPhoto2Server(Integer port) {
-		this(DEFAULT_CONTEXT_PATH, port);
+		this(null, DEFAULT_CONTEXT_PATH, port);
 	}
 
 	private final Server server;
+	private final Logger logger;
 	private volatile TemplateEngine templateEngine;
 	private final VelocityContextService contextService;
-	private final Logger logger;
+	private final GPhoto2CommandService gphoto2CommandService;
+	private final String pathToGphoto2;
 
-	public GPhoto2Server(String contextPath, Integer port) {
+	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port) {
 		this.logger = makeLogger();
 
 		logger.info("Initializing...");
 
 		try {
+			if (pathToGphoto2 == null) {
+				pathToGphoto2 = PathFinderHelper.findInPath("gphoto2", true).getAbsolutePath();
+				if (pathToGphoto2 == null) {
+					throw new RuntimeException("Unable to find gphoto2 in path.");
+				}
+			}
+			this.pathToGphoto2 = pathToGphoto2;
+
 			if (contextPath == null) {
 				contextPath = DEFAULT_CONTEXT_PATH;
 			}
@@ -88,10 +113,13 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 			context.setContextPath(contextPath);
 			String userHome = System.getProperty("user.home");
-			// File appHomeFolder = new File(userHome + File.separator + ".gp2srv");
-			// appHomeFolder.mkdir();
+			File appHomeFolder = new File(userHome + File.separator + ".gp2srv");
+			appHomeFolder.mkdir();
 			File imagesFolder = new File(userHome + File.separator + ".gp2srv" + File.separator + "img");
 			imagesFolder.mkdirs();
+
+			this.gphoto2CommandService = new GPhoto2CommandService(new GPhoto2ExecService(new ExecService(logger), pathToGphoto2, appHomeFolder, imagesFolder));
+
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
 			context.addServlet(new ServletHolder(new AdminServlet(this)), "/admin/*");
@@ -162,5 +190,9 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	@Override
 	public TemplateEngine provide() {
 		return templateEngine;
+	}
+
+	public String getPathToGphoto2() {
+		return pathToGphoto2;
 	}
 }
