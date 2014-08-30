@@ -22,7 +22,8 @@ import x.mvmn.gp2srv.service.gphoto2.GPhoto2ExecService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
-import x.mvmn.gp2srv.web.servlets.AdminServlet;
+import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
+import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.ImagesServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.lang.util.Provider;
@@ -79,7 +80,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final Server server;
 	private final Logger logger;
 	private volatile TemplateEngine templateEngine;
-	private final VelocityContextService contextService;
+	private final VelocityContextService velocityContextService;
 	private final GPhoto2CommandService gphoto2CommandService;
 	private final String pathToGphoto2;
 
@@ -105,7 +106,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			}
 
 			this.templateEngine = makeTemplateEngine();
-			this.contextService = new VelocityContextService();
+			this.velocityContextService = new VelocityContextService();
 
 			this.server = new Server(port);
 			this.server.setStopAtShutdown(true);
@@ -123,14 +124,15 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
-			context.addServlet(new ServletHolder(new AdminServlet(this)), "/admin/*");
+			context.addServlet(new ServletHolder(new CameraControlServlet(gphoto2CommandService, velocityContextService, this, logger)), "/");
+			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
 			context.setErrorHandler(new ErrorHandler() {
 				private AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
 					private static final long serialVersionUID = -30520483617261093L;
 				};
 
 				@Override
-				protected void handleErrorPage(HttpServletRequest request, Writer writer, int code, String message) {
+				protected void handleErrorPage(final HttpServletRequest request, final Writer writer, final int code, final String message) {
 					eh.serveGenericErrorPage(request, writer, code, message);
 				}
 			});
@@ -159,9 +161,9 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	}
 
 	protected TemplateEngine makeTemplateEngine() throws IOException {
-		Map<String, String> templatesRegistrations = new HashMap<String, String>();
+		final Map<String, String> templatesRegistrations = new HashMap<String, String>();
 		{
-			Properties templatesListProps = new Properties();
+			final Properties templatesListProps = new Properties();
 			templatesListProps.load(GPhoto2Server.class.getResourceAsStream(TemplateEngine.DEFAULT_TEMPLATES_CLASSPATH_PREFIX + "templates_list.properties"));
 			for (Object templateNameObj : templatesListProps.keySet()) {
 				String key = templateNameObj.toString();

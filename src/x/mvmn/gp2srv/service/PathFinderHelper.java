@@ -4,7 +4,7 @@ import java.io.File;
 
 public class PathFinderHelper {
 
-	public static File findInPath(String name, boolean tryCurrentDir) {
+	public static File findInPath(final String name, final boolean tryCurrentDir) {
 		File result = null;
 		FIND_SEQ: {
 			if (tryCurrentDir) {

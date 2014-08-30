@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>GP2Srv Admin.</title>
+		<title>GP2Srv dev mode.</title>
 		<link rel="stylesheet" type="text/css" href="/static/default.css">
 	</head>
 	<body class="adminPage">
@@ -10,13 +10,13 @@
 				<div class="pageSubHead">
 					$!toolDateHelper.getDateSortFriendlyStr() - <b>$!{message}</b>
 					<div class="actionLink"><a href="">Repeat</a></div>
-					<div class="actionLink backLink"><a href="$!{request.contextPath}/admin">Go back</a></div>
+					<div class="actionLink backLink"><a href="$!{request.contextPath}/devmode">Go back</a></div>
 				</div>
 			#else
 				<div class="pageHead">Admin</div>
 				<div class="pageSubHead">
 					Choose action
-					<div class="actionLink"><a href="$!{request.contextPath}/admin/rst">Re-read templates</a></div>
+					<div class="actionLink"><a href="$!{request.contextPath}/devmode/rst">Re-read templates</a></div>
 				</div>
 			#end
 		</div>
