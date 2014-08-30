@@ -15,7 +15,7 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import x.mvmn.gp2srv.service.ExecService;
+import x.mvmn.gp2srv.service.ExecServiceImpl;
 import x.mvmn.gp2srv.service.PathFinderHelper;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2ExecService;
@@ -118,7 +118,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			File imagesFolder = new File(userHome + File.separator + ".gp2srv" + File.separator + "img");
 			imagesFolder.mkdirs();
 
-			this.gphoto2CommandService = new GPhoto2CommandService(new GPhoto2ExecService(new ExecService(logger), pathToGphoto2, appHomeFolder, imagesFolder));
+			this.gphoto2CommandService = new GPhoto2CommandService(new GPhoto2ExecService(new ExecServiceImpl(logger), pathToGphoto2, appHomeFolder,
+					imagesFolder));
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
