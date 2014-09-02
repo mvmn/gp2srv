@@ -10,6 +10,8 @@ public interface Logger {
 
 	public LogLevel getLevel();
 
+	public boolean shouldLog(LogLevel logLevel);
+
 	public Logger log(LogLevel level, String text);
 
 	public Logger log(LogLevel level, String text, Throwable t);
