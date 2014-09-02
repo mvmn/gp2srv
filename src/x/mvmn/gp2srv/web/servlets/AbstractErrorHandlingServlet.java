@@ -18,27 +18,27 @@ public abstract class AbstractErrorHandlingServlet extends HttpServletWithTempla
 
 	protected final Logger logger;
 
-	public AbstractErrorHandlingServlet(Provider<TemplateEngine> templateEngineProvider, Logger logger) {
+	public AbstractErrorHandlingServlet(final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
 		super(templateEngineProvider);
 		this.logger = logger;
 	}
 
-	protected void returnForbidden(HttpServletRequest request, HttpServletResponse response) {
+	protected void returnForbidden(final HttpServletRequest request, final HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		serveGenericErrorPage(request, response, HttpServletResponse.SC_FORBIDDEN, "forbidden");
 	}
 
-	protected void returnInternalError(HttpServletRequest request, HttpServletResponse response) {
+	protected void returnInternalError(final HttpServletRequest request, final HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		serveGenericErrorPage(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal server error");
 	}
 
-	protected void returnNotFound(HttpServletRequest request, HttpServletResponse response) {
+	protected void returnNotFound(final HttpServletRequest request, final HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		serveGenericErrorPage(request, response, HttpServletResponse.SC_NOT_FOUND, "not found");
 	}
 
-	public void serveGenericErrorPage(HttpServletRequest request, HttpServletResponse response, int errorCode, String errorMessage) {
+	public void serveGenericErrorPage(final HttpServletRequest request, final HttpServletResponse response, final int errorCode, String errorMessage) {
 		VelocityContext context = new VelocityContext();
 		if (errorMessage == null && errorCode == 404) {
 			errorMessage = "not found";
@@ -56,7 +56,7 @@ public abstract class AbstractErrorHandlingServlet extends HttpServletWithTempla
 		}
 	}
 
-	public void serveGenericErrorPage(HttpServletRequest request, Writer writer, int errorCode, String errorMessage) {
+	public void serveGenericErrorPage(final HttpServletRequest request, final Writer writer, final int errorCode, String errorMessage) {
 		VelocityContext context = new VelocityContext();
 		if (errorMessage == null && errorCode == 404) {
 			errorMessage = "not found";

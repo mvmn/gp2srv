@@ -4,108 +4,123 @@ import x.mvmn.log.api.Logger;
 
 public abstract class AbstractLogger implements Logger {
 
+	protected volatile LogLevel level = LogLevel.INFO;
+
 	@Override
-	public Logger trace(String text) {
+	public Logger trace(final String text) {
 		return log(LogLevel.TRACE, text);
 	}
 
 	@Override
-	public Logger trace(String text, Throwable t) {
+	public Logger trace(final String text, final Throwable t) {
 		return log(LogLevel.TRACE, text, t);
 	}
 
 	@Override
-	public Logger trace(Throwable t) {
+	public Logger trace(final Throwable t) {
 		return log(LogLevel.TRACE, t);
 	}
 
 	@Override
-	public Logger debug(String text) {
+	public Logger debug(final String text) {
 		return log(LogLevel.DEBUG, text);
 	}
 
 	@Override
-	public Logger debug(String text, Throwable t) {
+	public Logger debug(final String text, final Throwable t) {
 		return log(LogLevel.DEBUG, text, t);
 	}
 
 	@Override
-	public Logger debug(Throwable t) {
+	public Logger debug(final Throwable t) {
 		return log(LogLevel.DEBUG, t);
 	}
 
 	@Override
-	public Logger info(String text) {
+	public Logger info(final String text) {
 		return log(LogLevel.INFO, text);
 	}
 
 	@Override
-	public Logger info(String text, Throwable t) {
+	public Logger info(final String text, final Throwable t) {
 		return log(LogLevel.INFO, text, t);
 	}
 
 	@Override
-	public Logger info(Throwable t) {
+	public Logger info(final Throwable t) {
 		return log(LogLevel.INFO, t);
 	}
 
 	@Override
-	public Logger warn(String text) {
+	public Logger warn(final String text) {
 		return log(LogLevel.WARN, text);
 	}
 
 	@Override
-	public Logger warn(String text, Throwable t) {
+	public Logger warn(final String text, final Throwable t) {
 		return log(LogLevel.WARN, text, t);
 	}
 
 	@Override
-	public Logger warn(Throwable t) {
+	public Logger warn(final Throwable t) {
 		return log(LogLevel.WARN, t);
 	}
 
 	@Override
-	public Logger error(String text) {
+	public Logger error(final String text) {
 		return log(LogLevel.ERROR, text);
 	}
 
 	@Override
-	public Logger error(String text, Throwable t) {
+	public Logger error(final String text, final Throwable t) {
 		return log(LogLevel.ERROR, text, t);
 	}
 
 	@Override
-	public Logger error(Throwable t) {
+	public Logger error(final Throwable t) {
 		return log(LogLevel.ERROR, t);
 	}
 
 	@Override
-	public Logger severe(String text) {
+	public Logger severe(final String text) {
 		return log(LogLevel.SEVERE, text);
 	}
 
 	@Override
-	public Logger severe(String text, Throwable t) {
+	public Logger severe(final String text, final Throwable t) {
 		return log(LogLevel.SEVERE, text, t);
 	}
 
 	@Override
-	public Logger severe(Throwable t) {
+	public Logger severe(final Throwable t) {
 		return log(LogLevel.SEVERE, t);
 	}
 
 	@Override
-	public Logger fatal(String text) {
+	public Logger fatal(final String text) {
 		return log(LogLevel.FATAL, text);
 	}
 
 	@Override
-	public Logger fatal(String text, Throwable t) {
+	public Logger fatal(final String text, final Throwable t) {
 		return log(LogLevel.FATAL, text, t);
 	}
 
 	@Override
-	public Logger fatal(Throwable t) {
+	public Logger fatal(final Throwable t) {
 		return log(LogLevel.FATAL, t);
+	}
+
+	public Logger setLevel(final LogLevel level) {
+		this.level = level;
+		return this;
+	}
+
+	public LogLevel getLevel() {
+		return level;
+	}
+
+	public boolean shouldLog(final LogLevel logLevel) {
+		return logLevel.ordinal() >= level.ordinal();
 	}
 }

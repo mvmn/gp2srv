@@ -1,6 +1,7 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
 import x.mvmn.gp2srv.service.ExecService.ExecCallback;
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 
 public class GPhoto2CommandService {
 
@@ -12,8 +13,10 @@ public class GPhoto2CommandService {
 
 	public <C extends GPhoto2Command> C executeCommand(final C command) {
 		try {
-			String output = gphoto2ExecService.execCommand(command.getCommandString(), command.getCommandParams());
-			command.submitRawOutput(output);
+			final ExecResult execResult = gphoto2ExecService.execCommand(command.getCommandString(), command.getCommandParams());
+			command.submitRawStandardOutput(execResult.getStandardOutput());
+			command.submitRawErrorOutput(execResult.getErrorOutput());
+			command.submitExitCode(execResult.getExitCode());
 		} catch (Throwable error) {
 			command.submitError(error);
 		}
@@ -23,16 +26,22 @@ public class GPhoto2CommandService {
 	public <C extends GPhoto2Command, CB extends GPhoto2CommandCallback<C>> void executeCommandAsync(final CB callback, final C command) {
 		gphoto2ExecService.execCommandAsync(new ExecCallback() {
 			@Override
-			public void processResult(String processOutput) {
-				command.submitRawOutput(processOutput);
+			public void processResult(final ExecResult execResult) {
+				command.submitRawStandardOutput(execResult.getStandardOutput());
+				command.submitRawErrorOutput(execResult.getErrorOutput());
+				command.submitExitCode(execResult.getExitCode());
 				callback.processResults(command);
 			}
 
 			@Override
-			public void processError(Throwable error) {
+			public void processError(final Throwable error) {
 				command.submitError(error);
 				callback.processResults(command);
 			}
 		}, command.getCommandString(), command.getCommandParams());
+	}
+
+	public boolean isProcessRunning() {
+		return gphoto2ExecService.isProcessRunning();
 	}
 }

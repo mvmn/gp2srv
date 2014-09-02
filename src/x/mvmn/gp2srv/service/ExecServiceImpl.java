@@ -2,6 +2,8 @@ package x.mvmn.gp2srv.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -11,7 +13,6 @@ import x.mvmn.log.api.Logger;
 
 public class ExecServiceImpl implements ExecService {
 
-	private volatile boolean processRunning = false;
 	private volatile Process currentProcess = null;
 
 	private final Object lockObject = new Object();
@@ -27,22 +28,44 @@ public class ExecServiceImpl implements ExecService {
 	 * 
 	 * @see x.mvmn.gp2srv.service.ExecService#execCommandSync(java.lang.String[], java.lang.String[], java.io.File)
 	 */
-	public String execCommandSync(final String[] command, final String[] envVars, final File dir) throws IOException {
-		String result;
+	public ExecResult execCommandSync(final String[] command, final String[] envVars, final File dir) throws IOException {
+		final String commandDebugInfo = "'" + Arrays.toString(command) + "' in dir '" + dir.getAbsolutePath() + "'.";
+		logger.debug("Command requested " + commandDebugInfo);
+		final StringBuilder standardOutput = new StringBuilder();
+		final StringBuilder errorOutput = new StringBuilder();
+		int processExitValue = 0;
 		synchronized (lockObject) {
+			logger.debug("Executing command " + commandDebugInfo);
 			currentProcess = Runtime.getRuntime().exec(command, envVars, dir);
-			processRunning = true;
+			final InputStream errorStream = currentProcess.getErrorStream();
+			final InputStream stdoutStream = currentProcess.getInputStream();
 
-			List<String> resultLines = IOUtils.readLines(currentProcess.getInputStream());
-			processRunning = false;
-			currentProcess = null;
-			StringBuilder resultBuilder = new StringBuilder();
-			for (String line : resultLines) {
-				resultBuilder.append(line).append("\n");
+			boolean processFinished = false;
+			while (!processFinished) {
+				final List<String> errorLines = IOUtils.readLines(errorStream);
+				for (String line : errorLines) {
+					errorOutput.append(line).append("\n");
+					logger.debug("Command " + commandDebugInfo + " ERROR output: " + line);
+				}
+				final List<String> resultLines = IOUtils.readLines(stdoutStream);
+				for (String line : resultLines) {
+					standardOutput.append(line).append("\n");
+					logger.debug("Command " + commandDebugInfo + " STANDARD output: " + line);
+				}
+				try {
+					processExitValue = currentProcess.exitValue();
+					processFinished = true;
+					logger.debug("Command " + commandDebugInfo + " process exited with code " + processExitValue);
+				} catch (IllegalThreadStateException e) {
+					processFinished = false; // superfluous here, but left to indicate the meaning of the code.
+				}
 			}
-			result = resultBuilder.toString();
+
+			currentProcess = null;
+			logger.debug("Command " + commandDebugInfo + " finished.");
 		}
-		return result;
+
+		return new ExecResult(standardOutput.toString(), errorOutput.toString(), processExitValue);
 	}
 
 	/*
@@ -56,7 +79,7 @@ public class ExecServiceImpl implements ExecService {
 			@Override
 			public void run() {
 				try {
-					final String result = execCommandSync(command, envVars, dir);
+					final ExecResult result = execCommandSync(command, envVars, dir);
 					if (callback != null) {
 						callback.processResult(result);
 					}
@@ -65,7 +88,7 @@ public class ExecServiceImpl implements ExecService {
 						try {
 							callback.processError(e);
 						} catch (Exception epe) {
-							StringBuilder commandBuilder = new StringBuilder();
+							final StringBuilder commandBuilder = new StringBuilder();
 							if (command == null) {
 								commandBuilder.append("null");
 							} else {
@@ -87,7 +110,7 @@ public class ExecServiceImpl implements ExecService {
 	 * @see x.mvmn.gp2srv.service.ExecService#isProcessRunning()
 	 */
 	public boolean isProcessRunning() {
-		return processRunning;
+		return currentProcess != null;
 	}
 
 	/*

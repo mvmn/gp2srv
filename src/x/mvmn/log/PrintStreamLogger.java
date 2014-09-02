@@ -19,13 +19,13 @@ public class PrintStreamLogger extends AbstractLogger {
 		return DateHelper.getDateSortFriendlyStr();
 	}
 
-	private String stacktraceToString(Throwable t) {
+	private String stacktraceToString(final Throwable t) {
 		StringWriter writer = new StringWriter();
 		t.printStackTrace(new PrintWriter(writer));
 		return writer.toString();
 	}
 
-	private String concatStr(String... strings) {
+	private String concatStr(final String... strings) {
 		StringBuilder result = new StringBuilder();
 		for (String str : strings) {
 			result.append(str);
@@ -34,20 +34,26 @@ public class PrintStreamLogger extends AbstractLogger {
 	}
 
 	@Override
-	public Logger log(LogLevel level, Throwable t) {
-		out.println(concatStr(getDateStr(), " - ", level.toString(), ":\n", stacktraceToString(t)));
+	public Logger log(final LogLevel level, final Throwable t) {
+		if (shouldLog(level)) {
+			out.println(concatStr(getDateStr(), " - ", level.toString(), ":\n", stacktraceToString(t)));
+		}
 		return this;
 	}
 
 	@Override
-	public Logger log(LogLevel level, String text, Throwable t) {
-		out.println(concatStr(getDateStr(), " - ", level.toString(), ": ", text, "\n", stacktraceToString(t)));
+	public Logger log(final LogLevel level, final String text, final Throwable t) {
+		if (shouldLog(level)) {
+			out.println(concatStr(getDateStr(), " - ", level.toString(), ": ", text, "\n", stacktraceToString(t)));
+		}
 		return this;
 	}
 
 	@Override
-	public Logger log(LogLevel level, String text) {
-		out.println(concatStr(getDateStr(), " - ", level.toString(), ": ", text));
+	public Logger log(final LogLevel level, final String text) {
+		if (shouldLog(level)) {
+			out.println(concatStr(getDateStr(), " - ", level.toString(), ": ", text));
+		}
 		return this;
 	}
 }

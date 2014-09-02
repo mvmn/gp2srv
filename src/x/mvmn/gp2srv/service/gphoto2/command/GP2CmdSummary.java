@@ -17,9 +17,4 @@ public class GP2CmdSummary extends AbstractGPhoto2Command {
 	public String[] getCommandParams() {
 		return null;
 	}
-
-	@Override
-	public void submitRawOutput(String output) {
-		super.submitRawOutput(output);
-	}
 }

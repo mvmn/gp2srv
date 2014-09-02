@@ -6,7 +6,7 @@
 	<body class="errorPage">
 		<div class="fullWidth">
 			<div class="pageHead">Error $errorCode</div>
-			<div class="pageSubHead"><b>$!{request.contextPath}$!{request.servletPath}$!{request.pathInfo}</b> $!{errorMessage}.</div>
+			<div class="pageSubHead"><b>$!{request.contextPath}$!{request.servletPath}$!{request.pathInfo}</b> #outputBr($errorMessage).</div>
 		</div>
 	</body>
 </html>

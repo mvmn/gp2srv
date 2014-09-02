@@ -5,9 +5,17 @@ public interface GPhoto2Command {
 
 	public String[] getCommandParams();
 
-	public void submitRawOutput(String output);
+	public void submitRawStandardOutput(String standardOutput);
+
+	public void submitRawErrorOutput(String errorOutput);
 
 	public void submitError(Throwable error);
 
-	public String getRawOutput();
+	public void submitExitCode(int exitCode);
+
+	public String getRawStandardOutput();
+
+	public String getRawErrorOutput();
+
+	public int getExitCode();
 }

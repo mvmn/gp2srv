@@ -1,0 +1,11 @@
+<html>
+	<head>
+		<title>GP2Srv dev mode.</title>
+		<link rel="stylesheet" type="text/css" href="/static/default.css">
+	</head>
+	<body>
+		<div class="statusLine">
+			#if($!commandIsBeingExecuted)
+				Camera command is being executed
+			#end
+		</div>

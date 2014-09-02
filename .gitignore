@@ -20,4 +20,8 @@ MvmnJavaLangUtil/
 SimpleEventBus-API/
 SimpleEventBus/
 
+# Maven #
+#########
 /target
+dependency-reduced-pom.xml
+

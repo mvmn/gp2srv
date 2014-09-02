@@ -9,7 +9,9 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -29,6 +31,7 @@ import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.PrintStreamLogger;
 import x.mvmn.log.api.Logger;
+import x.mvmn.log.api.Logger.LogLevel;
 
 public class GPhoto2Server implements Provider<TemplateEngine> {
 
@@ -37,9 +40,15 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 	public static void main(String[] args) throws Exception {
 		Integer port = null;
-		Options cliOptions = new Options();
-		if (cliOptions.hasOption("port")) {
-			String portOptionVal = cliOptions.getOption("port").getValue();
+		final Options cliOptions = new Options();
+
+		cliOptions.addOption("port", true, "HTTP port.");
+		cliOptions.addOption("gphoto2path", true, "Path to gphoto2 executable.");
+		cliOptions.addOption("logLevel", true, "Log level (TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL).");
+
+		final CommandLine commandLine = new PosixParser().parse(cliOptions, args);
+		if (commandLine.hasOption("port")) {
+			String portOptionVal = commandLine.getOptionValue("port");
 			try {
 				int parsedPort = Integer.parseInt(portOptionVal.trim());
 				if (parsedPort < 1 || parsedPort > 65535) {
@@ -48,33 +57,46 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 					port = parsedPort;
 				}
 			} catch (NumberFormatException e) {
-				throw new RuntimeException("Unable to parse port parameter as integer: '" + portOptionVal + "'");
+				throw new RuntimeException("Unable to parse port parameter as integer: '" + portOptionVal + "'.");
 			}
 		}
+
 		final String gphoto2path;
-		if (cliOptions.hasOption("gphoto2path") && cliOptions.getOption("gphoto2path").getValue() != null
-				&& cliOptions.getOption("gphoto2path").getValue().trim().length() > 0) {
-			gphoto2path = cliOptions.getOption("gphoto2path").getValue().trim();
+		if (commandLine.hasOption("gphoto2path") && commandLine.getOptionValue("gphoto2path") != null
+				&& commandLine.getOptionValue("gphoto2path").trim().length() > 0) {
+			gphoto2path = commandLine.getOptionValue("gphoto2path").trim();
 		} else {
 			gphoto2path = PathFinderHelper.findInPath("gphoto2", true).getAbsolutePath();
 		}
-		new GPhoto2Server(gphoto2path, port).start().join();
+
+		final LogLevel logLevel;
+		if (commandLine.hasOption("logLevel")) {
+			try {
+				logLevel = LogLevel.valueOf(commandLine.getOptionValue("logLevel").trim());
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to parse logLevel parameter: '" + cliOptions.getOption("logLevel").getValue() + "'.s");
+			}
+		} else {
+			logLevel = LogLevel.INFO;
+		}
+
+		new GPhoto2Server(gphoto2path, port, logLevel).start().join();
 	}
 
-	public GPhoto2Server(String pathToGphoto2) {
-		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT);
+	public GPhoto2Server(final String pathToGphoto2, final LogLevel logLevel) {
+		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel);
 	}
 
-	public GPhoto2Server() {
-		this(null, DEFAULT_CONTEXT_PATH, DEFAULT_PORT);
+	public GPhoto2Server(final LogLevel logLevel) {
+		this(null, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel);
 	}
 
-	public GPhoto2Server(String pathToGphoto2, Integer port) {
-		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, port);
+	public GPhoto2Server(String pathToGphoto2, Integer port, final LogLevel logLevel) {
+		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, port, logLevel);
 	}
 
-	public GPhoto2Server(Integer port) {
-		this(null, DEFAULT_CONTEXT_PATH, port);
+	public GPhoto2Server(Integer port, final LogLevel logLevel) {
+		this(null, DEFAULT_CONTEXT_PATH, port, logLevel);
 	}
 
 	private final Server server;
@@ -84,8 +106,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final GPhoto2CommandService gphoto2CommandService;
 	private final String pathToGphoto2;
 
-	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port) {
-		this.logger = makeLogger();
+	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port, final LogLevel logLevel) {
+		this.logger = makeLogger(logLevel);
 
 		logger.info("Initializing...");
 
@@ -152,8 +174,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		}
 	}
 
-	protected Logger makeLogger() {
-		return new PrintStreamLogger(System.out);
+	protected Logger makeLogger(final LogLevel logLevel) {
+		return new PrintStreamLogger(System.out).setLevel(logLevel);
 	}
 
 	public Logger getLogger() {

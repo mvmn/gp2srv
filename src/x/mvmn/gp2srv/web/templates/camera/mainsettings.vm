@@ -1,0 +1,63 @@
+#parse("camera/head.vm")
+#macro(showSettingSelector $cameraConfig $settingKey)
+	#set($configEntry = $cameraConfig.get($settingKey))
+	<div>
+		$configEntry.label
+		<select onchange="javascript:onsettingchange('$settingKey', this.options[this.selectedIndex].value)">
+			#foreach($choice in $configEntry.choices)
+				#set($count = $velocityCount - 1)
+				<option value="${count}"
+					#if($configEntry.value.toString().equals($choice.toString()))
+						selected="selected"
+					#end
+				>$choice</option>
+			#end
+		</select>
+	</div>
+#end
+<script>
+	function onsettingchange(key, value) {
+		document.forms["setsettingform"]["key"].value=key;
+		document.forms["setsettingform"]["value"].value=value;
+		document.forms["setsettingform"].submit();
+	}
+</script>
+<div class="fullWidth">
+	<form id="setsettingform" action="/mainsettingset" method="POST" style="display: none">
+		<input type="hidden" name="key" />
+		<input type="hidden" name="value" />
+	</form>
+	<div class="pageHead">Camera Control</div>
+	<div class="pageSubHead">
+		#parse("camera/navigation.vm")
+	</div>
+	<div>
+		<div>Camera: $!{cameraConfig.get("/main/status/cameramodel").value}</div>
+		<div>Lens: $!{cameraConfig.get("/main/status/lensname").value}</div>
+	</div>
+	<hr/>
+	<div>
+		<div>Battery: $!{cameraConfig.get("/main/status/batterylevel").value}</div>
+		<div>Available shots: $!{cameraConfig.get("/main/status/availableshots").value}</div>
+		<div>Shutter counter: $!{cameraConfig.get("/main/status/shuttercounter").value}</div>
+	</div>
+	<hr/>
+	<div>
+		#showSettingSelector($cameraConfig "/main/capturesettings/shutterspeed")
+		#showSettingSelector($cameraConfig "/main/capturesettings/aperture")
+		#showSettingSelector($cameraConfig "/main/imgsettings/iso")
+		#showSettingSelector($cameraConfig "/main/settings/reviewtime")
+		#showSettingSelector($cameraConfig "/main/imgsettings/whitebalance")
+		#showSettingSelector($cameraConfig "/main/capturesettings/drivemode")
+		#showSettingSelector($cameraConfig "/main/capturesettings/meteringmode")
+		#showSettingSelector($cameraConfig "/main/capturesettings/focusmode")
+		#showSettingSelector($cameraConfig "/main/capturesettings/picturestyle")
+		#showSettingSelector($cameraConfig "/main/imgsettings/imageformat")
+		#showSettingSelector($cameraConfig "/main/imgsettings/colorspace")		
+	</div>
+	<hr/>
+	<div style="display: none">
+		$cameraConfig
+	</div>	
+</div>
+#parse("camera/foot.vm")

@@ -4,6 +4,7 @@ import java.io.File;
 
 import x.mvmn.gp2srv.service.ExecService;
 import x.mvmn.gp2srv.service.ExecService.ExecCallback;
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 
 public class GPhoto2ExecService {
 
@@ -24,20 +25,30 @@ public class GPhoto2ExecService {
 		this.imagesSubdir = imagesSubdir;
 	}
 
-	public String execCommand(String gp2Command, String... params) throws Exception {
-		return execService.execCommandSync(prepareParams(gp2Command, params), null, workingDir);
+	public ExecResult execCommand(String gp2Command, String... params) throws Exception {
+		return execService.execCommandSync(prepareParams(gp2Command, params), null, imagesSubdir);
 	}
 
 	public void execCommandAsync(ExecCallback callback, String gp2Command, String... params) {
-		execService.execCommandAsync(callback, prepareParams(gp2Command, params), null, workingDir);
+		execService.execCommandAsync(callback, prepareParams(gp2Command, params), null, imagesSubdir);
+	}
+
+	public boolean isProcessRunning() {
+		return execService.isProcessRunning();
+	}
+
+	public Process getCurrentProcess() {
+		return execService.getCurrentProcess();
 	}
 
 	protected String[] prepareParams(String gp2Command, String... params) {
 		String[] execParams = new String[params == null ? 2 : params.length + 2];
 		execParams[0] = pathToGphoto2;
 		execParams[1] = GP2COMMAND_PREFIX + gp2Command;
-		for (int i = 0; i < params.length; i++) {
-			execParams[i + 2] = params[i];
+		if (params != null) {
+			for (int i = 0; i < params.length; i++) {
+				execParams[i + 2] = params[i];
+			}
 		}
 		return execParams;
 	}

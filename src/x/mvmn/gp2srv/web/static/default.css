@@ -39,7 +39,7 @@ body {
 	color: red;
 }
 
-.adminPage .actionLink {
+.actionLink {
 	font-size: 14pt;
 	line-height: 30pt;	
 }

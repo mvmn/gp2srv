@@ -1,0 +1,18 @@
+#parse("camera/head.vm")
+
+<div class="fullWidth">
+	<div class="pageHead">Camera Control</div>
+	<div class="pageSubHead">
+		#parse("camera/navigation.vm")
+	</div>
+	#if(!($!commandExitCode == 0))
+		<div>Command failed (exit code $!commandExitCode)</div>
+	#end
+	<div>
+		#outputBr($commandResponseStderr)
+	</div>
+	<div>
+		#outputBr($commandResponseStdout)
+	</div>
+</div>
+#parse("camera/foot.vm")

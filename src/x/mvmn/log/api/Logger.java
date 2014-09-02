@@ -6,6 +6,10 @@ public interface Logger {
 		TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL
 	}
 
+	public Logger setLevel(LogLevel level);
+
+	public LogLevel getLevel();
+
 	public Logger log(LogLevel level, String text);
 
 	public Logger log(LogLevel level, String text, Throwable t);

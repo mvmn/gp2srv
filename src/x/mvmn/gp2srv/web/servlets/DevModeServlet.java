@@ -1,5 +1,7 @@
 package x.mvmn.gp2srv.web.servlets;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,7 +27,13 @@ public class DevModeServlet extends AbstractErrorHandlingServlet {
 			gPhoto2Server.reReadTemplates();
 			context.put("commandSuccess", true);
 			context.put("message", "Templates reloaded");
+			try {
+				response.sendRedirect(request.getContextPath() + "/devmode");
+			} catch (IOException e) {
+				logger.error(e);
+			}
+		} else {
+			serveTempalteUTF8Safely("devmode.vm", context, response, logger);
 		}
-		serveTempalteUTF8Safely("devmode.vm", context, response, logger);
 	}
 }

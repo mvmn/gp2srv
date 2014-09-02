@@ -1,0 +1,109 @@
+package x.mvmn.gp2srv.service.gphoto2.service;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+
+import x.mvmn.gp2srv.service.gphoto2.model.CameraConfigEntry;
+import x.mvmn.gp2srv.service.gphoto2.model.CameraConfigEntry.CameraConfigEntryType;
+
+public class ConfigParser {
+
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator") != null && System.getProperty("line.separator").length() > 0 ? System
+			.getProperty("line.separator") : "\n";
+	private static final String SEPARATOR = ": ";
+
+	public static CameraConfigEntry parseConfigEntry(final String configAsText) throws Exception {
+		final CameraConfigEntry[] results = parseConfigEntries(configAsText);
+
+		if (results != null && results.length == 1) {
+			return results[0];
+		} else {
+			throw new Exception("Error parsing config entries: " + results != null ? "expected one entry but got " + results.length : " results are null.");
+		}
+	}
+
+	public static CameraConfigEntry[] parseConfigEntries(final String configAsText) throws Exception {
+		final List<CameraConfigEntry> results = new LinkedList<CameraConfigEntry>();
+
+		final String[] lines = configAsText.split(LINE_SEPARATOR);
+
+		CameraConfigEntryBuilder builder = new CameraConfigEntryBuilder();
+
+		for (int i = 0; i < lines.length; i++) {
+			final String line = lines[i];
+			if (line.trim().length() > 0) {
+				if (!line.contains(SEPARATOR)) {
+					if (builder.key != null) {
+						results.add(builder.build());
+						builder = new CameraConfigEntryBuilder();
+						builder.key = line;
+					} else {
+						builder.key = line;
+					}
+				} else {
+					if (builder.key == null) {
+						throw new Exception(String.format("Unexpected line #%s: %s", i, line));
+					} else {
+						final int separatorIndex = line.indexOf(SEPARATOR);
+						final String configType = line.substring(0, separatorIndex);
+						final String configValue = line.substring(separatorIndex + SEPARATOR.length());
+						setSetting(builder, configType, configValue);
+					}
+				}
+			}
+		}
+		if (builder.key != null) {
+			results.add(builder.build());
+		}
+
+		return results.toArray(new CameraConfigEntry[results.size()]);
+	}
+
+	protected static void setSetting(final CameraConfigEntryBuilder builder, final String configType, final String configValue) throws Exception {
+		if (configType.equals("Type")) {
+			try {
+				builder.type = CameraConfigEntryType.valueOf(configValue.trim());
+			} catch (Exception e) {
+				throw new Exception("Unable to parse type value " + configValue);
+			}
+		} else if (configType.equals("Choice")) {
+			builder.choices.add(configValue.trim().substring(configValue.indexOf(" ") + 1));
+		} else if (configType.equals("Current")) {
+			builder.value = configValue;
+		} else if (configType.equals("Label")) {
+			builder.label = configValue;
+		} else if (configType.equals("Printable")) {
+			builder.printableValue = configValue;
+		}
+	}
+
+	protected static class CameraConfigEntryBuilder {
+		public String key = null;
+		public String label = null;
+		public String value = null;
+		public String printableValue = null;
+		public CameraConfigEntryType type = null;
+		public final List<String> choices = new LinkedList<String>();
+
+		public CameraConfigEntry build() {
+			return new CameraConfigEntry(key, label, value, printableValue, type, choices.size() > 0 ? choices.toArray(new String[choices.size()]) : null);
+		}
+	}
+
+	// TODO: convert to unit test
+	public static void main(String[] args) throws Exception {
+		List<String> lines = IOUtils.readLines(new FileInputStream(new File("/Users/mvmn/Documents/_docs/gphoto2/eos600d_allconfigs.txt")));
+		StringBuilder configAsText = new StringBuilder();
+		for (String line : lines) {
+			configAsText.append(line).append(LINE_SEPARATOR);
+		}
+		CameraConfigEntry[] cces = ConfigParser.parseConfigEntries(configAsText.toString());
+		for (CameraConfigEntry cce : cces) {
+			System.out.println(cce);
+		}
+	}
+}

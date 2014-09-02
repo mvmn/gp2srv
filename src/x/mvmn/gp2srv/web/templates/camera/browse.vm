@@ -1,0 +1,25 @@
+#parse("camera/head.vm")
+
+<div class="fullWidth">
+	<div class="pageHead">Camera Control</div>
+	<div class="pageSubHead">
+		#parse("camera/navigation.vm")
+	</div>
+	#foreach($filesInFolder in $filesList.byFolder.entrySet())
+		#if($filesInFolder.value.size()>0)
+		<div>
+			<b>$filesInFolder.key</b>
+			<div>
+				#foreach($fileRef in $filesInFolder.value)
+					<div>
+						<span>$fileRef.refId</span>
+						<span>$fileRef.filename</span>
+					</div>
+				#end
+			</div>
+			<hr/>
+		</div>
+		#end
+	#end
+</div>
+#parse("camera/foot.vm")
