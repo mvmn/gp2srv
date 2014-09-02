@@ -31,31 +31,32 @@
 	<div class="pageSubHead">
 		#parse("camera/navigation.vm")
 	</div>
-	<div>
-		<div>Camera: $!{cameraConfig.get("/main/status/cameramodel").value}</div>
-		<div>Lens: $!{cameraConfig.get("/main/status/lensname").value}</div>
+	<div class="pageContent">
+		<div>
+			<div>Camera: $!{cameraConfig.get("/main/status/cameramodel").value}</div>
+			<div>Lens: $!{cameraConfig.get("/main/status/lensname").value}</div>
+		</div>
+		<hr/>
+		<div>
+			<div>Battery: $!{cameraConfig.get("/main/status/batterylevel").value}</div>
+			<div>Available shots: $!{cameraConfig.get("/main/status/availableshots").value}</div>
+			<div>Shutter counter: $!{cameraConfig.get("/main/status/shuttercounter").value}</div>
+		</div>
+		<hr/>
+		<div>
+			#showSettingSelector($cameraConfig "/main/capturesettings/shutterspeed")
+			#showSettingSelector($cameraConfig "/main/capturesettings/aperture")
+			#showSettingSelector($cameraConfig "/main/imgsettings/iso")
+			#showSettingSelector($cameraConfig "/main/settings/reviewtime")
+			#showSettingSelector($cameraConfig "/main/imgsettings/whitebalance")
+			#showSettingSelector($cameraConfig "/main/capturesettings/drivemode")
+			#showSettingSelector($cameraConfig "/main/capturesettings/meteringmode")
+			#showSettingSelector($cameraConfig "/main/capturesettings/focusmode")
+			#showSettingSelector($cameraConfig "/main/capturesettings/picturestyle")
+			#showSettingSelector($cameraConfig "/main/imgsettings/imageformat")
+			#showSettingSelector($cameraConfig "/main/imgsettings/colorspace")		
+		</div>
 	</div>
-	<hr/>
-	<div>
-		<div>Battery: $!{cameraConfig.get("/main/status/batterylevel").value}</div>
-		<div>Available shots: $!{cameraConfig.get("/main/status/availableshots").value}</div>
-		<div>Shutter counter: $!{cameraConfig.get("/main/status/shuttercounter").value}</div>
-	</div>
-	<hr/>
-	<div>
-		#showSettingSelector($cameraConfig "/main/capturesettings/shutterspeed")
-		#showSettingSelector($cameraConfig "/main/capturesettings/aperture")
-		#showSettingSelector($cameraConfig "/main/imgsettings/iso")
-		#showSettingSelector($cameraConfig "/main/settings/reviewtime")
-		#showSettingSelector($cameraConfig "/main/imgsettings/whitebalance")
-		#showSettingSelector($cameraConfig "/main/capturesettings/drivemode")
-		#showSettingSelector($cameraConfig "/main/capturesettings/meteringmode")
-		#showSettingSelector($cameraConfig "/main/capturesettings/focusmode")
-		#showSettingSelector($cameraConfig "/main/capturesettings/picturestyle")
-		#showSettingSelector($cameraConfig "/main/imgsettings/imageformat")
-		#showSettingSelector($cameraConfig "/main/imgsettings/colorspace")		
-	</div>
-	<hr/>
 	<div style="display: none">
 		$cameraConfig
 	</div>	

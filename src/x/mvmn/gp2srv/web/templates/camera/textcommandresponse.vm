@@ -5,14 +5,16 @@
 	<div class="pageSubHead">
 		#parse("camera/navigation.vm")
 	</div>
-	#if(!($!commandExitCode == 0))
-		<div>Command failed (exit code $!commandExitCode)</div>
-	#end
-	<div>
-		#outputBr($commandResponseStderr)
-	</div>
-	<div>
-		#outputBr($commandResponseStdout)
+	<div class="pageContent">
+		#if(!($!commandExitCode == 0))
+			<div>Command failed (exit code $!commandExitCode)</div>
+		#end
+		<div>
+			#outputBr($commandResponseStderr)
+		</div>
+		<div>
+			#outputBr($commandResponseStdout)
+		</div>
 	</div>
 </div>
 #parse("camera/foot.vm")

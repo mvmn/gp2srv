@@ -30,6 +30,14 @@ body {
 	font-size: 16pt;
 }
 
+.pageContent {
+	border: solid 1px black;
+	background-color: white;
+	color: black;
+	padding: 10pt;
+	font-size: 14pt;	
+}
+
 .errorPage .pageHead {
 	background-color: red;
 }

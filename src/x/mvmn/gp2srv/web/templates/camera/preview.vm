@@ -5,12 +5,14 @@
 	<div class="pageSubHead">
 		#parse("camera/navigation.vm")
 	</div>
-	<div>
-		<a href="$!request.contextPath/refreshpreview">Capture new</a>
-	</div>
-	<div>
-		<div>Last capture:</div>
-		<div><img src="/img/thumb.jpg?t=$!currentTimeMillis" /></div>
+	<div class="pageContent">
+		<div>
+			<a href="$!request.contextPath/refreshpreview">Capture new</a>
+		</div>
+		<div>
+			<div>Last capture:</div>
+			<div><img src="/img/thumb.jpg?t=$!currentTimeMillis" /></div>
+		</div>
 	</div>	
 </div>
 #parse("camera/foot.vm")

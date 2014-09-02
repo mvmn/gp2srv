@@ -75,13 +75,13 @@ public class CameraControlServlet extends AbstractErrorHandlingServlet {
 		if (requestPath.equals("/") || requestPath.equals("")) {
 			serveTempalteUTF8Safely("camera/index.vm", velocityContext, response, logger);
 		} else if (requestPath.equals("/mainsettings")) {
-			GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
+			final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
 			if (!processCommandFailure(cameraConfigsCommand, velocityContext, request, response, logger)) {
 				velocityContext.put("cameraConfig", cameraConfigsCommand.getCameraConfig());
 				serveTempalteUTF8Safely("camera/mainsettings.vm", velocityContext, response, logger);
 			}
 		} else if (requestPath.equals("/summary")) {
-			GP2CmdSummary cmd = gphoto2CommandService.executeCommand(new GP2CmdSummary(logger));
+			final GP2CmdSummary cmd = gphoto2CommandService.executeCommand(new GP2CmdSummary(logger));
 			populateContextWithGenericCommandResults(cmd, velocityContext);
 			serveTempalteUTF8Safely("camera/textcommandresponse.vm", velocityContext, response, logger);
 		} else if (requestPath.equals("/browse")) {
