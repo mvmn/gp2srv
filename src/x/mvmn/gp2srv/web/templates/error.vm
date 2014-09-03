@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta name="viewport" content="width=400">
 		<title>Error ${errorCode} $!{errorMessage}.</title>
 		<link rel="stylesheet" type="text/css" href="/static/default.css">
 	</head>
