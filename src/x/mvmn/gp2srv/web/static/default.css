@@ -1,6 +1,6 @@
 body {
 	font-family: Helvetica, Sans-Serif;
-	font-size: 16pt;
+	font-size: 14pt;
 }
 
 *,*:before,*:after {
@@ -17,7 +17,7 @@ body {
 	background-color: black;
 	color: white;
 	font-weight: bold;
-	font-size: 30pt;
+	font-size: 24pt;
 	padding: 14pt;
 	text-transform:uppercase;
 }

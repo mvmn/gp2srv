@@ -59,10 +59,11 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 	}
 
 	@Override
-	public void doHead(HttpServletRequest request, HttpServletResponse response) {
+	public void doHead(final HttpServletRequest request, final HttpServletResponse response) {
 		File file = processRequest(request, response);
-		if (file != null) {
-			response.setContentLengthLong(file.length());
+		if (file != null && file.length() < Integer.MAX_VALUE) {
+			response.setContentLength((int) file.length());
+			// response.setContentLengthLong(file.length());
 		}
 	}
 

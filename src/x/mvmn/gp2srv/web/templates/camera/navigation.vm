@@ -1,5 +1,7 @@
 <div class="navigationContainer">
-	<div><a href="$!{request.contextPath}/mainsettings">Settings</a></div>
-	<div><a href="$!{request.contextPath}/preview">Preview</a></div>
-	<div><a href="$!{request.contextPath}/browse">Browse</a></div>
+	<span><a href="$!{request.contextPath}/mainsettings">Settings</a></span>
+	|
+	<span><a href="$!{request.contextPath}/preview">Preview</a></span>
+	|
+	<span><a href="$!{request.contextPath}/browse">Browse</a></span>
 </div>
