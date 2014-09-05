@@ -2,14 +2,11 @@ package x.mvmn.gp2srv.web.service.velocity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -73,16 +70,5 @@ public class TemplateEngine {
 
 	public void renderTemplate(String tempalteName, String encoding, Context context, Writer output) {
 		engine.mergeTemplate(tempalteName, encoding, context, output);
-	}
-
-	public static void main(String args[]) {
-		Map<String, String> templatePaths = new HashMap<String, String>();
-		templatePaths.put("test.vm", "test.vm");
-		TemplateEngine engine = new TemplateEngine(templatePaths);
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("testVar", "Yeah, some text here");
-		StringWriter stringWriter = new StringWriter();
-		engine.renderTemplate("test.vm", "UTF-8", new VelocityContext(context), stringWriter);
-		System.out.println(stringWriter.toString());
 	}
 }
