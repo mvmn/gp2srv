@@ -9,7 +9,7 @@ public class StaticToolsHelper {
 	private static final Class<?> TOOLS[] = new Class<?>[] { DateHelper.class };
 
 	public static void populateTools(final Context context) {
-		for (Class<?> toolClass : TOOLS) {
+		for (final Class<?> toolClass : TOOLS) {
 			context.put("tool" + toolClass.getSimpleName(), toolClass);
 		}
 	}
