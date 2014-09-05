@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import x.mvmn.gp2srv.service.gphoto2.model.CameraConfigEntry;
-import x.mvmn.gp2srv.service.gphoto2.service.ConfigParser;
+import x.mvmn.gp2srv.model.CameraConfigEntry;
+import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
 import x.mvmn.log.api.Logger;
 
 public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {

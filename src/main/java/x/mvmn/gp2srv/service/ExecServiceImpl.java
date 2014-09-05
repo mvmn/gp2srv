@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
-import x.mvmn.log.PrintStreamLogger;
 import x.mvmn.log.api.Logger;
 import x.mvmn.log.api.Logger.LogLevel;
 
@@ -139,13 +138,5 @@ public class ExecServiceImpl implements ExecService {
 	 */
 	public Process getCurrentProcess() {
 		return currentProcess;
-	}
-
-	public static void main(String[] args) throws Exception {
-		ExecServiceImpl svc = new ExecServiceImpl(new PrintStreamLogger(System.out));
-		System.out.println(svc.execCommandSync(new String[] { "ls" }, null, null));
-		svc.execCommandAsync(null, new String[] { "sleep", "5" }, null, null);
-		Thread.sleep(1);
-		System.out.println(svc.execCommandSync(new String[] { "/opt/local/bin/gphoto2", "--summary" }, null, null));
 	}
 }

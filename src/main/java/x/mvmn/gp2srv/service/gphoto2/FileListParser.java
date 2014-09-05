@@ -1,4 +1,4 @@
-package x.mvmn.gp2srv.service.gphoto2.service;
+package x.mvmn.gp2srv.service.gphoto2;
 
 import java.util.HashMap;
 import java.util.Map;

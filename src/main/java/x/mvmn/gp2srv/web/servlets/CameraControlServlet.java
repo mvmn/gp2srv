@@ -11,13 +11,13 @@ import org.apache.velocity.context.Context;
 
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
+import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCaptureImageAndListFiles;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetAllCameraConfigurations;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetThumbnail;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdListFiles;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdSetSettingByIndex;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdSummary;
-import x.mvmn.gp2srv.service.gphoto2.service.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.lang.util.Provider;

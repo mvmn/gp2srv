@@ -1,4 +1,4 @@
-package x.mvmn.gp2srv.service.gphoto2.service;
+package x.mvmn.gp2srv.service.gphoto2;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
-import x.mvmn.gp2srv.service.gphoto2.model.CameraConfigEntry;
-import x.mvmn.gp2srv.service.gphoto2.model.CameraConfigEntry.CameraConfigEntryType;
+import x.mvmn.gp2srv.model.CameraConfigEntry;
+import x.mvmn.gp2srv.model.CameraConfigEntry.CameraConfigEntryType;
 
 public class ConfigParser {
 

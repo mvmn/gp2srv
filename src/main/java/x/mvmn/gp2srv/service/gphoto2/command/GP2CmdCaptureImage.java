@@ -3,7 +3,7 @@ package x.mvmn.gp2srv.service.gphoto2.command;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import x.mvmn.gp2srv.service.gphoto2.service.ConfigParser;
+import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
 import x.mvmn.log.api.Logger;
 
 public class GP2CmdCaptureImage extends AbstractGPhoto2Command {

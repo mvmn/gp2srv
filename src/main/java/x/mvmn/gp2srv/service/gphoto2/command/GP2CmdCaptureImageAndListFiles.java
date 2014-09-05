@@ -1,8 +1,8 @@
 package x.mvmn.gp2srv.service.gphoto2.command;
 
-import x.mvmn.gp2srv.service.gphoto2.service.ConfigParser;
-import x.mvmn.gp2srv.service.gphoto2.service.FileListParser;
-import x.mvmn.gp2srv.service.gphoto2.service.FileListParser.CameraFileRefsCollected;
+import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
+import x.mvmn.gp2srv.service.gphoto2.FileListParser;
+import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRefsCollected;
 import x.mvmn.log.api.Logger;
 
 public class GP2CmdCaptureImageAndListFiles extends GP2CmdCaptureImage {

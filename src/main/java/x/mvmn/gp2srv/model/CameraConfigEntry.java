@@ -1,4 +1,4 @@
-package x.mvmn.gp2srv.service.gphoto2.model;
+package x.mvmn.gp2srv.model;
 
 public class CameraConfigEntry {
 
