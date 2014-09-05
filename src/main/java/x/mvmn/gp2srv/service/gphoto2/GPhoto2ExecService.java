@@ -18,18 +18,18 @@ public class GPhoto2ExecService {
 
 	protected final File imagesSubdir;
 
-	public GPhoto2ExecService(ExecService execService, String pathToGphoto2, final File workingDir, final File imagesSubdir) {
+	public GPhoto2ExecService(final ExecService execService, final String pathToGphoto2, final File workingDir, final File imagesSubdir) {
 		this.execService = execService;
 		this.pathToGphoto2 = pathToGphoto2;
 		this.workingDir = workingDir;
 		this.imagesSubdir = imagesSubdir;
 	}
 
-	public ExecResult execCommand(String gp2Command, String... params) throws Exception {
+	public ExecResult execCommand(final String gp2Command, final String... params) throws Exception {
 		return execService.execCommandSync(prepareParams(gp2Command, params), null, imagesSubdir);
 	}
 
-	public void execCommandAsync(ExecCallback callback, String gp2Command, String... params) {
+	public void execCommandAsync(final ExecCallback callback, final String gp2Command, final String... params) {
 		execService.execCommandAsync(callback, prepareParams(gp2Command, params), null, imagesSubdir);
 	}
 
@@ -41,7 +41,7 @@ public class GPhoto2ExecService {
 		return execService.getCurrentProcess();
 	}
 
-	protected String[] prepareParams(String gp2Command, String... params) {
+	protected String[] prepareParams(final String gp2Command, final String... params) {
 		String[] execParams = new String[params == null ? 2 : params.length + 2];
 		execParams[0] = pathToGphoto2;
 		execParams[1] = GP2COMMAND_PREFIX + gp2Command;
