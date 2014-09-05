@@ -1,4 +1,4 @@
-package x.mvmn.gp2.srv.service;
+package x.mvmn.gp2srv.service;
 
 import org.junit.Test;
 

@@ -93,17 +93,4 @@ public class ConfigParser {
 			return new CameraConfigEntry(key, label, value, printableValue, type, choices.size() > 0 ? choices.toArray(new String[choices.size()]) : null);
 		}
 	}
-
-	// TODO: convert to unit test
-	public static void main(String[] args) throws Exception {
-		List<String> lines = IOUtils.readLines(new FileInputStream(new File("/Users/mvmn/Documents/_docs/gphoto2/eos600d_allconfigs.txt")));
-		StringBuilder configAsText = new StringBuilder();
-		for (String line : lines) {
-			configAsText.append(line).append(LINE_SEPARATOR);
-		}
-		CameraConfigEntry[] cces = ConfigParser.parseConfigEntries(configAsText.toString());
-		for (CameraConfigEntry cce : cces) {
-			System.out.println(cce);
-		}
-	}
 }
