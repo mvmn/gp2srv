@@ -15,7 +15,7 @@ import x.mvmn.log.api.Logger;
 public class StaticsResourcesServlet extends AbstractErrorHandlingServlet {
 	private static final long serialVersionUID = 898038473129345743L;
 
-	public static final String STATIC_RESOURCES_CLASSPATH_PREFIX = "/x/mvmn/gp2srv/web/static/";
+	public static final String STATIC_RESOURCES_CLASSPATH_PREFIX = "/x/mvmn/gp2srv/web/static";
 
 	final Provider<TemplateEngine> templateEngineProvider;
 
@@ -24,10 +24,10 @@ public class StaticsResourcesServlet extends AbstractErrorHandlingServlet {
 		this.templateEngineProvider = templateEngineProvider;
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+	public void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 		try {
-			String path = request.getPathInfo().replaceAll("\\.\\./", "");
-			InputStream resourceInputStream = GPhoto2Server.class.getResourceAsStream(STATIC_RESOURCES_CLASSPATH_PREFIX + path);
+			final String path = request.getPathInfo().replaceAll("\\.\\./", "");
+			final InputStream resourceInputStream = GPhoto2Server.class.getResourceAsStream(STATIC_RESOURCES_CLASSPATH_PREFIX + path);
 			if (resourceInputStream == null) {
 				returnNotFound(request, response);
 			} else {
