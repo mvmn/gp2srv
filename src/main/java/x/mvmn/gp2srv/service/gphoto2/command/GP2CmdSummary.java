@@ -8,12 +8,10 @@ public class GP2CmdSummary extends AbstractGPhoto2Command {
 		super(logger);
 	}
 
-	@Override
 	public String getCommandString() {
 		return "summary";
 	}
 
-	@Override
 	public String[] getCommandParams() {
 		return null;
 	}

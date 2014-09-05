@@ -25,7 +25,6 @@ public class GPhoto2CommandService {
 
 	public <C extends GPhoto2Command, CB extends GPhoto2CommandCallback<C>> void executeCommandAsync(final CB callback, final C command) {
 		gphoto2ExecService.execCommandAsync(new ExecCallback() {
-			@Override
 			public void processResult(final ExecResult execResult) {
 				command.submitRawStandardOutput(execResult.getStandardOutput());
 				command.submitRawErrorOutput(execResult.getErrorOutput());
@@ -33,7 +32,6 @@ public class GPhoto2CommandService {
 				callback.processResults(command);
 			}
 
-			@Override
 			public void processError(final Throwable error) {
 				command.submitError(error);
 				callback.processResults(command);

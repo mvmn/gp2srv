@@ -33,7 +33,6 @@ public class PrintStreamLogger extends AbstractLogger {
 		return result.toString();
 	}
 
-	@Override
 	public Logger log(final LogLevel level, final Throwable t) {
 		if (shouldLog(level)) {
 			out.println(concatStr(getDateStr(), " - ", level.toString(), ":\n", stacktraceToString(t)));
@@ -41,7 +40,6 @@ public class PrintStreamLogger extends AbstractLogger {
 		return this;
 	}
 
-	@Override
 	public Logger log(final LogLevel level, final String text, final Throwable t) {
 		if (shouldLog(level)) {
 			out.println(concatStr(getDateStr(), " - ", level.toString(), ": ", text, "\n", stacktraceToString(t)));
@@ -49,7 +47,6 @@ public class PrintStreamLogger extends AbstractLogger {
 		return this;
 	}
 
-	@Override
 	public Logger log(final LogLevel level, final String text) {
 		if (shouldLog(level)) {
 			out.println(concatStr(getDateStr(), " - ", level.toString(), ": ", text));

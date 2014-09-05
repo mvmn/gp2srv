@@ -212,7 +212,6 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		return this;
 	}
 
-	@Override
 	public TemplateEngine provide() {
 		return templateEngine;
 	}

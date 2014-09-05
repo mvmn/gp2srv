@@ -16,14 +16,12 @@ public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 		this.keepImageOnCamera = keepImageOnCamera;
 	}
 
-	@Override
 	public String getCommandString() {
 		return "capture-image";
 	}
 
 	protected static final Pattern resultPattern = Pattern.compile("^New file is in location (.+) on the camera$");
 
-	@Override
 	public void submitRawStandardOutput(final String standardOutput) {
 		super.submitRawStandardOutput(standardOutput);
 		final Matcher matcher = resultPattern.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
@@ -35,7 +33,6 @@ public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 	protected static final String[] PARAMS_KEEP = new String[] { "--keep" };
 	protected static final String[] PARAMS_NO_KEEP = new String[] { "--no-keep" };
 
-	@Override
 	public String[] getCommandParams() {
 		return keepImageOnCamera == null ? null : (keepImageOnCamera ? PARAMS_KEEP : PARAMS_NO_KEEP);
 	}

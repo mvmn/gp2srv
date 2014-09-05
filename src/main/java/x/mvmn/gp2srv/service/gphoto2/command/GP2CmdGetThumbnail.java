@@ -13,12 +13,10 @@ public class GP2CmdGetThumbnail extends AbstractGPhoto2Command {
 		this.targetFileName = targetFileName;
 	}
 
-	@Override
 	public String getCommandString() {
 		return "get-thumbnail";
 	}
 
-	@Override
 	public String[] getCommandParams() {
 		return new String[] { String.valueOf(sourceFileRef), "--force-overwrite", "--filename", targetFileName };
 	}

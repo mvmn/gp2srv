@@ -14,17 +14,14 @@ public abstract class AbstractGPhoto2Command implements GPhoto2Command {
 		this.logger = logger;
 	}
 
-	@Override
 	public void submitError(final Throwable error) {
 		logger.error("Failed to execute command '" + this.getCommandString() + "'.", error);
 	}
 
-	@Override
 	public void submitRawStandardOutput(final String standardOutput) {
 		this.rawStandardOutput += standardOutput;
 	}
 
-	@Override
 	public String getRawStandardOutput() {
 		return this.rawStandardOutput;
 	}
@@ -37,12 +34,10 @@ public abstract class AbstractGPhoto2Command implements GPhoto2Command {
 		return rawErrorOutput;
 	}
 
-	@Override
 	public void submitExitCode(final int exitCode) {
 		this.exitCode = exitCode;
 	}
 
-	@Override
 	public int getExitCode() {
 		return exitCode;
 	}

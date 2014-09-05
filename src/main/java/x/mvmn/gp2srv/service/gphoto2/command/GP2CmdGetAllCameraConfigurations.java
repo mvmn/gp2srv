@@ -16,12 +16,10 @@ public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
 		super(logger);
 	}
 
-	@Override
 	public String getCommandString() {
 		return "list-all-config";
 	}
 
-	@Override
 	public void submitRawStandardOutput(final String standardOutput) {
 		super.submitRawStandardOutput(standardOutput);
 		try {
@@ -39,7 +37,6 @@ public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
 		}
 	}
 
-	@Override
 	public String[] getCommandParams() {
 		return null;
 	}
