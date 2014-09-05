@@ -1,11 +1,7 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 
 import x.mvmn.gp2srv.model.CameraConfigEntry;
 import x.mvmn.gp2srv.model.CameraConfigEntry.CameraConfigEntryType;

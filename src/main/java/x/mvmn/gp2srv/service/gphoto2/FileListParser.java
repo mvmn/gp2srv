@@ -75,7 +75,7 @@ public class FileListParser {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			CameraFileRef other = (CameraFileRef) obj;
+			final CameraFileRef other = (CameraFileRef) obj;
 			if (filename == null) {
 				if (other.filename != null)
 					return false;
@@ -142,30 +142,5 @@ public class FileListParser {
 		}
 
 		return new CameraFileRefsCollected(resultsByFolders, resultsByRefIds);
-	}
-
-	public static void main(final String[] args) throws Exception {
-		// TODO: make unit test out of this
-		final String dummyData = "There is no file in folder '/'.\n" + "There is no file in folder '/store_00020001'.\n"
-				+ "There is no file in folder '/store_00020001/DCIM'.\n" + "There are 6 files in folder '/store_00020001/DCIM/100CANON'.\n"
-				+ "#1     IMG_0781.JPG               rd   921 KB image/jpeg\n" + "#2     IMG_0782.JPG               rd   984 KB image/jpeg\n"
-				+ "#3     IMG_0787.JPG               rd  2873 KB image/jpeg\n" + "#4     IMG_0792.JPG               rd  4888 KB image/jpeg\n"
-				+ "#5     IMG_0793.JPG               rd  4893 KB image/jpeg\n" + "#6     IMG_0794.JPG               rd  4900 KB image/jpeg\n"
-				+ "There is no file in folder '/store_00020001/MISC'.\n";
-
-		final CameraFileRefsCollected results = parseList(dummyData);
-		for (Map.Entry<String, Map<String, CameraFileRef>> entry : results.byFolder.entrySet()) {
-			System.out.println("Folder " + entry.getKey() + " (" + entry.getValue().size() + " files)");
-			for (final Map.Entry<String, CameraFileRef> cfrEntry : entry.getValue().entrySet()) {
-				final CameraFileRef cfr = cfrEntry.getValue();
-				if (!cfr.getFilename().equals(cfrEntry.getKey())) {
-					throw new Exception("Bad mapping file with name " + cfr.getFilename() + " mapped as " + cfrEntry.getKey());
-				}
-				System.out.println(String.format("%s: %s - %s (%s)", cfr.getRefId(), cfr.getFilename(), cfr.getFilesizestr(), cfr.getFiletypestr()));
-				if (results.byRefId.get(cfr.getRefId()) != cfr) {
-					throw new Exception("Bad entry by ref ID " + cfr.getRefId());
-				}
-			}
-		}
 	}
 }
