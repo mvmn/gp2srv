@@ -29,8 +29,4 @@ public class PathFinderHelper {
 		}
 		return result;
 	}
-
-	public static void main(String args[]) {
-		System.out.println(PathFinderHelper.findInPath("gphoto2", false));
-	}
 }
