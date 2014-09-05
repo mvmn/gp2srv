@@ -16,6 +16,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
+							<mainClass>x.mvmn.gp2srv.GPhoto2Server</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
