@@ -1,7 +1,9 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,12 @@ public class FileListParser {
 	}
 
 	public static class CameraFileRef {
+		public class CameraFileRefByRefIdComparator implements Comparator<CameraFileRef> {
+			public int compare(final CameraFileRef o1, final CameraFileRef o2) {
+				return o2.getRefId() - o1.getRefId();
+			}
+		}
+
 		private final int refId;
 		private final String filename;
 		private final String filesizestr;
@@ -103,7 +111,7 @@ public class FileListParser {
 
 	public static CameraFileRefsCollected parseList(final String listText) throws Exception {
 		final Map<String, Map<String, CameraFileRef>> resultsByFolders = new HashMap<String, Map<String, CameraFileRef>>();
-		final Map<Integer, CameraFileRef> resultsByRefIds = new HashMap<Integer, CameraFileRef>();
+		final Map<Integer, CameraFileRef> resultsByRefIds = new TreeMap<Integer, CameraFileRef>();
 
 		final String[] lines = listText.split(ConfigParser.LINE_SEPARATOR);
 
@@ -117,7 +125,7 @@ public class FileListParser {
 					if (matcher.find()) {
 						Map<String, CameraFileRef> fileRefs = resultsByFolders.get(currentFolder);
 						if (fileRefs == null) {
-							fileRefs = new HashMap<String, CameraFileRef>();
+							fileRefs = new TreeMap<String, CameraFileRef>();
 							resultsByFolders.put(currentFolder, fileRefs);
 						}
 						final CameraFileRef cfr = new CameraFileRef(Integer.parseInt(matcher.group(1)), matcher.group(2), matcher.group(4), matcher.group(5));
@@ -133,7 +141,7 @@ public class FileListParser {
 					currentFolder = matcher.group(2);
 					if (resultsByFolders.get(currentFolder) == null) {
 						// Keep empty folders in results
-						resultsByFolders.put(currentFolder, new HashMap<String, CameraFileRef>());
+						resultsByFolders.put(currentFolder, new TreeMap<String, CameraFileRef>());
 					}
 				} else {
 					throw new Exception("Unexpected line: " + line);

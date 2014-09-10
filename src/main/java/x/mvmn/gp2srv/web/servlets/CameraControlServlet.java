@@ -13,6 +13,7 @@ import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCaptureImageAndListFiles;
+import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCapturePreview;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetAllCameraConfigurations;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetThumbnail;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdListFiles;
@@ -93,6 +94,32 @@ public class CameraControlServlet extends AbstractErrorHandlingServlet {
 		} else if (requestPath.equals("/preview")) {
 			serveTempalteUTF8Safely("camera/preview.vm", velocityContext, response, logger);
 		} else if (requestPath.equals("/refreshpreview")) {
+			final Integer lastPreviewRetriesCount = (Integer) velocityContextService.getGlobalContext().get("lastPreviewRetriesCount");
+			int previewRetriesCount = lastPreviewRetriesCount == null ? 0 : lastPreviewRetriesCount.intValue();
+			boolean success = false;
+			while (!success && previewRetriesCount < 5) {
+				final GP2CmdCapturePreview command = gphoto2CommandService.executeCommand(new GP2CmdCapturePreview(logger, "thumb.jpg", true,
+						previewRetriesCount));
+				if (command.isResultedWithPossibleTimingFailure()) {
+					previewRetriesCount++;
+				} else {
+					if (command.getRawErrorOutput() != null && command.getRawErrorOutput().trim().length() > 0) {
+						processCommandFailure(command, velocityContext, request, response, logger);
+						break;
+					} else {
+						success = true;
+					}
+				}
+			}
+			if (success) {
+				velocityContextService.getGlobalContext().put("lastPreviewRetriesCount", previewRetriesCount);
+				try {
+					response.sendRedirect(request.getContextPath() + "/preview");
+				} catch (final IOException e) {
+					logger.error(e);
+				}
+			}
+		} else if (requestPath.equals("/captureandrefreshpreview")) {
 			final GP2CmdCaptureImageAndListFiles cmdCaptureAndList = new GP2CmdCaptureImageAndListFiles(null, logger);
 			if (!processCommandFailure(gphoto2CommandService.executeCommand(cmdCaptureAndList), velocityContext, request, response, logger)) {
 				final String newlyCapturedImagePath = cmdCaptureAndList.getResultFile();

@@ -17,7 +17,9 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import x.mvmn.gp2srv.service.ExecService;
 import x.mvmn.gp2srv.service.ExecServiceImpl;
+import x.mvmn.gp2srv.service.MockExecService;
 import x.mvmn.gp2srv.service.PathFinderHelper;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2ExecService;
@@ -42,6 +44,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		Integer port = null;
 		final Options cliOptions = new Options();
 
+		cliOptions.addOption("usemocks", false, "Use mocks instead of real gphoto2 - for code testing.");
 		cliOptions.addOption("port", true, "HTTP port.");
 		cliOptions.addOption("gphoto2path", true, "Path to gphoto2 executable.");
 		cliOptions.addOption("logLevel", true, "Log level (TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL).");
@@ -80,23 +83,23 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			logLevel = LogLevel.INFO;
 		}
 
-		new GPhoto2Server(gphoto2path, port, logLevel).start().join();
+		new GPhoto2Server(gphoto2path, port, logLevel, commandLine.hasOption("usemocks")).start().join();
 	}
 
-	public GPhoto2Server(final String pathToGphoto2, final LogLevel logLevel) {
-		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel);
+	public GPhoto2Server(final String pathToGphoto2, final LogLevel logLevel, final boolean mockMode) {
+		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, mockMode);
 	}
 
 	public GPhoto2Server(final LogLevel logLevel) {
-		this(null, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel);
+		this(null, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, false);
 	}
 
-	public GPhoto2Server(String pathToGphoto2, Integer port, final LogLevel logLevel) {
-		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, port, logLevel);
+	public GPhoto2Server(String pathToGphoto2, Integer port, final LogLevel logLevel, final boolean mockMode) {
+		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, port, logLevel, mockMode);
 	}
 
 	public GPhoto2Server(Integer port, final LogLevel logLevel) {
-		this(null, DEFAULT_CONTEXT_PATH, port, logLevel);
+		this(null, DEFAULT_CONTEXT_PATH, port, logLevel, false);
 	}
 
 	private final Server server;
@@ -106,7 +109,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final GPhoto2CommandService gphoto2CommandService;
 	private final String pathToGphoto2;
 
-	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port, final LogLevel logLevel) {
+	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode) {
 		this.logger = makeLogger(logLevel);
 
 		logger.info("Initializing...");
@@ -141,8 +144,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			File imagesFolder = new File(userHome + File.separator + ".gp2srv" + File.separator + "img");
 			imagesFolder.mkdirs();
 
-			this.gphoto2CommandService = new GPhoto2CommandService(new GPhoto2ExecService(new ExecServiceImpl(logger), pathToGphoto2, appHomeFolder,
-					imagesFolder));
+			final Properties mockResults = new Properties();
+			mockResults.load(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties"));
+
+			final ExecService execService = mockMode ? new MockExecService(mockResults, logger) : new ExecServiceImpl(logger);
+
+			this.gphoto2CommandService = new GPhoto2CommandService(new GPhoto2ExecService(execService, pathToGphoto2, appHomeFolder, imagesFolder));
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
