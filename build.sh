@@ -1,4 +1,5 @@
 rm -rf ./target
 mvn clean package dependency:copy-dependencies
-mv ./target/*.jar ./target/dependency/
-mv ./target/dependency ./target/gp2srv-bin
+mkdir -p ./target/gp2srv-bin/lib/
+mv ./target/dependency/*.jar ./target/gp2srv-bin/lib/
+mv ./target/*.jar ./target/gp2srv-bin/
