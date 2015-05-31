@@ -8,7 +8,7 @@ import x.mvmn.log.api.Logger;
 
 public class ExecServiceImpl extends AbstractExecService {
 
-	private volatile Process currentProcess = null;
+	protected volatile Process currentProcess = null;
 
 	public ExecServiceImpl(final Logger logger) {
 		super(logger);
@@ -25,22 +25,13 @@ public class ExecServiceImpl extends AbstractExecService {
 
 	@Override
 	protected ProcessAccess startProcess(final String[] command, final String[] envVars, final File dir) throws IOException {
-		return new ProcessAccess() {
-			private final Process process = Runtime.getRuntime().exec(command, envVars, dir);
-
-			public InputStream getStandardOutput() {
-				return process.getInputStream();
-			}
-
-			public InputStream getErrorOutput() {
-				// TODO Auto-generated method stub
-				return process.getErrorStream();
-			}
-
-			public int getProcessExitCode() {
-				return process.exitValue();
-			}
-		};
+		ProcessAccess result = null;
+		if (!isProcessRunning()) {
+			final Process process = Runtime.getRuntime().exec(command, envVars, dir);
+			currentProcess = process;
+			result = new ProcessAccessImpl(process);
+		}
+		return result;
 	}
 
 	@Override
@@ -56,4 +47,24 @@ public class ExecServiceImpl extends AbstractExecService {
 	public boolean isProcessRunning() {
 		return currentProcess != null;
 	}
+
+	public static class ProcessAccessImpl implements ProcessAccess {
+		protected final Process process;
+
+		public ProcessAccessImpl(final Process process) {
+			this.process = process;
+		}
+
+		public InputStream getStandardOutput() {
+			return process.getInputStream();
+		}
+
+		public InputStream getErrorOutput() {
+			return process.getErrorStream();
+		}
+
+		public int getProcessExitCode() {
+			return process.exitValue();
+		}
+	};
 }

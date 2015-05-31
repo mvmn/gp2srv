@@ -2,20 +2,12 @@ package x.mvmn.lang.util;
 
 import java.util.Calendar;
 
+import org.apache.commons.lang.time.FastDateFormat;
+
 public class DateHelper {
+	private static final FastDateFormat FDF = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSS");
+
 	public static String getDateSortFriendlyStr() {
-		Calendar calendar = Calendar.getInstance();
-		StringBuilder dateStrBuilder = new StringBuilder();
-
-		dateStrBuilder.append(String.format("%04d", calendar.get(Calendar.YEAR))).append("-");
-		dateStrBuilder.append(String.format("%02d", calendar.get(Calendar.MONTH) + 1)).append("-");
-		dateStrBuilder.append(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH))).append(" ");
-
-		dateStrBuilder.append(String.format("%02d", calendar.get(Calendar.HOUR_OF_DAY))).append(":");
-		dateStrBuilder.append(String.format("%02d", calendar.get(Calendar.MINUTE))).append(":");
-		dateStrBuilder.append(String.format("%02d", calendar.get(Calendar.SECOND))).append(".");
-		dateStrBuilder.append(String.format("%03d", calendar.get(Calendar.MILLISECOND)));
-
-		return dateStrBuilder.toString();
+		return FDF.format(Calendar.getInstance());
 	}
 }

@@ -9,9 +9,6 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -40,51 +37,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private static final String DEFAULT_CONTEXT_PATH = "/";
 	private static final int DEFAULT_PORT = 8080;
 
-	public static void main(String[] args) throws Exception {
-		Integer port = null;
-		final Options cliOptions = new Options();
-
-		cliOptions.addOption("usemocks", false, "Use mocks instead of real gphoto2 - for code testing.");
-		cliOptions.addOption("port", true, "HTTP port.");
-		cliOptions.addOption("gphoto2path", true, "Path to gphoto2 executable.");
-		cliOptions.addOption("logLevel", true, "Log level (TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL).");
-
-		final CommandLine commandLine = new PosixParser().parse(cliOptions, args);
-		if (commandLine.hasOption("port")) {
-			String portOptionVal = commandLine.getOptionValue("port");
-			try {
-				int parsedPort = Integer.parseInt(portOptionVal.trim());
-				if (parsedPort < 1 || parsedPort > 65535) {
-					throw new RuntimeException("Bad port value: " + parsedPort);
-				} else {
-					port = parsedPort;
-				}
-			} catch (NumberFormatException e) {
-				throw new RuntimeException("Unable to parse port parameter as integer: '" + portOptionVal + "'.");
-			}
-		}
-
-		final String gphoto2path;
-		if (commandLine.hasOption("gphoto2path") && commandLine.getOptionValue("gphoto2path") != null
-				&& commandLine.getOptionValue("gphoto2path").trim().length() > 0) {
-			gphoto2path = commandLine.getOptionValue("gphoto2path").trim();
-		} else {
-			gphoto2path = PathFinderHelper.findInPath("gphoto2", true).getAbsolutePath();
-		}
-
-		final LogLevel logLevel;
-		if (commandLine.hasOption("logLevel")) {
-			try {
-				logLevel = LogLevel.valueOf(commandLine.getOptionValue("logLevel").trim());
-			} catch (Exception e) {
-				throw new RuntimeException("Unable to parse logLevel parameter: '" + cliOptions.getOption("logLevel").getValue() + "'.s");
-			}
-		} else {
-			logLevel = LogLevel.INFO;
-		}
-
-		new GPhoto2Server(gphoto2path, port, logLevel, commandLine.hasOption("usemocks")).start().join();
-	}
+	private final Server server;
+	private final Logger logger;
+	private volatile TemplateEngine templateEngine;
+	private final VelocityContextService velocityContextService;
+	private final GPhoto2CommandService gphoto2CommandService;
+	private final String pathToGphoto2;
 
 	public GPhoto2Server(final String pathToGphoto2, final LogLevel logLevel, final boolean mockMode) {
 		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, mockMode);
@@ -101,13 +59,6 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	public GPhoto2Server(Integer port, final LogLevel logLevel) {
 		this(null, DEFAULT_CONTEXT_PATH, port, logLevel, false);
 	}
-
-	private final Server server;
-	private final Logger logger;
-	private volatile TemplateEngine templateEngine;
-	private final VelocityContextService velocityContextService;
-	private final GPhoto2CommandService gphoto2CommandService;
-	private final String pathToGphoto2;
 
 	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode) {
 		this.logger = makeLogger(logLevel);
