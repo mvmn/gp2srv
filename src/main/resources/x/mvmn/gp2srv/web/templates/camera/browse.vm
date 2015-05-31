@@ -5,21 +5,27 @@
 	<div class="pageSubHead">
 		#parse("camera/navigation.vm")
 	</div>
-	<div class="pageContent">
+	<div class="pageContent scroll">
+		#set($needsSeparator = false)
 		#foreach($filesInFolder in $filesList.byFolder.entrySet())
 			#if($filesInFolder.value.size()>0)
-			<div>
-				<b>$filesInFolder.key</b>
+				#if($needsSeparator) <hr/> #end	
+				#set($needsSeparator = true)
 				<div>
-					#foreach($fileRef in $filesInFolder.value)
-						<div>
-							<span>$fileRef.refId</span>
-							<span>$fileRef.filename</span>
-						</div>
-					#end
-				</div>
-				<hr/>
-			</div>
+					<b>$filesInFolder.key</b>
+					<div>
+						#foreach($fileRef in $filesInFolder.value)
+							<div>
+								<span>$fileRef.refId</span>
+								-
+								<span>$fileRef.filename</span> 
+								// 
+								<span>$fileRef.filesizestr</span> 
+								[<span>$fileRef.filetypestr</span>]
+							</div>
+						#end
+					</div>
+				</div>				
 			#end
 		#end
 	</div>

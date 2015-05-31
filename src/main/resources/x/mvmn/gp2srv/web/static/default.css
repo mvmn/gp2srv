@@ -13,6 +13,11 @@ body {
 	width: 100%;
 }
 
+.scroll {
+	overflow: auto;
+	white-space: nowrap;
+}
+
 .pageHead {
 	background-color: black;
 	color: white;

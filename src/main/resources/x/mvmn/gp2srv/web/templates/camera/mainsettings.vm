@@ -54,7 +54,22 @@
 			#showSettingSelector($cameraConfig "/main/capturesettings/focusmode")
 			#showSettingSelector($cameraConfig "/main/capturesettings/picturestyle")
 			#showSettingSelector($cameraConfig "/main/imgsettings/imageformat")
-			#showSettingSelector($cameraConfig "/main/imgsettings/colorspace")		
+			#showSettingSelector($cameraConfig "/main/imgsettings/colorspace")
+		</div>
+		<hr/>
+		<div>
+			#foreach($settingEntry in $cameraConfig.entrySet())
+				#if($settingEntry.value.type.name().equalsIgnoreCase("radio"))
+					#showSettingSelector($cameraConfig $settingEntry.key)
+				#else
+					<div>
+						<span>$settingEntry.value.type.name()</span>
+						<span>$settingEntry.value.label</span> 
+						= 
+						<span>$settingEntry.value.value</span>
+					</div>
+				#end
+			#end
 		</div>
 	</div>
 	<div style="display: none">

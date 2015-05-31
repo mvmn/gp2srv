@@ -1,8 +1,8 @@
 package x.mvmn.gp2srv.service.gphoto2.command;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import x.mvmn.gp2srv.model.CameraConfigEntry;
 import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
@@ -24,7 +24,7 @@ public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
 		super.submitRawStandardOutput(standardOutput);
 		try {
 			final CameraConfigEntry[] config = ConfigParser.parseConfigEntries(standardOutput);
-			final Map<String, CameraConfigEntry> cameraConfig = new HashMap<String, CameraConfigEntry>();
+			final Map<String, CameraConfigEntry> cameraConfig = new TreeMap<String, CameraConfigEntry>();
 			if (config != null) {
 				for (final CameraConfigEntry configEntry : config) {
 					cameraConfig.put(configEntry.getKey(), configEntry);
