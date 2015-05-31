@@ -23,23 +23,23 @@ import x.mvmn.log.api.Logger;
 public class AbstractGP2Servlet extends AbstractErrorHandlingServlet {
 	private static final long serialVersionUID = 7210482012835862732L;
 
-	protected VelocityContextService contextService;
+	protected VelocityContextService velocityContextService;
 
-	public AbstractGP2Servlet(VelocityContextService contextService, Provider<TemplateEngine> templateEngineProvider, Logger logger) {
+	public AbstractGP2Servlet(final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
 		super(templateEngineProvider, logger);
-		this.contextService = contextService;
+		this.velocityContextService = velocityContextService;
 	}
 
 	@Override
-	public Context createContext(HttpServletRequest request, HttpServletResponse response) {
-		Context result = new VelocityContext(contextService.getGlobalContext());
+	public Context createContext(final HttpServletRequest request, final HttpServletResponse response) {
+		Context result = new VelocityContext(velocityContextService.getGlobalContext());
 		result.put("request", request);
 		result.put("response", response);
 		return result;
 	}
 
-	public Context createContext(HttpServletRequest request, HttpServletResponse response, Map<String, Object> values) {
-		Context result = new VelocityContext(values, contextService.getGlobalContext());
+	public Context createContext(final HttpServletRequest request, final HttpServletResponse response, final Map<String, Object> values) {
+		Context result = new VelocityContext(values, velocityContextService.getGlobalContext());
 		result.put("request", request);
 		result.put("response", response);
 		return result;

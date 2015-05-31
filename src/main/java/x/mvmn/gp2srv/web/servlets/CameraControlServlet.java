@@ -24,19 +24,17 @@ import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
 
-public class CameraControlServlet extends AbstractErrorHandlingServlet {
+public class CameraControlServlet extends AbstractGP2Servlet {
 
 	private static final long serialVersionUID = 7389681375772493366L;
 
 	protected final GPhoto2CommandService gphoto2CommandService;
-	protected final VelocityContextService velocityContextService;
 	protected volatile GPhoto2Command currentCommand = null;
 
 	public CameraControlServlet(final GPhoto2CommandService gphoto2CommandService, final VelocityContextService velocityContextService,
 			final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
-		super(templateEngineProvider, logger);
+		super(velocityContextService, templateEngineProvider, logger);
 		this.gphoto2CommandService = gphoto2CommandService;
-		this.velocityContextService = velocityContextService;
 	}
 
 	@Override

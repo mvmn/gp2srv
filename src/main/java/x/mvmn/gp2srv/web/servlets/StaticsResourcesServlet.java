@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 
 import x.mvmn.gp2srv.GPhoto2Server;
+import x.mvmn.gp2srv.web.MimeTypesHelper;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;

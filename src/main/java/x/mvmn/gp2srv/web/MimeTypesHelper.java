@@ -1,4 +1,4 @@
-package x.mvmn.gp2srv.web.servlets;
+package x.mvmn.gp2srv.web;
 
 import java.util.Collections;
 import java.util.HashMap;
