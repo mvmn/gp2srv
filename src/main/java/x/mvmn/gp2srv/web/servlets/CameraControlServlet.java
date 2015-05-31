@@ -59,8 +59,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 		params.put("response", response);
 		params.put("currentTimeMillis", System.currentTimeMillis());
 		params.put("commandIsBeingExecuted", gphoto2CommandService.isProcessRunning());
-		final Context velocityContext = velocityContextService.constructContextWithGlobals(params);
-		return velocityContext;
+		return createContext(request, response, params);
 	}
 
 	@Override
