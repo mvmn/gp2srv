@@ -11,7 +11,10 @@
 		</div>
 		<div>
 			<div>Last capture:</div>
-			<div><img src="/img/thumb.jpg?t=$!currentTimeMillis" /></div>
+			<div>
+				#set($previewUrl = "/img/thumb.jpg?t=$!currentTimeMillis")
+				<a href="$previewUrl" target="_blank"><img class="fullWidth" src="$previewUrl" /></a>
+			</div>
 		</div>
 	</div>	
 </div>
