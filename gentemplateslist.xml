@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project basedir="." default="build" name="gentemplateslist">
-	<fileset dir="./src/x/mvmn/gp2srv/web/templates" id="vmfiles">
+	<fileset dir="./src/main/java/x/mvmn/gp2srv/web/templates" id="vmfiles">
 		<include name="**/*.vm" />
 		<exclude name="test.vm" />
 		<exclude name="VM_global_library.vm" />
@@ -8,12 +8,12 @@
 	</fileset>
 	<property name="vmfiles" refid="vmfiles" />
 	<target name="build">
-		<echo file="./src/x/mvmn/gp2srv/web/templates/templates_list.properties">${vmfiles}</echo>
+		<echo file="./src/main/java/x/mvmn/gp2srv/web/templates/templates_list.properties">${vmfiles}</echo>
 		<property name="linebreak">${line.separator}</property>
-		<replaceregexp flags="g" file="./src/x/mvmn/gp2srv/web/templates/templates_list.properties" match="([^;]+)(?:;|$)" replace="\1=\1${linebreak}" />
+		<replaceregexp flags="g" file="./src/main/java/x/mvmn/gp2srv/web/templates/templates_list.properties" match="([^;]+)(?:;|$)" replace="\1=\1${linebreak}" />
 		<echo>Generation complete</echo>
 		<concat>
-			<file name="./src/x/mvmn/gp2srv/web/templates/templates_list.properties" />
+			<file name="./src/main/java/x/mvmn/gp2srv/web/templates/templates_list.properties" />
 		</concat>
 	</target>
 </project>
