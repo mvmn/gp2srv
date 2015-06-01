@@ -7,7 +7,12 @@
 	</div>
 	<div class="pageContent">
 		<div>
-			<a href="$!request.contextPath/refreshpreview">Capture new</a>
+			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/refreshpreview">
+				<input type="submit" value="Capture preview" />
+			</form>
+			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/captureandrefreshpreview">
+				<input type="submit" value="Capture image" />
+			</form>			
 		</div>
 		<div>
 			<div>Last capture:</div>

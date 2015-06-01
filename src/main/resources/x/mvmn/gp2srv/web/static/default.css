@@ -15,6 +15,14 @@ body {
 	font-size: 5pt;
 }
 
+.hidden {
+	display: none;
+}
+
+.inlineBlock {
+	display: inline-block;
+}
+
 *,*:before,*:after {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;

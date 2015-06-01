@@ -10,12 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import x.mvmn.gp2srv.model.CameraConfigEntry.CameraConfigEntryType;
+import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
-import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.command.AbstractGPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCaptureImageAndListFiles;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCapturePreview;
+import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdDeleteFile;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetAllCameraConfigurations;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetThumbnail;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdListFiles;
@@ -42,7 +43,8 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
-		if ("/mainsettingset".equals(request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : ""))) {
+		final String path = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
+		if ("/mainsettingset".equals(path)) {
 			final String type = request.getParameter("type");
 			final String key = request.getParameter("key");
 			final String value = request.getParameter("value");
@@ -67,6 +69,84 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					try {
 						response.sendRedirect(request.getContextPath() + "/mainsettings");
 					} catch (final Exception e) {
+						logger.error(e);
+					}
+				}
+			}
+		} else if ("/refreshpreview".equals(path)) {
+			final Integer lastPreviewRetriesCount = (Integer) velocityContextService.getGlobalContext().get("lastPreviewRetriesCount");
+			int previewRetriesCount = lastPreviewRetriesCount == null ? 0 : lastPreviewRetriesCount.intValue();
+			boolean success = false;
+			while (!success && previewRetriesCount < 15) {
+				final GP2CmdCapturePreview command = gphoto2CommandService.executeCommand(new GP2CmdCapturePreview(logger, "thumb.jpg", true,
+						previewRetriesCount));
+				if (command.isResultedWithPossibleTimingFailure()) {
+					previewRetriesCount++;
+				} else {
+					if (command.getRawErrorOutput() != null && command.getRawErrorOutput().trim().length() > 0) {
+						processCommandFailure(command, null, request, response, logger);
+						break;
+					} else {
+						success = true;
+					}
+				}
+			}
+			if (success) {
+				velocityContextService.getGlobalContext().put("lastPreviewRetriesCount", previewRetriesCount);
+				try {
+					response.sendRedirect(request.getContextPath() + "/preview");
+				} catch (final IOException e) {
+					logger.error(e);
+				}
+			}
+		} else if ("/camfilepreview".equals(path)) {
+			final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
+			if (!processCommandFailure(
+					gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(request.getParameter("folder"), imgRefId, "thumb.jpg", logger)),
+					makeVelocityContext(request, response), request, response, logger)) {
+				try {
+					response.sendRedirect(request.getContextPath() + "/preview");
+				} catch (final IOException e) {
+					logger.error(e);
+				}
+			}
+		} else if ("/deletefile".equals(path)) {
+			final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
+			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdDeleteFile(request.getParameter("folder"), imgRefId, logger)),
+					makeVelocityContext(request, response), request, response, logger)) {
+				try {
+					response.sendRedirect(request.getContextPath() + "/browse");
+				} catch (final IOException e) {
+					logger.error(e);
+				}
+			}
+		} else if ("/captureandrefreshpreview".equals(path)) {
+			final GP2CmdCaptureImageAndListFiles cmdCaptureAndList = new GP2CmdCaptureImageAndListFiles(null, logger);
+			if (!processCommandFailure(gphoto2CommandService.executeCommand(cmdCaptureAndList), null, request, response, logger)) {
+				final String newlyCapturedImagePath = cmdCaptureAndList.getResultFile();
+				boolean proceed = true;
+				if (newlyCapturedImagePath != null && cmdCaptureAndList.getFilesList() != null && cmdCaptureAndList.getFilesList().getByFolder() != null
+						&& cmdCaptureAndList.getFilesList().getByRefId() != null) {
+					final int indexOfLastSlash = newlyCapturedImagePath.lastIndexOf("/");
+					final String fileName = newlyCapturedImagePath.substring(indexOfLastSlash + 1);
+					final String folderPath = newlyCapturedImagePath.substring(0, indexOfLastSlash);
+					final Map<String, CameraFileRef> filesInFolder = cmdCaptureAndList.getFilesList().getByFolder().get(folderPath);
+					if (filesInFolder != null) {
+						final CameraFileRef resultFileRef = filesInFolder.get(fileName);
+						if (resultFileRef != null) {
+							if (processCommandFailure(
+									gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(folderPath, resultFileRef.getRefId(), "thumb.jpg", logger)),
+									null, request, response, logger)) {
+								proceed = false;
+							}
+						}
+					}
+				}
+
+				if (proceed) {
+					try {
+						response.sendRedirect(request.getContextPath() + "/preview");
+					} catch (final IOException e) {
 						logger.error(e);
 					}
 				}
@@ -111,63 +191,6 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 		} else if (requestPath.equals("/preview")) {
 			serveTempalteUTF8Safely("camera/preview.vm", velocityContext, response, logger);
-		} else if (requestPath.equals("/refreshpreview")) {
-			final Integer lastPreviewRetriesCount = (Integer) velocityContextService.getGlobalContext().get("lastPreviewRetriesCount");
-			int previewRetriesCount = lastPreviewRetriesCount == null ? 0 : lastPreviewRetriesCount.intValue();
-			boolean success = false;
-			while (!success && previewRetriesCount < 15) {
-				final GP2CmdCapturePreview command = gphoto2CommandService.executeCommand(new GP2CmdCapturePreview(logger, "thumb.jpg", true,
-						previewRetriesCount));
-				if (command.isResultedWithPossibleTimingFailure()) {
-					previewRetriesCount++;
-				} else {
-					if (command.getRawErrorOutput() != null && command.getRawErrorOutput().trim().length() > 0) {
-						processCommandFailure(command, velocityContext, request, response, logger);
-						break;
-					} else {
-						success = true;
-					}
-				}
-			}
-			if (success) {
-				velocityContextService.getGlobalContext().put("lastPreviewRetriesCount", previewRetriesCount);
-				try {
-					response.sendRedirect(request.getContextPath() + "/preview");
-				} catch (final IOException e) {
-					logger.error(e);
-				}
-			}
-		} else if (requestPath.equals("/captureandrefreshpreview")) {
-			final GP2CmdCaptureImageAndListFiles cmdCaptureAndList = new GP2CmdCaptureImageAndListFiles(null, logger);
-			if (!processCommandFailure(gphoto2CommandService.executeCommand(cmdCaptureAndList), velocityContext, request, response, logger)) {
-				final String newlyCapturedImagePath = cmdCaptureAndList.getResultFile();
-				boolean proceed = true;
-				if (newlyCapturedImagePath != null && cmdCaptureAndList.getFilesList() != null && cmdCaptureAndList.getFilesList().getByFolder() != null
-						&& cmdCaptureAndList.getFilesList().getByRefId() != null) {
-					final int indexOfLastSlash = newlyCapturedImagePath.lastIndexOf("/");
-					final String fileName = newlyCapturedImagePath.substring(indexOfLastSlash + 1);
-					final String folderPath = newlyCapturedImagePath.substring(0, indexOfLastSlash);
-					final Map<String, CameraFileRef> filesInFolder = cmdCaptureAndList.getFilesList().getByFolder().get(folderPath);
-					if (filesInFolder != null) {
-						final CameraFileRef resultFileRef = filesInFolder.get(fileName);
-						if (resultFileRef != null) {
-							if (processCommandFailure(
-									gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(resultFileRef.getRefId(), "thumb.jpg", logger)),
-									velocityContext, request, response, logger)) {
-								proceed = false;
-							}
-						}
-					}
-				}
-
-				if (proceed) {
-					try {
-						response.sendRedirect(request.getContextPath() + "/preview");
-					} catch (final IOException e) {
-						logger.error(e);
-					}
-				}
-			}
 		} else {
 			returnNotFound(request, response);
 		}

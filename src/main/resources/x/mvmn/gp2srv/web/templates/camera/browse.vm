@@ -6,6 +6,26 @@
 		#parse("camera/navigation.vm")
 	</div>
 	<div class="pageContent scroll">
+		<form id="actForm" method="POST" action="" class="hidden">
+			<input type="text" name="imgRefId" value="" />
+			<input type="text" name="folder" value="" />
+		</form>
+		<script>
+			function actFormSubmit(action, imgRefId, folder) {
+				document.forms["actForm"].action = action;
+				document.forms["actForm"]["imgRefId"].value = imgRefId;
+				document.forms["actForm"]["folder"].value = folder;
+				document.forms["actForm"].submit();
+			}
+			function dldpreview(id, folder) {
+				actFormSubmit("$!request.contextPath/camfilepreview", id, folder)
+			}
+			function deletefile(id, name, folder) {
+				if(confirm("Delete file "+name+"?")) {
+					actFormSubmit("$!request.contextPath/deletefile", id, folder)
+				}
+			}
+		</script>
 		#set($needsSeparator = false)
 		#foreach($filesInFolder in $filesList.byFolder.entrySet())
 			#if($filesInFolder.value.size()>0)
@@ -14,14 +34,15 @@
 				<div>
 					<div class="headline">$filesInFolder.key</div>
 					<div>
-						#foreach($fileRef in $filesInFolder.value)
+						#foreach($fileRef in $filesInFolder.value)							
 							<div>
-								<span>$fileRef.refId</span>
-								-
-								<span>$fileRef.filename</span> 
+								<span>$!fileRef.refId</span>
+								- 
+								<a href="javascript:dldpreview($!fileRef.refId, '$!filesInFolder.key')"><span>$!fileRef.filename</span></a> 
 								// 
-								<span>$fileRef.filesizestr</span> 
-								[<span>$fileRef.filetypestr</span>]
+								<span>$!fileRef.filesizestr</span> 
+								[<span>$!fileRef.filetypestr</span>]
+								<a href="javascript:deletefile($!fileRef.refId, '$!fileRef.filename', '$!filesInFolder.key')">del</a>
 							</div>
 						#end
 					</div>
