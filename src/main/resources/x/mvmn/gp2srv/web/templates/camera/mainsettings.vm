@@ -1,22 +1,46 @@
 #parse("camera/head.vm")
 #macro(showSettingSelector $cameraConfig $settingKey)
 	#set($configEntry = $cameraConfig.get($settingKey))
-	<div>
-		$configEntry.label
-		<select onchange="javascript:onsettingchange('$settingKey', this.options[this.selectedIndex].value)">
-			#foreach($choice in $configEntry.choices)
-				#set($count = $velocityCount - 1)
-				<option value="${count}"
-					#if($configEntry.value.toString().equals($choice.toString()))
-						selected="selected"
-					#end
-				>$choice</option>
+	<div class="scroll">
+		<div><span class="headline">$configEntry.label</span></div>
+		<div><span class="smallest">(<span>$configEntry.type.name()</span>: <span>$configEntry.key</span>)</span></div>
+		<div>
+			#if($!configEntry.printableValue)
+				<div>$!configEntry.printableValue</div>
 			#end
-		</select>
+			#if($configEntry.type.name().equalsIgnoreCase("radio") || $configEntry.type.name().equalsIgnoreCase("menu"))
+				<select class="eightyPercentWidth" onchange="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', this.options[this.selectedIndex].value)">
+					#foreach($choice in $configEntry.choices)
+						#set($count = $velocityCount - 1)
+						<option value="${count}"
+							#if($configEntry.value.toString().equals($choice.toString()))
+								selected="selected"
+							#end
+						>$choice</option>
+					#end
+				</select>
+			#elseif($configEntry.type.name().equalsIgnoreCase("toggle"))
+				#set($choices = {"2":"--", "0":"Off", "1":"On"})
+				<select class="eightyPercentWidth" onchange="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', this.options[this.selectedIndex].value)">
+					#foreach($choice in $choices.entrySet())
+						<option value="$!choice.key"
+							#if($configEntry.value.toString().equals($choice.key.toString()))
+								selected="selected"
+							#end
+						>$!choice.value</option>
+					#end
+				</select>
+			#elseif($configEntry.type.name().equalsIgnoreCase("text") || $configEntry.type.name().equalsIgnoreCase("date"))
+				#set($inputId = "settingInput_$settingKey.replaceAll('/', '_')")
+				<input type="button" value="Set" onclick="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', document.getElementById('$inputId').value)" />
+				<input class="eightyPercentWidth" type="text" id="$inputId" value="$!configEntry.value.toString()" />
+			#end
+		</div>
 	</div>
 #end
 <script>
-	function onsettingchange(key, value) {
+	function onsettingchange(type, key, value) {
+		document.forms["setsettingform"]["type"].value=type;
 		document.forms["setsettingform"]["key"].value=key;
 		document.forms["setsettingform"]["value"].value=value;
 		document.forms["setsettingform"].submit();
@@ -24,6 +48,7 @@
 </script>
 <div class="fullWidth">
 	<form id="setsettingform" action="/mainsettingset" method="POST" style="display: none">
+		<input type="hidden" name="type" />
 		<input type="hidden" name="key" />
 		<input type="hidden" name="value" />
 	</form>
@@ -32,6 +57,7 @@
 		#parse("camera/navigation.vm")
 	</div>
 	<div class="pageContent">
+	#*
 		<div>
 			<div>Camera: $!{cameraConfig.get("/main/status/cameramodel").value}</div>
 			<div>Lens: $!{cameraConfig.get("/main/status/lensname").value}</div>
@@ -57,18 +83,11 @@
 			#showSettingSelector($cameraConfig "/main/imgsettings/colorspace")
 		</div>
 		<hr/>
+	*#
 		<div>
 			#foreach($settingEntry in $cameraConfig.entrySet())
-				#if($settingEntry.value.type.name().equalsIgnoreCase("radio"))
-					#showSettingSelector($cameraConfig $settingEntry.key)
-				#else
-					<div>
-						<span>$settingEntry.value.type.name()</span>
-						<span>$settingEntry.value.label</span> 
-						= 
-						<span>$settingEntry.value.value</span>
-					</div>
-				#end
+				#showSettingSelector($cameraConfig $settingEntry.key)
+				<hr/>
 			#end
 		</div>
 	</div>

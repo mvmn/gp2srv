@@ -9,14 +9,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.context.Context;
 
+import x.mvmn.gp2srv.model.CameraConfigEntry.CameraConfigEntryType;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
+import x.mvmn.gp2srv.service.gphoto2.command.AbstractGPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCaptureImageAndListFiles;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCapturePreview;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetAllCameraConfigurations;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdGetThumbnail;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdListFiles;
+import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdSetSetting;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdSetSettingByIndex;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdSummary;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
@@ -40,14 +43,32 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 		if ("/mainsettingset".equals(request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : ""))) {
+			final String type = request.getParameter("type");
 			final String key = request.getParameter("key");
-			final int value = Integer.parseInt(request.getParameter("value"));
-			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdSetSettingByIndex(key, value, logger)),
-					makeVelocityContext(request, response), request, response, logger)) {
-				try {
-					response.sendRedirect(request.getContextPath() + "/mainsettings");
-				} catch (final Exception e) {
-					logger.error(e);
+			final String value = request.getParameter("value");
+			final AbstractGPhoto2Command command;
+			switch (CameraConfigEntryType.valueOf(type)) {
+				case RADIO:
+				case MENU:
+					command = new GP2CmdSetSettingByIndex(key, Integer.parseInt(value), logger);
+				break;
+				case TOGGLE:
+				case TEXT:
+				case DATE:
+					command = new GP2CmdSetSetting(key, value, logger);
+				break;
+				default:
+					returnForbidden(request, response);
+					command = null;
+				break;
+			}
+			if (command != null) {
+				if (!processCommandFailure(gphoto2CommandService.executeCommand(command), makeVelocityContext(request, response), request, response, logger)) {
+					try {
+						response.sendRedirect(request.getContextPath() + "/mainsettings");
+					} catch (final Exception e) {
+						logger.error(e);
+					}
 				}
 			}
 		}
@@ -94,7 +115,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			final Integer lastPreviewRetriesCount = (Integer) velocityContextService.getGlobalContext().get("lastPreviewRetriesCount");
 			int previewRetriesCount = lastPreviewRetriesCount == null ? 0 : lastPreviewRetriesCount.intValue();
 			boolean success = false;
-			while (!success && previewRetriesCount < 5) {
+			while (!success && previewRetriesCount < 15) {
 				final GP2CmdCapturePreview command = gphoto2CommandService.executeCommand(new GP2CmdCapturePreview(logger, "thumb.jpg", true,
 						previewRetriesCount));
 				if (command.isResultedWithPossibleTimingFailure()) {

@@ -12,7 +12,7 @@
 				#if($needsSeparator) <hr/> #end	
 				#set($needsSeparator = true)
 				<div>
-					<b>$filesInFolder.key</b>
+					<div class="headline">$filesInFolder.key</div>
 					<div>
 						#foreach($fileRef in $filesInFolder.value)
 							<div>

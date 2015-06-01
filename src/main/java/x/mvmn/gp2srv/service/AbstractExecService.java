@@ -3,10 +3,10 @@ package x.mvmn.gp2srv.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import x.mvmn.log.api.Logger;
 import x.mvmn.log.api.Logger.LogLevel;
@@ -28,9 +28,8 @@ public abstract class AbstractExecService implements ExecService {
 	 */
 	public ExecResult execCommandSync(final String[] command, final String[] envVars, final File dir) throws IOException {
 		final String commandDebugInfo;
-		if (logger.shouldLog(LogLevel.DEBUG)) {
-			commandDebugInfo = "'" + Arrays.toString(command) + "' in dir '" + dir.getAbsolutePath() + "'.";
-			logger.debug("Command requested " + commandDebugInfo);
+		if (logger.shouldLog(LogLevel.DEBUG) || logger.shouldLog(LogLevel.TRACE)) {
+			commandDebugInfo = "'" + StringUtils.join(command, " ") + "' in dir '" + dir.getAbsolutePath() + "'.";
 		} else {
 			commandDebugInfo = "";
 		}
@@ -53,22 +52,22 @@ public abstract class AbstractExecService implements ExecService {
 				final List<String> errorLines = IOUtils.readLines(errorStream);
 				for (String line : errorLines) {
 					errorOutput.append(line).append("\n");
-					if (logger.shouldLog(LogLevel.DEBUG)) {
-						logger.debug("Command " + commandDebugInfo + " ERROR output: " + line);
+					if (logger.shouldLog(LogLevel.TRACE)) {
+						logger.trace("Command " + commandDebugInfo + " ERROR output: " + line);
 					}
 				}
 				final List<String> resultLines = IOUtils.readLines(stdoutStream);
 				for (String line : resultLines) {
 					standardOutput.append(line).append("\n");
-					if (logger.shouldLog(LogLevel.DEBUG)) {
-						logger.debug("Command " + commandDebugInfo + " STANDARD output: " + line);
+					if (logger.shouldLog(LogLevel.TRACE)) {
+						logger.trace("Command " + commandDebugInfo + " STANDARD output: " + line);
 					}
 				}
 				try {
 					processExitValue = process.getProcessExitCode();
 					processFinished = true;
-					if (logger.shouldLog(LogLevel.DEBUG)) {
-						logger.debug("Command " + commandDebugInfo + " process exited with code " + processExitValue);
+					if (logger.shouldLog(LogLevel.TRACE)) {
+						logger.trace("Command " + commandDebugInfo + " process exited with code " + processExitValue);
 					}
 				} catch (IllegalThreadStateException e) {
 					processFinished = false; // superfluous here, but left to indicate the meaning of the code.
@@ -76,8 +75,8 @@ public abstract class AbstractExecService implements ExecService {
 			}
 
 			afterProcessFinish();
-			if (logger.shouldLog(LogLevel.DEBUG)) {
-				logger.debug("Command " + commandDebugInfo + " finished.");
+			if (logger.shouldLog(LogLevel.TRACE)) {
+				logger.trace("Command " + commandDebugInfo + " finished.");
 			}
 		}
 

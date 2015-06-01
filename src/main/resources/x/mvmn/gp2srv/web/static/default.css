@@ -3,6 +3,18 @@ body {
 	font-size: 14pt;
 }
 
+.small {
+	font-size: 10pt;
+}
+
+.smaller {
+	font-size: 8pt;
+}
+
+.smallest {
+	font-size: 5pt;
+}
+
 *,*:before,*:after {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -11,6 +23,10 @@ body {
 
 .fullWidth {
 	width: 100%;
+}
+
+.eightyPercentWidth {
+	width: 80%;
 }
 
 .scroll {
@@ -55,4 +71,8 @@ body {
 .actionLink {
 	font-size: 14pt;
 	line-height: 30pt;	
+}
+
+.headline {
+	font-weight: bold;
 }
