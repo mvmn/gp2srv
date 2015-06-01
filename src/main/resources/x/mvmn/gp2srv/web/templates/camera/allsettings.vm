@@ -47,7 +47,7 @@
 	}
 </script>
 <div class="fullWidth">
-	<form id="setsettingform" action="/mainsettingset" method="POST" style="display: none">
+	<form id="setsettingform" action="/allsettingset" method="POST" style="display: none">
 		<input type="hidden" name="type" />
 		<input type="hidden" name="key" />
 		<input type="hidden" name="value" />

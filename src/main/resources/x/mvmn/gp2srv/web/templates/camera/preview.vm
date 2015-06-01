@@ -8,10 +8,13 @@
 	<div class="pageContent">
 		<div>
 			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/refreshpreview">
-				<input type="submit" value="Capture preview" />
+				<input type="submit" value="Get preview" />
 			</form>
+			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/capture">
+				<input type="submit" value="Shoot" />
+			</form>			
 			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/captureandrefreshpreview">
-				<input type="submit" value="Capture image" />
+				<input type="submit" value="Shoot + get thumb" />
 			</form>			
 		</div>
 		<div>

@@ -1,6 +1,5 @@
 package x.mvmn.gp2srv.web.servlets;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
 import x.mvmn.gp2srv.service.gphoto2.command.AbstractGPhoto2Command;
+import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCaptureImage;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCaptureImageAndListFiles;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdCapturePreview;
 import x.mvmn.gp2srv.service.gphoto2.command.GP2CmdDeleteFile;
@@ -44,7 +44,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 		final String path = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
-		if ("/mainsettingset".equals(path)) {
+		if ("/allsettingset".equals(path)) {
 			final String type = request.getParameter("type");
 			final String key = request.getParameter("key");
 			final String value = request.getParameter("value");
@@ -66,11 +66,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 			if (command != null) {
 				if (!processCommandFailure(gphoto2CommandService.executeCommand(command), makeVelocityContext(request, response), request, response, logger)) {
-					try {
-						response.sendRedirect(request.getContextPath() + "/mainsettings");
-					} catch (final Exception e) {
-						logger.error(e);
-					}
+					redirectSafely(response, request.getContextPath() + "/allsettings", logger);
 				}
 			}
 		} else if ("/refreshpreview".equals(path)) {
@@ -93,32 +89,24 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 			if (success) {
 				velocityContextService.getGlobalContext().put("lastPreviewRetriesCount", previewRetriesCount);
-				try {
-					response.sendRedirect(request.getContextPath() + "/preview");
-				} catch (final IOException e) {
-					logger.error(e);
-				}
+				redirectSafely(response, request.getContextPath() + "/preview", logger);
 			}
 		} else if ("/camfilepreview".equals(path)) {
 			final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
 			if (!processCommandFailure(
 					gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(request.getParameter("folder"), imgRefId, "thumb.jpg", logger)),
 					makeVelocityContext(request, response), request, response, logger)) {
-				try {
-					response.sendRedirect(request.getContextPath() + "/preview");
-				} catch (final IOException e) {
-					logger.error(e);
-				}
+				redirectSafely(response, request.getContextPath() + "/preview", logger);
 			}
 		} else if ("/deletefile".equals(path)) {
 			final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
 			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdDeleteFile(request.getParameter("folder"), imgRefId, logger)),
 					makeVelocityContext(request, response), request, response, logger)) {
-				try {
-					response.sendRedirect(request.getContextPath() + "/browse");
-				} catch (final IOException e) {
-					logger.error(e);
-				}
+				redirectSafely(response, request.getContextPath() + "/browse", logger);
+			}
+		} else if ("/capture".equals(path)) {
+			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdCaptureImage(true, logger)), null, request, response, logger)) {
+				redirectSafely(response, request.getContextPath() + "/preview", logger);
 			}
 		} else if ("/captureandrefreshpreview".equals(path)) {
 			final GP2CmdCaptureImageAndListFiles cmdCaptureAndList = new GP2CmdCaptureImageAndListFiles(null, logger);
@@ -144,11 +132,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				}
 
 				if (proceed) {
-					try {
-						response.sendRedirect(request.getContextPath() + "/preview");
-					} catch (final IOException e) {
-						logger.error(e);
-					}
+					redirectSafely(response, request.getContextPath() + "/preview", logger);
 				}
 			}
 		}
@@ -173,11 +157,11 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			final HttpServletResponse response, final Logger logger) {
 		if (requestPath.equals("/") || requestPath.equals("")) {
 			serveTempalteUTF8Safely("camera/index.vm", velocityContext, response, logger);
-		} else if (requestPath.equals("/mainsettings")) {
+		} else if (requestPath.equals("/allsettings")) {
 			final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
 			if (!processCommandFailure(cameraConfigsCommand, velocityContext, request, response, logger)) {
 				velocityContext.put("cameraConfig", cameraConfigsCommand.getCameraConfig());
-				serveTempalteUTF8Safely("camera/mainsettings.vm", velocityContext, response, logger);
+				serveTempalteUTF8Safely("camera/allsettings.vm", velocityContext, response, logger);
 			}
 		} else if (requestPath.equals("/summary")) {
 			final GP2CmdSummary cmd = gphoto2CommandService.executeCommand(new GP2CmdSummary(logger));
@@ -193,6 +177,14 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			serveTempalteUTF8Safely("camera/preview.vm", velocityContext, response, logger);
 		} else {
 			returnNotFound(request, response);
+		}
+	}
+
+	protected void redirectSafely(final HttpServletResponse response, final String destination, final Logger logger) {
+		try {
+			response.sendRedirect(destination);
+		} catch (final Exception e) {
+			logger.error(e);
 		}
 	}
 
