@@ -23,6 +23,20 @@ body {
 	display: inline-block;
 }
 
+.selectedButton {
+	background-color: black;
+	color: white;
+}
+
+.settingDisplayValueContainer {
+	text-align: right;
+	width: 100%;
+}
+
+.tableCell {
+	display: table-cell;
+}
+
 *,*:before,*:after {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -33,8 +47,8 @@ body {
 	width: 100%;
 }
 
-.eightyPercentWidth {
-	width: 80%;
+.halfWidth {
+	width: 50%;
 }
 
 .scroll {
@@ -81,6 +95,13 @@ body {
 	line-height: 30pt;	
 }
 
-.headline {
+.headline, .navigationContainer a {
 	font-weight: bold;
+}
+
+.browseList.odd {
+	background-color: #F0F0FF;
+}
+.browseList.even {
+	background-color: #E0E0FF;
 }

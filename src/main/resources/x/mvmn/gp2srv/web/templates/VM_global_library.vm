@@ -3,3 +3,79 @@
 #end
 
 #macro(outputBr $obj)$!obj.toString().replaceAll("[\r\n]","<br/>")#end
+
+#macro(embedSettingChangeScriptAndForm $pageParam)
+<script>
+	function onsettingchange(type, key, value, returnTo) {
+		document.forms["setsettingform"]["type"].value=type;
+		document.forms["setsettingform"]["key"].value=key;
+		document.forms["setsettingform"]["value"].value=value;
+		document.forms["setsettingform"]["page"].value = "$!pageParam";
+		document.forms["setsettingform"].submit();
+	}
+</script>
+<form id="setsettingform" action="/allsettingset" method="POST" style="display: none">
+	<input type="hidden" name="type" />
+	<input type="hidden" name="key" />
+	<input type="hidden" name="value" />
+	<input type="hidden" name="page" />
+</form>
+#end
+#macro(showSettingSelector $cameraConfig $settingKey $showFavToggle $favedSelectors)
+	#set($configEntry = $cameraConfig.get($settingKey))
+	<div class="scroll">
+		<div>
+			<span class="headline">$configEntry.label</span>
+			#if($showFavToggle)
+				<span class="">
+					<input type="checkbox" #if($!favedSelectors.contains($settingKey)) checked="checked" #end onchange="saveFavedCamConf('$configEntry.key', this.checked)" />
+				</span>
+			#end
+		</div>
+		<div><span class="smallest">[<span>$configEntry.type.name()</span>: <span>$configEntry.key</span>]</span></div>
+		<div class="fullWidth">
+			#if($!configEntry.printableValue)
+				<div class="settingDisplayValueContainer">$!configEntry.printableValue</div>
+			#end
+			#if($configEntry.type.name().equalsIgnoreCase("radio") || $configEntry.type.name().equalsIgnoreCase("menu"))
+				<select class="fullWidth" onchange="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', this.options[this.selectedIndex].value)">
+					#foreach($choice in $configEntry.choices)
+						#set($count = $velocityCount - 1)
+						<option value="${count}"
+							#if($configEntry.value.toString().equals($choice.toString()))
+								selected="selected"
+							#end
+						>$choice</option>
+					#end
+				</select>
+			#elseif($configEntry.type.name().equalsIgnoreCase("toggle"))
+				#*
+				#set($choices = {"2":"--", "0":"Off", "1":"On"})
+				<select class="fullWidth" onchange="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', this.options[this.selectedIndex].value)">
+					#foreach($choice in $choices.entrySet())
+						<option value="$!choice.key"
+							#if($configEntry.value.toString().equals($choice.key.toString()))
+								selected="selected"
+							#end
+						>$!choice.value</option>
+					#end
+				</select>
+				*#
+				<div class="inlineBlock halfWidth"><!--
+					--><input class="fullWidth #if($configEntry.value.toString().equals("1")) selectedButton #end" type="button" value="On" onclick="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', 1)" /><!--
+				--></div><!--
+				--><div class="inlineBlock halfWidth"><!--
+					--><input class="fullWidth #if($configEntry.value.toString().equals("0")) selectedButton #end" type="button" value="Off" onclick="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', 0)" /><!--
+				--></div>
+			#elseif($configEntry.type.name().equalsIgnoreCase("text") || $configEntry.type.name().equalsIgnoreCase("date"))
+				#set($inputId = "settingInput_$settingKey.replaceAll('/', '_')")
+				<div class="tableCell">
+					<input type="button" value="Set" onclick="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', document.getElementById('$inputId').value)" />
+				</div>
+				<div class="tableCell fullWidth">
+					<input class="fullWidth" type="text" id="$inputId" value="$!configEntry.value.toString()" />
+				</div>
+			#end
+		</div>
+	</div>
+#end

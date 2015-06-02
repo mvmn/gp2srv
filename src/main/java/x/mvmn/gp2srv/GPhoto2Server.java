@@ -1,6 +1,8 @@
 package x.mvmn.gp2srv;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -9,6 +11,7 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -43,6 +46,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final VelocityContextService velocityContextService;
 	private final GPhoto2CommandService gphoto2CommandService;
 	private final String pathToGphoto2;
+
+	private final File userHome;
+	private final File appHomeFolder;
+	private final File imagesFolder;
+	private final File favouredCamConfSettingsFile;
+	private final Properties favouredCamConfSettings;
 
 	public GPhoto2Server(final String pathToGphoto2, final LogLevel logLevel, final boolean mockMode) {
 		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, mockMode);
@@ -89,14 +98,62 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 			context.setContextPath(contextPath);
-			String userHome = System.getProperty("user.home");
-			File appHomeFolder = new File(userHome + File.separator + ".gp2srv");
+			userHome = new File(System.getProperty("user.home"));
+			appHomeFolder = new File(userHome, ".gp2srv");
 			appHomeFolder.mkdir();
-			File imagesFolder = new File(userHome + File.separator + ".gp2srv" + File.separator + "img");
+			imagesFolder = new File(appHomeFolder, "img");
 			imagesFolder.mkdirs();
+			favouredCamConfSettingsFile = new File(appHomeFolder, "favouredConfs.properties");
+			if (!favouredCamConfSettingsFile.exists()) {
+				favouredCamConfSettingsFile.createNewFile();
+			}
+			favouredCamConfSettings = new Properties() {
+				private static final long serialVersionUID = 3248780562679168446L;
 
-			final Properties mockResults = new Properties();
-			mockResults.load(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties"));
+				@Override
+				public Object remove(final Object key) {
+					final Object result = super.remove(key);
+					store();
+					return result;
+				}
+
+				@Override
+				public Object setProperty(final String key, final String value) {
+					final Object result = super.setProperty(key, value);
+					store();
+					return result;
+				}
+
+				protected void store() {
+					FileOutputStream tmpFileWriter = null;
+					try {
+						tmpFileWriter = new FileOutputStream(favouredCamConfSettingsFile);
+						this.store(tmpFileWriter, "GPhoto2Server - favoured camera settings");
+					} catch (final Exception e) {
+						throw new RuntimeException("Failed to write favoured camera conf settings file " + favouredCamConfSettingsFile.getAbsolutePath(), e);
+					} finally {
+						IOUtils.closeQuietly(tmpFileWriter);
+					}
+				}
+			};
+			FileReader tmpFileReader = null;
+			try {
+				tmpFileReader = new FileReader(favouredCamConfSettingsFile);
+				favouredCamConfSettings.load(tmpFileReader);
+			} catch (final Exception e) {
+				throw new RuntimeException("Failed to read favoured camera conf settings file " + favouredCamConfSettingsFile.getAbsolutePath(), e);
+			} finally {
+				IOUtils.closeQuietly(tmpFileReader);
+			}
+			velocityContextService.getGlobalContext().put("favouredCamConfSettings", favouredCamConfSettings);
+
+			final Properties mockResults;
+			if (mockMode) {
+				mockResults = new Properties();
+				mockResults.load(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties"));
+			} else {
+				mockResults = null;
+			}
 
 			final ExecService execService = mockMode ? new MockExecService(mockResults, logger) : new ExecServiceImpl(logger);
 
@@ -104,7 +161,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
-			context.addServlet(new ServletHolder(new CameraControlServlet(gphoto2CommandService, velocityContextService, this, logger)), "/");
+			context.addServlet(
+					new ServletHolder(new CameraControlServlet(gphoto2CommandService, favouredCamConfSettings, velocityContextService, this, logger)), "/");
 			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
 			context.setErrorHandler(new ErrorHandler() {
 				private AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {

@@ -34,15 +34,17 @@
 				<div>
 					<div class="headline">$filesInFolder.key</div>
 					<div>
-						#foreach($fileRef in $filesInFolder.value)							
-							<div>
+						#foreach($fileRef in $filesInFolder.value)
+							#set($odd = $foreach.index % 2)							
+							<div class="fullWidth browseList #if($odd == 1) odd #else even #end">
 								<span>$!fileRef.refId</span>
 								- 
 								<a href="javascript:dldpreview($!fileRef.refId, '$!filesInFolder.key')"><span>$!fileRef.filename</span></a> 
-								// 
-								<span>$!fileRef.filesizestr</span> 
-								[<span>$!fileRef.filetypestr</span>]
-								<a href="javascript:deletefile($!fileRef.refId, '$!fileRef.filename', '$!filesInFolder.key')">del</a>
+								<span class="smaller">
+									<span>$!fileRef.filesizestr</span> 
+									[<span>$!fileRef.filetypestr.replaceAll("image/","")</span>]
+									<a href="javascript:deletefile($!fileRef.refId, '$!fileRef.filename', '$!filesInFolder.key')">delete</a>
+								</span>
 							</div>
 						#end
 					</div>

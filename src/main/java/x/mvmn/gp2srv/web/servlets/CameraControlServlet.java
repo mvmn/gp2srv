@@ -2,12 +2,14 @@ package x.mvmn.gp2srv.web.servlets;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.context.Context;
 
+import x.mvmn.gp2srv.model.CameraConfigEntry;
 import x.mvmn.gp2srv.model.CameraConfigEntry.CameraConfigEntryType;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
@@ -34,20 +36,32 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 	protected final GPhoto2CommandService gphoto2CommandService;
 	protected volatile GPhoto2Command currentCommand = null;
+	private final Properties favouredCamConfSettings;
 
-	public CameraControlServlet(final GPhoto2CommandService gphoto2CommandService, final VelocityContextService velocityContextService,
-			final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
+	public CameraControlServlet(final GPhoto2CommandService gphoto2CommandService, final Properties favouredCamConfSettings,
+			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
 		this.gphoto2CommandService = gphoto2CommandService;
+		this.favouredCamConfSettings = favouredCamConfSettings;
 	}
 
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 		final String path = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
-		if ("/allsettingset".equals(path)) {
+		if ("/favsetting".equals(path)) {
+			final String key = request.getParameter("key");
+			final String value = request.getParameter("value");
+			if (Boolean.valueOf(value.toLowerCase())) {
+				favouredCamConfSettings.setProperty(key, Boolean.TRUE.toString());
+			} else {
+				favouredCamConfSettings.remove(key);
+			}
+			redirectSafely(response, request.getContextPath() + "/allsettings", logger);
+		} else if ("/allsettingset".equals(path)) {
 			final String type = request.getParameter("type");
 			final String key = request.getParameter("key");
 			final String value = request.getParameter("value");
+			final String page = request.getParameter("page");
 			final AbstractGPhoto2Command command;
 			switch (CameraConfigEntryType.valueOf(type)) {
 				case RADIO:
@@ -66,7 +80,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 			if (command != null) {
 				if (!processCommandFailure(gphoto2CommandService.executeCommand(command), makeVelocityContext(request, response), request, response, logger)) {
-					redirectSafely(response, request.getContextPath() + "/allsettings", logger);
+					redirectSafely(response, request.getContextPath() + (page != null && "preview".equals(page) ? "/preview" : "/allsettings"), logger);
 				}
 			}
 		} else if ("/refreshpreview".equals(path)) {
@@ -160,7 +174,9 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 		} else if (requestPath.equals("/allsettings")) {
 			final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
 			if (!processCommandFailure(cameraConfigsCommand, velocityContext, request, response, logger)) {
-				velocityContext.put("cameraConfig", cameraConfigsCommand.getCameraConfig());
+				final Map<String, CameraConfigEntry> cameraConfig = cameraConfigsCommand.getCameraConfig();
+				velocityContext.put("cameraConfig", cameraConfig);
+				velocityContextService.getGlobalContext().put("lastReadCameraConfig", cameraConfig);
 				serveTempalteUTF8Safely("camera/allsettings.vm", velocityContext, response, logger);
 			}
 		} else if (requestPath.equals("/summary")) {
@@ -174,6 +190,15 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				serveTempalteUTF8Safely("camera/browse.vm", velocityContext, response, logger);
 			}
 		} else if (requestPath.equals("/preview")) {
+			if (velocityContextService.getGlobalContext().get("lastReadCameraConfig") == null) {
+				final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService
+						.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
+				if (cameraConfigsCommand.getExitCode() == 0) {
+					velocityContextService.getGlobalContext().put("lastReadCameraConfig", cameraConfigsCommand.getCameraConfig());
+				} else {
+					logger.warn("Error pre-reading camera config for preview page: " + cameraConfigsCommand.getRawErrorOutput());
+				}
+			}
 			serveTempalteUTF8Safely("camera/preview.vm", velocityContext, response, logger);
 		} else {
 			returnNotFound(request, response);
