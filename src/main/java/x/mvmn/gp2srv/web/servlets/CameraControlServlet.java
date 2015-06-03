@@ -81,13 +81,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			if (command != null) {
 				if (!processCommandFailure(gphoto2CommandService.executeCommand(command), makeVelocityContext(request, response), request, response, logger)) {
 					if (page != null && "preview".equals(page)) {
-						final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService
-								.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
-						if (cameraConfigsCommand.getExitCode() == 0) {
-							velocityContextService.getGlobalContext().put("lastReadCameraConfig", cameraConfigsCommand.getCameraConfig());
-						} else {
-							logger.warn("Error reading updated camera config for preview page: " + cameraConfigsCommand.getRawErrorOutput());
-						}
+						updateLastReadConfig();
 						redirectLocalSafely(request, response, "/preview");
 					} else {
 						redirectLocalSafely(request, response, "/allsettings");
@@ -131,6 +125,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 		} else if ("/capture".equals(path)) {
 			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdCaptureImage(true, logger)), null, request, response, logger)) {
+				updateLastReadConfig();
 				redirectLocalSafely(request, response, "/preview");
 			}
 		} else if ("/captureandrefreshpreview".equals(path)) {
@@ -202,17 +197,20 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 		} else if (requestPath.equals("/preview")) {
 			if (velocityContextService.getGlobalContext().get("lastReadCameraConfig") == null) {
-				final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService
-						.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
-				if (cameraConfigsCommand.getExitCode() == 0) {
-					velocityContextService.getGlobalContext().put("lastReadCameraConfig", cameraConfigsCommand.getCameraConfig());
-				} else {
-					logger.warn("Error pre-reading camera config for preview page: " + cameraConfigsCommand.getRawErrorOutput());
-				}
+				updateLastReadConfig();
 			}
 			serveTempalteUTF8Safely("camera/preview.vm", velocityContext, response, logger);
 		} else {
 			returnNotFound(request, response);
+		}
+	}
+
+	protected void updateLastReadConfig() {
+		final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
+		if (cameraConfigsCommand.getExitCode() == 0) {
+			velocityContextService.getGlobalContext().put("lastReadCameraConfig", cameraConfigsCommand.getCameraConfig());
+		} else {
+			logger.warn("Error reading updated camera config for preview page: " + cameraConfigsCommand.getRawErrorOutput());
 		}
 	}
 
