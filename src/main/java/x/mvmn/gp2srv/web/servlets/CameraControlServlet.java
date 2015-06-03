@@ -56,7 +56,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			} else {
 				favouredCamConfSettings.remove(key);
 			}
-			redirectSafely(response, request.getContextPath() + "/allsettings", logger);
+			redirectLocalSafely(request, response, "/allsettings");
 		} else if ("/allsettingset".equals(path)) {
 			final String type = request.getParameter("type");
 			final String key = request.getParameter("key");
@@ -80,7 +80,18 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 			if (command != null) {
 				if (!processCommandFailure(gphoto2CommandService.executeCommand(command), makeVelocityContext(request, response), request, response, logger)) {
-					redirectSafely(response, request.getContextPath() + (page != null && "preview".equals(page) ? "/preview" : "/allsettings"), logger);
+					if (page != null && "preview".equals(page)) {
+						final GP2CmdGetAllCameraConfigurations cameraConfigsCommand = gphoto2CommandService
+								.executeCommand(new GP2CmdGetAllCameraConfigurations(logger));
+						if (cameraConfigsCommand.getExitCode() == 0) {
+							velocityContextService.getGlobalContext().put("lastReadCameraConfig", cameraConfigsCommand.getCameraConfig());
+						} else {
+							logger.warn("Error reading updated camera config for preview page: " + cameraConfigsCommand.getRawErrorOutput());
+						}
+						redirectLocalSafely(request, response, "/preview");
+					} else {
+						redirectLocalSafely(request, response, "/allsettings");
+					}
 				}
 			}
 		} else if ("/refreshpreview".equals(path)) {
@@ -103,24 +114,24 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			}
 			if (success) {
 				velocityContextService.getGlobalContext().put("lastPreviewRetriesCount", previewRetriesCount);
-				redirectSafely(response, request.getContextPath() + "/preview", logger);
+				redirectLocalSafely(request, response, "/preview");
 			}
 		} else if ("/camfilepreview".equals(path)) {
 			final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
 			if (!processCommandFailure(
 					gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(request.getParameter("folder"), imgRefId, "thumb.jpg", logger)),
 					makeVelocityContext(request, response), request, response, logger)) {
-				redirectSafely(response, request.getContextPath() + "/preview", logger);
+				redirectLocalSafely(request, response, "/preview");
 			}
 		} else if ("/deletefile".equals(path)) {
 			final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
 			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdDeleteFile(request.getParameter("folder"), imgRefId, logger)),
 					makeVelocityContext(request, response), request, response, logger)) {
-				redirectSafely(response, request.getContextPath() + "/browse", logger);
+				redirectLocalSafely(request, response, "/browse");
 			}
 		} else if ("/capture".equals(path)) {
 			if (!processCommandFailure(gphoto2CommandService.executeCommand(new GP2CmdCaptureImage(true, logger)), null, request, response, logger)) {
-				redirectSafely(response, request.getContextPath() + "/preview", logger);
+				redirectLocalSafely(request, response, "/preview");
 			}
 		} else if ("/captureandrefreshpreview".equals(path)) {
 			final GP2CmdCaptureImageAndListFiles cmdCaptureAndList = new GP2CmdCaptureImageAndListFiles(null, logger);
@@ -146,7 +157,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				}
 
 				if (proceed) {
-					redirectSafely(response, request.getContextPath() + "/preview", logger);
+					redirectLocalSafely(request, response, "/preview");
 				}
 			}
 		}
@@ -205,9 +216,9 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 		}
 	}
 
-	protected void redirectSafely(final HttpServletResponse response, final String destination, final Logger logger) {
+	protected void redirectLocalSafely(final HttpServletRequest request, final HttpServletResponse response, final String destination) {
 		try {
-			response.sendRedirect(destination);
+			response.sendRedirect(request.getContextPath() + destination);
 		} catch (final Exception e) {
 			logger.error(e);
 		}
