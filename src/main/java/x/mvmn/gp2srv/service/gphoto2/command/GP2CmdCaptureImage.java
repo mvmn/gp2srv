@@ -8,33 +8,29 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 
+	protected static final String[] COMMAND_STR_KEEP = new String[] { "--capture-image", "--keep" };
+	protected static final String[] COMMAND_STR_NO_KEEP = new String[] { "--capture-image", "--no-keep" };
+
+	protected static final Pattern RESULT_PATTERN = Pattern.compile("^New file is in location (.+) on the camera$");
+
 	protected final Boolean keepImageOnCamera;
-	protected String resultFile;
+	protected volatile String resultFile;
 
 	public GP2CmdCaptureImage(final Boolean keepImageOnCamera, final Logger logger) {
 		super(logger);
 		this.keepImageOnCamera = keepImageOnCamera;
 	}
 
-	public String getCommandString() {
-		return "capture-image";
+	public String[] getCommandString() {
+		return keepImageOnCamera == null ? null : (keepImageOnCamera ? COMMAND_STR_KEEP : COMMAND_STR_NO_KEEP);
 	}
-
-	protected static final Pattern resultPattern = Pattern.compile("^New file is in location (.+) on the camera$");
 
 	public void submitRawStandardOutput(final String standardOutput) {
 		super.submitRawStandardOutput(standardOutput);
-		final Matcher matcher = resultPattern.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
+		final Matcher matcher = RESULT_PATTERN.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
 		if (matcher.find()) {
 			resultFile = matcher.group(1);
 		}
-	}
-
-	protected static final String[] PARAMS_KEEP = new String[] { "--keep" };
-	protected static final String[] PARAMS_NO_KEEP = new String[] { "--no-keep" };
-
-	public String[] getCommandParams() {
-		return keepImageOnCamera == null ? null : (keepImageOnCamera ? PARAMS_KEEP : PARAMS_NO_KEEP);
 	}
 
 	public String getResultFile() {

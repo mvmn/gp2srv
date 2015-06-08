@@ -15,11 +15,7 @@ public class GP2CmdGetThumbnail extends AbstractGPhoto2Command {
 		this.targetFileName = targetFileName;
 	}
 
-	public String getCommandString() {
-		return "get-thumbnail";
-	}
-
-	public String[] getCommandParams() {
-		return new String[] { String.valueOf(sourceFileRef), "--force-overwrite", "--filename", targetFileName, "--folder", folder };
+	public String[] getCommandString() {
+		return new String[] { "--get-thumbnail", String.valueOf(sourceFileRef), "--force-overwrite", "--filename", targetFileName, "--folder", folder };
 	}
 }

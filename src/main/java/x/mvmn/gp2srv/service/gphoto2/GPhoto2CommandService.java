@@ -13,11 +13,11 @@ public class GPhoto2CommandService {
 
 	public <C extends GPhoto2Command> C executeCommand(final C command) {
 		try {
-			final ExecResult execResult = gphoto2ExecService.execCommand(command.getCommandString(), command.getCommandParams());
+			final ExecResult execResult = gphoto2ExecService.execCommand(command.getCommandString());
 			command.submitRawStandardOutput(execResult.getStandardOutput());
 			command.submitRawErrorOutput(execResult.getErrorOutput());
 			command.submitExitCode(execResult.getExitCode());
-		} catch (Throwable error) {
+		} catch (final Throwable error) {
 			command.submitError(error);
 		}
 		return command;
@@ -36,7 +36,7 @@ public class GPhoto2CommandService {
 				command.submitError(error);
 				callback.processResults(command);
 			}
-		}, command.getCommandString(), command.getCommandParams());
+		}, command.getCommandString());
 	}
 
 	public boolean isProcessRunning() {

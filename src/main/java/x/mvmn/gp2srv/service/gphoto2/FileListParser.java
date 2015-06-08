@@ -26,6 +26,17 @@ public class FileListParser {
 		public Map<Integer, CameraFileRef> getByRefId() {
 			return byRefId;
 		}
+
+		@Override
+		public String toString() {
+			final StringBuilder result = new StringBuilder();
+			for (final Map.Entry<String, Map<String, CameraFileRef>> byFolderEntry : byFolder.entrySet()) {
+				for (Map.Entry<String, CameraFileRef> ref : byFolderEntry.getValue().entrySet()) {
+					result.append(byFolderEntry.getKey()).append(": ").append(ref.getKey()).append(" - ").append(ref.getValue().toString()).append("\n");
+				}
+			}
+			return result.toString();
+		}
 	}
 
 	public static class CameraFileRef {
@@ -102,6 +113,12 @@ public class FileListParser {
 			if (refId != other.refId)
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return new StringBuilder(String.valueOf(refId)).append(" - ").append(filename).append(" - ").append(filesizestr).append(" - ").append(filetypestr)
+					.toString();
 		}
 	}
 

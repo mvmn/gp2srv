@@ -4,12 +4,12 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.apache.velocity.VelocityContext;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class TemplateEngineTest extends TestCase {
+public class TemplateEngineTest {
 
 	@Test
 	public void test() {
@@ -20,6 +20,6 @@ public class TemplateEngineTest extends TestCase {
 		context.put("testVar", "Yeah, some text here");
 		final StringWriter stringWriter = new StringWriter();
 		engine.renderTemplate("test.vm", "UTF-8", new VelocityContext(context), stringWriter);
-		assertEquals("Test template.\nTest variable: Yeah, some text here\n	Hi there from testGlobalMacro.", stringWriter.toString().trim());
+		TestCase.assertEquals("Test template.\nTest variable: Yeah, some text here\n	Hi there from testGlobalMacro.", stringWriter.toString().trim());
 	}
 }

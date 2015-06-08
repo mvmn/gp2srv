@@ -7,9 +7,6 @@ import x.mvmn.gp2srv.service.ExecService.ExecCallback;
 import x.mvmn.gp2srv.service.ExecService.ExecResult;
 
 public class GPhoto2ExecService {
-
-	private static final String GP2COMMAND_PREFIX = "--";
-
 	protected final ExecService execService;
 
 	protected final String pathToGphoto2;
@@ -25,12 +22,12 @@ public class GPhoto2ExecService {
 		this.imagesSubdir = imagesSubdir;
 	}
 
-	public ExecResult execCommand(final String gp2Command, final String... params) throws Exception {
-		return execService.execCommandSync(prepareParams(gp2Command, params), null, imagesSubdir);
+	public ExecResult execCommand(final String... gp2Commands) throws Exception {
+		return execService.execCommandSync(prepareExecCommand(gp2Commands), null, imagesSubdir);
 	}
 
-	public void execCommandAsync(final ExecCallback callback, final String gp2Command, final String... params) {
-		execService.execCommandAsync(callback, prepareParams(gp2Command, params), null, imagesSubdir);
+	public void execCommandAsync(final ExecCallback callback, final String... gp2Commands) {
+		execService.execCommandAsync(callback, prepareExecCommand(gp2Commands), null, imagesSubdir);
 	}
 
 	public boolean isProcessRunning() {
@@ -41,16 +38,13 @@ public class GPhoto2ExecService {
 		return execService.getCurrentProcess();
 	}
 
-	protected String[] prepareParams(final String gp2Command, final String... params) {
-		String[] execParams = new String[params == null ? 2 : params.length + 2];
+	protected String[] prepareExecCommand(final String[] gp2Commands) {
+		String[] execParams = new String[gp2Commands.length + 1];
 		execParams[0] = pathToGphoto2;
-		execParams[1] = GP2COMMAND_PREFIX + gp2Command;
-		if (params != null) {
-			for (int i = 0; i < params.length; i++) {
-				execParams[i + 2] = params[i];
-			}
+		for (int i = 0; i < gp2Commands.length; i++) {
+			execParams[i + 1] = gp2Commands[i];
 		}
+
 		return execParams;
 	}
-
 }

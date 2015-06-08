@@ -7,7 +7,11 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdCaptureImageAndListFiles extends GP2CmdCaptureImage {
 
-	protected CameraFileRefsCollected filesList = null;
+	protected static final String[] COMMAND_STR = new String[] { "--capture-image", "-L" };
+	protected static final String[] COMMAND_STR_KEEP = new String[] { "--capture-image", "--keep", "-L" };
+	protected static final String[] COMMAND_STR_NO_KEEP = new String[] { "--capture-image", "--no-keep", "-L" };
+
+	protected volatile CameraFileRefsCollected filesList = null;
 
 	public GP2CmdCaptureImageAndListFiles(final Boolean keepImageOnCamera, final Logger logger) {
 		super(keepImageOnCamera, logger);
@@ -25,14 +29,9 @@ public class GP2CmdCaptureImageAndListFiles extends GP2CmdCaptureImage {
 		}
 	}
 
-	private static final String[] PARAMS = new String[] { "-L" };
-
-	protected static final String[] PARAMS_KEEP = new String[] { "--keep", "-L" };
-	protected static final String[] PARAMS_NO_KEEP = new String[] { "--no-keep", "-L" };
-
 	@Override
-	public String[] getCommandParams() {
-		return keepImageOnCamera == null ? PARAMS : (keepImageOnCamera ? PARAMS_KEEP : PARAMS_NO_KEEP);
+	public String[] getCommandString() {
+		return keepImageOnCamera == null ? COMMAND_STR : (keepImageOnCamera ? COMMAND_STR_KEEP : COMMAND_STR_NO_KEEP);
 	}
 
 	public CameraFileRefsCollected getFilesList() {

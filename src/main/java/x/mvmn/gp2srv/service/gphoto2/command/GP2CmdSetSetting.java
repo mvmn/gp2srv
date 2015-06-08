@@ -13,12 +13,8 @@ public class GP2CmdSetSetting extends AbstractGPhoto2Command {
 		this.settingValue = settingValue;
 	}
 
-	public String getCommandString() {
-		return "set-config-value";
-	}
-
-	public String[] getCommandParams() {
-		return new String[] { settingKey + "=" + settingValue };
+	public String[] getCommandString() {
+		return new String[] { "--set-config-value", settingKey + "=" + settingValue };
 	}
 
 	public String getSettingKey() {
@@ -28,5 +24,4 @@ public class GP2CmdSetSetting extends AbstractGPhoto2Command {
 	public String getSettingValue() {
 		return settingValue;
 	}
-
 }

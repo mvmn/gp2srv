@@ -4,15 +4,13 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdSummary extends AbstractGPhoto2Command {
 
+	protected final String[] COMMAND_STR = { "--summary" };
+
 	public GP2CmdSummary(final Logger logger) {
 		super(logger);
 	}
 
-	public String getCommandString() {
-		return "summary";
-	}
-
-	public String[] getCommandParams() {
-		return null;
+	public String[] getCommandString() {
+		return COMMAND_STR;
 	}
 }

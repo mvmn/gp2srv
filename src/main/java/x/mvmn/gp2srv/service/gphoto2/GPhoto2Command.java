@@ -1,9 +1,7 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
 public interface GPhoto2Command {
-	public String getCommandString();
-
-	public String[] getCommandParams();
+	public String[] getCommandString();
 
 	public void submitRawStandardOutput(String standardOutput);
 

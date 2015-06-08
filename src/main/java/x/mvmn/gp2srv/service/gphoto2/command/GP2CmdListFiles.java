@@ -6,18 +6,16 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdListFiles extends AbstractGPhoto2Command {
 
+	protected final String[] COMMAND_STR = { "--list-files" };
+
 	protected CameraFileRefsCollected filesList = null;
 
 	public GP2CmdListFiles(final Logger logger) {
 		super(logger);
 	}
 
-	public String getCommandString() {
-		return "list-files";
-	}
-
-	public String[] getCommandParams() {
-		return null;
+	public String[] getCommandString() {
+		return COMMAND_STR;
 	}
 
 	public void submitRawStandardOutput(final String standardOutput) {

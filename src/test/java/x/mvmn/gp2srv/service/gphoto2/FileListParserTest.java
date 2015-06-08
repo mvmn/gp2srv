@@ -1,14 +1,16 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+
 import java.util.Map;
 
 import org.junit.Test;
 
-import junit.framework.TestCase;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRef;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRefsCollected;
 
-public class FileListParserTest extends TestCase {
+public class FileListParserTest {
 
 	@Test
 	public void testParsing() throws Exception {
@@ -35,6 +37,5 @@ public class FileListParserTest extends TestCase {
 		assertTrue(inFolderResults.get("IMG_0794.JPG").equals(new CameraFileRef(6, "IMG_0794.JPG", "4900 KB", "image/jpeg")));
 		assertTrue(inFolderResults.get("IMG_0787.JPG").equals(new CameraFileRef(3, "IMG_0787.JPG", "2873 KB", "image/jpeg")));
 		assertTrue(inFolderResults.get("IMG_0792.JPG").equals(new CameraFileRef(4, "IMG_0792.JPG", "4888 KB", "image/jpeg")));
-
 	}
 }

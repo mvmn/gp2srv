@@ -8,6 +8,8 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdCapturePreview extends AbstractGPhoto2Command {
 
+	protected static final Pattern RESULT_PATTERN = Pattern.compile("^Saving file as (.+)$");
+
 	protected final String fileName;
 	protected final boolean forceOverwrite;
 	protected final int repeat;
@@ -21,13 +23,10 @@ public class GP2CmdCapturePreview extends AbstractGPhoto2Command {
 		this.repeat = repeat;
 	}
 
-	public String getCommandString() {
-		return "capture-preview";
-	}
-
-	public String[] getCommandParams() {
-		final String[] result = new String[(repeat > 0 ? repeat : 0) + (forceOverwrite ? 1 : 0) + (fileName != null ? 2 : 0)];
-		int offset = 0;
+	public String[] getCommandString() {
+		final String[] result = new String[1 + (repeat > 0 ? repeat : 0) + (forceOverwrite ? 1 : 0) + (fileName != null ? 2 : 0)];
+		result[0] = "--capture-preview";
+		int offset = 1;
 		if (repeat > 0) {
 			for (int i = 0; i < repeat; i++) {
 				result[offset++] = "--capture-preview";
@@ -43,8 +42,6 @@ public class GP2CmdCapturePreview extends AbstractGPhoto2Command {
 		return result;
 	}
 
-	protected static final Pattern resultPattern = Pattern.compile("^Saving file as (.+)$");
-
 	@Override
 	public void submitRawErrorOutput(final String errorOutput) {
 		super.submitRawErrorOutput(errorOutput);
@@ -58,7 +55,7 @@ public class GP2CmdCapturePreview extends AbstractGPhoto2Command {
 	@Override
 	public void submitRawStandardOutput(final String standardOutput) {
 		super.submitRawStandardOutput(standardOutput);
-		final Matcher matcher = resultPattern.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
+		final Matcher matcher = RESULT_PATTERN.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
 		if (matcher.find()) {
 			resultFileName = matcher.group(1);
 		}

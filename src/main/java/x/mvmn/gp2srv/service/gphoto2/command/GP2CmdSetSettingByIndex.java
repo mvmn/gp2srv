@@ -13,12 +13,8 @@ public class GP2CmdSetSettingByIndex extends AbstractGPhoto2Command {
 		this.valueIndex = valueIndex;
 	}
 
-	public String getCommandString() {
-		return "set-config-index";
-	}
-
-	public String[] getCommandParams() {
-		return new String[] { settingKey + "=" + valueIndex };
+	public String[] getCommandString() {
+		return new String[] { "--set-config-index", settingKey + "=" + valueIndex };
 	}
 
 	public String getSettingKey() {

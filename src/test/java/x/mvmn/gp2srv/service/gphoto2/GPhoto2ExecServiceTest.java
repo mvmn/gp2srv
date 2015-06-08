@@ -11,7 +11,7 @@ import x.mvmn.gp2srv.service.ExecService;
 import x.mvmn.gp2srv.service.ExecService.ExecResult;
 import x.mvmn.gp2srv.service.ExecService.ExecCallback;
 
-public class GPhoto2ExecServiceTest extends TestCase {
+public class GPhoto2ExecServiceTest {
 
 	GPhoto2ExecService unit;
 	final ExecService mockExecService = new ExecService() {
@@ -24,14 +24,14 @@ public class GPhoto2ExecServiceTest extends TestCase {
 		}
 
 		public ExecResult execCommandSync(String[] command, String[] envVars, File dir) throws IOException {
-			assertEquals("/fake/imgdir", dir.getAbsolutePath());
-			final String[] expectedCommand = new String[] { "/path/to/gphoto2", "--fakeCommand", "fakeParam1", "fakeParam2" };
-			assertEquals(expectedCommand.length, command.length);
+			TestCase.assertEquals("/fake/imgdir", dir.getAbsolutePath());
+			final String[] expectedCommand = new String[] { "/path/to/gphoto2", "--fakeCommand", "fake param 1", "fake param 2" };
+			TestCase.assertEquals(expectedCommand.length, command.length);
 			for (int i = 0; i < expectedCommand.length; i++) {
-				assertEquals(expectedCommand[i], command[i]);
+				TestCase.assertEquals(expectedCommand[i], command[i]);
 			}
-			assertTrue(unit.isProcessRunning());
-			assertNull(unit.getCurrentProcess());
+			TestCase.assertTrue(unit.isProcessRunning());
+			TestCase.assertNull(unit.getCurrentProcess());
 			return new ExecResult("Unit passed", "", 123);
 		}
 
@@ -42,11 +42,11 @@ public class GPhoto2ExecServiceTest extends TestCase {
 	@Test
 	public void testExecCommand() throws Exception {
 		unit = new GPhoto2ExecService(mockExecService, "/path/to/gphoto2", null, new File("/fake/imgdir"));
-		final ExecResult result = unit.execCommand("fakeCommand", new String[] { "fakeParam1", "fakeParam2" });
+		final ExecResult result = unit.execCommand(new String[] { "--fakeCommand", "fake param 1", "fake param 2" });
 
-		assertEquals("Unit passed", result.getStandardOutput());
-		assertEquals("", result.getErrorOutput());
-		assertEquals(123, result.getExitCode());
+		TestCase.assertEquals("Unit passed", result.getStandardOutput());
+		TestCase.assertEquals("", result.getErrorOutput());
+		TestCase.assertEquals(123, result.getExitCode());
 	}
 
 	@Test
@@ -55,15 +55,14 @@ public class GPhoto2ExecServiceTest extends TestCase {
 
 		unit.execCommandAsync(new ExecCallback() {
 			public void processResult(final ExecResult execResult) {
-				assertEquals("Unit passed", execResult.getStandardOutput());
-				assertEquals("", execResult.getErrorOutput());
-				assertEquals(123, execResult.getExitCode());
+				TestCase.assertEquals("Unit passed", execResult.getStandardOutput());
+				TestCase.assertEquals("", execResult.getErrorOutput());
+				TestCase.assertEquals(123, execResult.getExitCode());
 			}
 
 			public void processError(final Throwable error) {
 				throw new RuntimeException(error);
 			}
 		}, "fakeCommand", "fakeParam1", "fakeParam2");
-
 	}
 }

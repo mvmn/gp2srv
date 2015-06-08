@@ -10,14 +10,16 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
 
+	protected final String[] COMMAND_STR = { "--list-all-config" };
+
 	private volatile Map<String, CameraConfigEntry> cameraConfig = Collections.emptyMap();
 
 	public GP2CmdGetAllCameraConfigurations(Logger logger) {
 		super(logger);
 	}
 
-	public String getCommandString() {
-		return "list-all-config";
+	public String[] getCommandString() {
+		return COMMAND_STR;
 	}
 
 	public void submitRawStandardOutput(final String standardOutput) {
@@ -35,10 +37,6 @@ public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
 			this.cameraConfig = Collections.emptyMap();
 			logger.error("Failed to parse camera config", e);
 		}
-	}
-
-	public String[] getCommandParams() {
-		return null;
 	}
 
 	public Map<String, CameraConfigEntry> getCameraConfig() {

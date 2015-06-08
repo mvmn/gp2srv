@@ -1,5 +1,7 @@
 package x.mvmn.gp2srv.service.gphoto2.command;
 
+import java.util.Arrays;
+
 import x.mvmn.gp2srv.service.gphoto2.GPhoto2Command;
 import x.mvmn.log.api.Logger;
 
@@ -15,7 +17,7 @@ public abstract class AbstractGPhoto2Command implements GPhoto2Command {
 	}
 
 	public void submitError(final Throwable error) {
-		logger.error("Failed to execute command '" + this.getCommandString() + "'.", error);
+		logger.error("Failed to execute command '" + this.getCommandString() != null ? Arrays.toString(this.getCommandString()) : "null" + "'.", error);
 	}
 
 	public void submitRawStandardOutput(final String standardOutput) {

@@ -1,10 +1,10 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
+import static junit.framework.TestCase.assertTrue;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import org.junit.Test;
 import x.mvmn.gp2srv.model.CameraConfigEntry;
 import x.mvmn.gp2srv.model.CameraConfigEntry.CameraConfigEntryType;
 
-public class ConfigParserTest extends TestCase {
+public class ConfigParserTest {
 
 	@Test
 	public void testParsing() throws Exception {
@@ -116,5 +116,4 @@ public class ConfigParserTest extends TestCase {
 		assertTrue(cceSet.contains(new CameraConfigEntry("/main/settings/reviewtime", "Quick Review Time", "4 seconds", CameraConfigEntryType.RADIO,
 				new String[] { "None", "2 seconds", "4 seconds", "8 seconds", "Hold" })));
 	}
-
 }

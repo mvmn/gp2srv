@@ -12,11 +12,7 @@ public class GP2CmdDeleteFile extends AbstractGPhoto2Command {
 		this.sourceFileRef = sourceFileRef;
 	}
 
-	public String getCommandString() {
-		return "delete-file";
-	}
-
-	public String[] getCommandParams() {
-		return new String[] { String.valueOf(sourceFileRef), "--folder", folder };
+	public String[] getCommandString() {
+		return new String[] { "--delete-file", String.valueOf(sourceFileRef), "--folder", folder };
 	}
 }
