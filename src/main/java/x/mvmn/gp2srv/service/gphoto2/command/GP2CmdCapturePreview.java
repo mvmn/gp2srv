@@ -3,18 +3,17 @@ package x.mvmn.gp2srv.service.gphoto2.command;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
 import x.mvmn.log.api.Logger;
 
-public class GP2CmdCapturePreview extends AbstractGPhoto2Command {
+public class GP2CmdCapturePreview extends AbstractGPhoto2Command<String> {
 
 	protected static final Pattern RESULT_PATTERN = Pattern.compile("^Saving file as (.+)$");
 
 	protected final String fileName;
 	protected final boolean forceOverwrite;
 	protected final int repeat;
-	protected String resultFileName;
-	protected boolean resultedWithPossibleTimingFailure = false;
 
 	public GP2CmdCapturePreview(final Logger logger, final String fileName, final boolean forceOverwrite, final int repeat) {
 		super(logger);
@@ -43,29 +42,17 @@ public class GP2CmdCapturePreview extends AbstractGPhoto2Command {
 	}
 
 	@Override
-	public void submitRawErrorOutput(final String errorOutput) {
-		super.submitRawErrorOutput(errorOutput);
-		if (errorOutput != null && errorOutput.split("[\n\r]")[0].trim().equalsIgnoreCase("*** Error (-1: 'Unspecified error') ***")) {
-			resultedWithPossibleTimingFailure = true;
+	protected String processExecResultInternal(final ExecResult execResult) {
+		String resultFileName = null;
+		if (execResult.getErrorOutput() != null
+				&& execResult.getErrorOutput().split("[\n\r]")[0].trim().equalsIgnoreCase("*** Error (-1: 'Unspecified error') ***")) {
+			resultFileName = "";
 		} else {
-			resultedWithPossibleTimingFailure = false;
+			final Matcher matcher = RESULT_PATTERN.matcher(execResult.getStandardOutput().split(ConfigParser.LINE_SEPARATOR)[0]);
+			if (matcher.find()) {
+				resultFileName = matcher.group(1);
+			}
 		}
-	}
-
-	@Override
-	public void submitRawStandardOutput(final String standardOutput) {
-		super.submitRawStandardOutput(standardOutput);
-		final Matcher matcher = RESULT_PATTERN.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
-		if (matcher.find()) {
-			resultFileName = matcher.group(1);
-		}
-	}
-
-	public String getResultFileName() {
 		return resultFileName;
-	}
-
-	public boolean isResultedWithPossibleTimingFailure() {
-		return resultedWithPossibleTimingFailure;
 	}
 }

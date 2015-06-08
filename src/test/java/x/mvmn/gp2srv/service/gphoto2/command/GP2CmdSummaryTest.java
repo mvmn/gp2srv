@@ -4,11 +4,13 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 
+import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandResult;
+
 public class GP2CmdSummaryTest extends MockGPhoto2ExecTest {
 	@Test
-	public void testParseResult() {
-		final GP2CmdSummary cmd = MOCK_GPHOTO2_COMMAND_SERVICE.executeCommand(new GP2CmdSummary(LOGGER));
-		TestCase.assertEquals(MOCK_PROPERTIES.get("--summary"), cmd.getRawStandardOutput());
-		TestCase.assertEquals(0, cmd.getExitCode());
+	public void testParseResult() throws Exception {
+		final GPhoto2CommandResult<String> result = MOCK_GPHOTO2_COMMAND_SERVICE.executeCommand(new GP2CmdSummary(LOGGER));
+		TestCase.assertEquals(MOCK_PROPERTIES.get("--summary"), result.getStandardOutput());
+		TestCase.assertEquals(0, result.getExitCode());
 	}
 }

@@ -3,18 +3,17 @@ package x.mvmn.gp2srv.service.gphoto2.command;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
 import x.mvmn.log.api.Logger;
 
-public class GP2CmdGetThumbnail extends AbstractGPhoto2Command {
+public class GP2CmdGetThumbnail extends AbstractGPhoto2Command<String> {
 
 	protected static final Pattern RESULT_PATTERN = Pattern.compile("^Saving file as (.+)$");
 
 	protected final int sourceFileRef;
 	protected final String targetFileName;
 	protected final String folder;
-
-	protected volatile String resultFileName;
 
 	public GP2CmdGetThumbnail(final String folder, final int sourceFileRef, final String targetFileName, final Logger logger) {
 		super(logger);
@@ -28,15 +27,13 @@ public class GP2CmdGetThumbnail extends AbstractGPhoto2Command {
 	}
 
 	@Override
-	public void submitRawStandardOutput(final String standardOutput) {
-		super.submitRawStandardOutput(standardOutput);
-		final Matcher matcher = RESULT_PATTERN.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[1]);
+	protected String processExecResultInternal(final ExecResult execResult) {
+		String resultFileName = null;
+		final Matcher matcher = RESULT_PATTERN.matcher(execResult.getStandardOutput().split(ConfigParser.LINE_SEPARATOR)[1]);
 		if (matcher.find()) {
 			resultFileName = matcher.group(1);
 		}
-	}
 
-	public String getResultFileName() {
 		return resultFileName;
 	}
 }

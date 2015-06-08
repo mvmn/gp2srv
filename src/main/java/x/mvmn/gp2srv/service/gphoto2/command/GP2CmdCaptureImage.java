@@ -3,10 +3,11 @@ package x.mvmn.gp2srv.service.gphoto2.command;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
 import x.mvmn.log.api.Logger;
 
-public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
+public class GP2CmdCaptureImage extends AbstractGPhoto2Command<String> {
 
 	protected static final String[] COMMAND_STR = new String[] { "--capture-image" };
 	protected static final String[] COMMAND_STR_KEEP = new String[] { "--capture-image", "--keep" };
@@ -15,7 +16,6 @@ public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 	protected static final Pattern RESULT_PATTERN = Pattern.compile("^New file is in location (.+) on the camera$");
 
 	protected final Boolean keepImageOnCamera;
-	protected volatile String resultFile;
 
 	public GP2CmdCaptureImage(final Boolean keepImageOnCamera, final Logger logger) {
 		super(logger);
@@ -26,15 +26,14 @@ public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 		return keepImageOnCamera == null ? COMMAND_STR : (keepImageOnCamera ? COMMAND_STR_KEEP : COMMAND_STR_NO_KEEP);
 	}
 
-	public void submitRawStandardOutput(final String standardOutput) {
-		super.submitRawStandardOutput(standardOutput);
-		final Matcher matcher = RESULT_PATTERN.matcher(standardOutput.split(ConfigParser.LINE_SEPARATOR)[0]);
+	public String processExecResultInternal(final ExecResult execResult) {
+		String resultFile = null;
+
+		final Matcher matcher = RESULT_PATTERN.matcher(execResult.getStandardOutput().split(ConfigParser.LINE_SEPARATOR)[0]);
 		if (matcher.find()) {
 			resultFile = matcher.group(1);
 		}
-	}
 
-	public String getResultFile() {
 		return resultFile;
 	}
 }

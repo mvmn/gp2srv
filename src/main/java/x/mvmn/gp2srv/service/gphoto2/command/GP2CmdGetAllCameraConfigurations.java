@@ -5,16 +5,15 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import x.mvmn.gp2srv.model.CameraConfigEntry;
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 import x.mvmn.gp2srv.service.gphoto2.ConfigParser;
 import x.mvmn.log.api.Logger;
 
-public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
+public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command<Map<String, CameraConfigEntry>> {
 
 	protected final String[] COMMAND_STR = { "--list-all-config" };
 
-	private volatile Map<String, CameraConfigEntry> cameraConfig = Collections.emptyMap();
-
-	public GP2CmdGetAllCameraConfigurations(Logger logger) {
+	public GP2CmdGetAllCameraConfigurations(final Logger logger) {
 		super(logger);
 	}
 
@@ -22,24 +21,22 @@ public class GP2CmdGetAllCameraConfigurations extends AbstractGPhoto2Command {
 		return COMMAND_STR;
 	}
 
-	public void submitRawStandardOutput(final String standardOutput) {
-		super.submitRawStandardOutput(standardOutput);
+	@Override
+	protected Map<String, CameraConfigEntry> processExecResultInternal(final ExecResult execResult) {
+		Map<String, CameraConfigEntry> cameraConfig;
 		try {
-			final CameraConfigEntry[] config = ConfigParser.parseConfigEntries(standardOutput);
-			final Map<String, CameraConfigEntry> cameraConfig = new TreeMap<String, CameraConfigEntry>();
+			final CameraConfigEntry[] config = ConfigParser.parseConfigEntries(execResult.getStandardOutput());
+			cameraConfig = new TreeMap<String, CameraConfigEntry>();
 			if (config != null) {
 				for (final CameraConfigEntry configEntry : config) {
 					cameraConfig.put(configEntry.getKey(), configEntry);
 				}
 			}
-			this.cameraConfig = Collections.unmodifiableMap(cameraConfig);
-		} catch (Exception e) {
-			this.cameraConfig = Collections.emptyMap();
+			cameraConfig = Collections.unmodifiableMap(cameraConfig);
+		} catch (final Exception e) {
+			cameraConfig = Collections.emptyMap();
 			logger.error("Failed to parse camera config", e);
 		}
-	}
-
-	public Map<String, CameraConfigEntry> getCameraConfig() {
 		return cameraConfig;
 	}
 }

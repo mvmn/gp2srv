@@ -1,14 +1,13 @@
 package x.mvmn.gp2srv.service.gphoto2.command;
 
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser;
 import x.mvmn.gp2srv.service.gphoto2.FileListParser.CameraFileRefsCollected;
 import x.mvmn.log.api.Logger;
 
-public class GP2CmdListFiles extends AbstractGPhoto2Command {
+public class GP2CmdListFiles extends AbstractGPhoto2Command<CameraFileRefsCollected> {
 
 	protected final String[] COMMAND_STR = { "--list-files" };
-
-	protected CameraFileRefsCollected filesList = null;
 
 	public GP2CmdListFiles(final Logger logger) {
 		super(logger);
@@ -18,16 +17,14 @@ public class GP2CmdListFiles extends AbstractGPhoto2Command {
 		return COMMAND_STR;
 	}
 
-	public void submitRawStandardOutput(final String standardOutput) {
-		super.submitRawStandardOutput(standardOutput);
+	@Override
+	protected CameraFileRefsCollected processExecResultInternal(final ExecResult execResult) {
+		CameraFileRefsCollected filesList = null;
 		try {
-			filesList = FileListParser.parseList(standardOutput);
+			filesList = FileListParser.parseList(execResult.getStandardOutput());
 		} catch (Exception e) {
 			logger.error(e);
 		}
-	}
-
-	public CameraFileRefsCollected getFilesList() {
 		return filesList;
 	}
 }

@@ -11,30 +11,21 @@ public class GPhoto2CommandService {
 		this.gphoto2ExecService = gphoto2ExecService;
 	}
 
-	public <C extends GPhoto2Command> C executeCommand(final C command) {
-		try {
-			final ExecResult execResult = gphoto2ExecService.execCommand(command.getCommandString());
-			command.submitRawStandardOutput(execResult.getStandardOutput());
-			command.submitRawErrorOutput(execResult.getErrorOutput());
-			command.submitExitCode(execResult.getExitCode());
-		} catch (final Throwable error) {
-			command.submitError(error);
-		}
-		return command;
+	public <R> GPhoto2CommandResult<R> executeCommand(final GPhoto2Command<R> command) throws Exception {
+		final GPhoto2CommandResult<R> result;
+		final ExecResult execResult = gphoto2ExecService.execCommand(command.getCommandString());
+		result = command.processExecResult(execResult);
+		return result;
 	}
 
-	public <C extends GPhoto2Command, CB extends GPhoto2CommandCallback<C>> void executeCommandAsync(final CB callback, final C command) {
+	public <R> void executeCommandAsync(final GPhoto2CommandCallback<R, GPhoto2Command<R>> callback, final GPhoto2Command<R> command) {
 		gphoto2ExecService.execCommandAsync(new ExecCallback() {
 			public void processResult(final ExecResult execResult) {
-				command.submitRawStandardOutput(execResult.getStandardOutput());
-				command.submitRawErrorOutput(execResult.getErrorOutput());
-				command.submitExitCode(execResult.getExitCode());
-				callback.processResults(command);
+				callback.processResults(command.processExecResult(execResult));
 			}
 
 			public void processError(final Throwable error) {
-				command.submitError(error);
-				callback.processResults(command);
+				callback.processError(error);
 			}
 		}, command.getCommandString());
 	}

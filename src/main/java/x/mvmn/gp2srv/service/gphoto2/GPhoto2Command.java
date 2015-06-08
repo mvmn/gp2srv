@@ -1,19 +1,9 @@
 package x.mvmn.gp2srv.service.gphoto2;
 
-public interface GPhoto2Command {
+import x.mvmn.gp2srv.service.ExecService.ExecResult;
+
+public interface GPhoto2Command<T> {
 	public String[] getCommandString();
 
-	public void submitRawStandardOutput(String standardOutput);
-
-	public void submitRawErrorOutput(String errorOutput);
-
-	public void submitError(Throwable error);
-
-	public void submitExitCode(int exitCode);
-
-	public String getRawStandardOutput();
-
-	public String getRawErrorOutput();
-
-	public int getExitCode();
+	public GPhoto2CommandResult<T> processExecResult(final ExecResult execResult);
 }
