@@ -8,6 +8,7 @@ import x.mvmn.log.api.Logger;
 
 public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 
+	protected static final String[] COMMAND_STR = new String[] { "--capture-image" };
 	protected static final String[] COMMAND_STR_KEEP = new String[] { "--capture-image", "--keep" };
 	protected static final String[] COMMAND_STR_NO_KEEP = new String[] { "--capture-image", "--no-keep" };
 
@@ -22,7 +23,7 @@ public class GP2CmdCaptureImage extends AbstractGPhoto2Command {
 	}
 
 	public String[] getCommandString() {
-		return keepImageOnCamera == null ? null : (keepImageOnCamera ? COMMAND_STR_KEEP : COMMAND_STR_NO_KEEP);
+		return keepImageOnCamera == null ? COMMAND_STR : (keepImageOnCamera ? COMMAND_STR_KEEP : COMMAND_STR_NO_KEEP);
 	}
 
 	public void submitRawStandardOutput(final String standardOutput) {
