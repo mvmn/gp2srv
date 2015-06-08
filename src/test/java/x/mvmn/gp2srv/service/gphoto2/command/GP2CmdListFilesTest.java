@@ -1,4 +1,4 @@
 package x.mvmn.gp2srv.service.gphoto2.command;
 
-public class GP2CmdListFilesTest {
+public class GP2CmdListFilesTest extends MockGPhoto2ExecTest {
 }
