@@ -31,17 +31,18 @@ public abstract class MockGPhoto2ExecTest {
 			return this;
 		}
 	};
+	protected static final Properties MOCK_PROPERTIES;
 	protected static final MockExecService MOCK_EXEC_SERVICE;
 	protected static final GPhoto2CommandService MOCK_GPHOTO2_COMMAND_SERVICE;
 	static {
-		final Properties mockResults = new Properties();
+		MOCK_PROPERTIES = new Properties();
 		try {
-			mockResults.load(MockGPhoto2ExecTest.class.getResourceAsStream("/x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties"));
+			MOCK_PROPERTIES.load(MockGPhoto2ExecTest.class.getResourceAsStream("/x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties"));
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load resource /x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties", e);
 		}
 
-		MOCK_EXEC_SERVICE = new MockExecService(mockResults, LOGGER);
+		MOCK_EXEC_SERVICE = new MockExecService(MOCK_PROPERTIES, LOGGER);
 		MOCK_GPHOTO2_COMMAND_SERVICE = new GPhoto2CommandService(new GPhoto2ExecService(MOCK_EXEC_SERVICE, "/path/to/mock/gphoto2", new File("/path/to/mock/"),
 				new File("/path/to/mock/images")));
 	}
