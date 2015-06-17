@@ -70,6 +70,27 @@ public class ConfigParser {
 			builder.choices.add(configValue.trim().substring(configValue.indexOf(" ") + 1));
 		} else if (configType.equals("Current")) {
 			builder.value = configValue;
+		} else if (configType.equals("Top")) {
+			try {
+				builder.top = Long.parseLong(configValue.trim());
+			} catch (final Exception e) {
+				// TODO: Proper logging
+				System.err.println("Failed to parse Top value: " + configValue);
+			}
+		} else if (configType.equals("Bottom")) {
+			try {
+				builder.bottom = Long.parseLong(configValue.trim());
+			} catch (final Exception e) {
+				// TODO: Proper logging
+				System.err.println("Failed to parse Bottom value: " + configValue);
+			}
+		} else if (configType.equals("Step")) {
+			try {
+				builder.step = Long.parseLong(configValue.trim());
+			} catch (final Exception e) {
+				// TODO: Proper logging
+				System.err.println("Failed to parse Step value: " + configValue);
+			}
 		} else if (configType.equals("Label")) {
 			builder.label = configValue;
 		} else if (configType.equals("Printable")) {
@@ -84,9 +105,13 @@ public class ConfigParser {
 		public String printableValue = null;
 		public CameraConfigEntryType type = null;
 		public final List<String> choices = new LinkedList<String>();
+		public Long bottom;
+		public Long top;
+		public Long step;
 
 		public CameraConfigEntry build() {
-			return new CameraConfigEntry(key, label, value, printableValue, type, choices.size() > 0 ? choices.toArray(new String[choices.size()]) : null);
+			return type.equals(CameraConfigEntryType.RANGE) ? new CameraConfigEntry(key, label, value, printableValue, type, bottom, top, step)
+					: new CameraConfigEntry(key, label, value, printableValue, type, choices.size() > 0 ? choices.toArray(new String[choices.size()]) : null);
 		}
 	}
 }

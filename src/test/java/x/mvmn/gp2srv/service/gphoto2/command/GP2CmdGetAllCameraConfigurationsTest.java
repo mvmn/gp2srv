@@ -16,7 +16,7 @@ public class GP2CmdGetAllCameraConfigurationsTest extends MockGPhoto2ExecTest {
 		final GPhoto2CommandResult<Map<String, CameraConfigEntry>> result = MOCK_GPHOTO2_COMMAND_SERVICE.executeCommand(new GP2CmdGetAllCameraConfigurations(
 				LOGGER));
 		TestCase.assertEquals(0, result.getExitCode());
-		TestCase.assertEquals(55, result.getResult().size());
+		TestCase.assertEquals(56, result.getResult().size());
 
 		TestCase.assertEquals(new CameraConfigEntry("/main/actions/autofocusdrive", "Drive Canon DSLR Autofocus", "0", CameraConfigEntryType.TOGGLE), result
 				.getResult().get("/main/actions/autofocusdrive"));
@@ -141,5 +141,7 @@ public class GP2CmdGetAllCameraConfigurationsTest extends MockGPhoto2ExecTest {
 				.get("/main/status/shuttercounter"));
 		TestCase.assertEquals(new CameraConfigEntry("/main/status/vendorextension", "Vendor Extension", "None", CameraConfigEntryType.TEXT), result.getResult()
 				.get("/main/status/vendorextension"));
+		TestCase.assertEquals(new CameraConfigEntry("/main/other/d126", "Flash Exposure Compensation", "-6", null, CameraConfigEntryType.RANGE, -18L, 6L, 2L),
+				result.getResult().get("/main/other/d126"));
 	}
 }

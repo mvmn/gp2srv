@@ -446,3 +446,10 @@ Choice: 1 0
 Choice: 2 75
 Choice: 3 0
 Choice: 4 50
+/main/other/d126
+Label: Flash Exposure Compensation
+Type: RANGE
+Current: 0
+Bottom: -18
+Top: 6
+Step: 2

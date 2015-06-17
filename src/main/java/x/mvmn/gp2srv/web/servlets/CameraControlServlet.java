@@ -73,6 +73,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					case TOGGLE:
 					case TEXT:
 					case DATE:
+					case RANGE:
 						command = new GP2CmdSetSetting(key, value, logger);
 					break;
 					default:

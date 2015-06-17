@@ -115,5 +115,7 @@ public class ConfigParserTest {
 						"Unknown value 0000" })));
 		assertTrue(cceSet.contains(new CameraConfigEntry("/main/settings/reviewtime", "Quick Review Time", "4 seconds", CameraConfigEntryType.RADIO,
 				new String[] { "None", "2 seconds", "4 seconds", "8 seconds", "Hold" })));
+		assertTrue(cceSet.contains(new CameraConfigEntry("/main/other/d126", "Flash Exposure Compensation", "0", null, CameraConfigEntryType.RANGE, -18L, 6L,
+				2L)));
 	}
 }

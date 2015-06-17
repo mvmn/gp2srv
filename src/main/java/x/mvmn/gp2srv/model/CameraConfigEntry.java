@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class CameraConfigEntry {
 
 	public static enum CameraConfigEntryType {
-		DATE, MENU, RADIO, TEXT, TOGGLE
+		DATE, MENU, RADIO, TEXT, TOGGLE, RANGE
 	}
 
 	protected final String key;
@@ -14,6 +14,9 @@ public class CameraConfigEntry {
 	protected final String printableValue;
 	protected final CameraConfigEntryType type;
 	protected final String[] choices;
+	protected final Long bottom;
+	protected final Long top;
+	protected final Long step;
 
 	public CameraConfigEntry(final String key, final String label, final String value, final CameraConfigEntryType type) {
 		this(key, label, value, null, type, null);
@@ -35,6 +38,22 @@ public class CameraConfigEntry {
 		this.printableValue = printableValue;
 		this.type = type;
 		this.choices = choices;
+		this.bottom = null;
+		this.top = null;
+		this.step = null;
+	}
+
+	public CameraConfigEntry(final String key, final String label, final String value, final String printableValue, final CameraConfigEntryType type,
+			final Long bottom, final Long top, final Long step) {
+		this.key = key;
+		this.label = label;
+		this.value = value;
+		this.printableValue = printableValue;
+		this.type = type;
+		this.choices = null;
+		this.bottom = bottom;
+		this.top = top;
+		this.step = step;
 	}
 
 	public String getKey() {
@@ -61,6 +80,35 @@ public class CameraConfigEntry {
 		return choices;
 	}
 
+	public Long getBottom() {
+		return bottom;
+	}
+
+	public Long getTop() {
+		return top;
+	}
+
+	public Long getStep() {
+		return step;
+	}
+
+	public long[] getRangeOptions() {
+		long[] result = null;
+
+		if (top != null && bottom != null && top >= bottom) {
+			long theStep = this.step != null ? this.step : 1L;
+			int count = (int) ((top - bottom) / theStep + 1);
+			result = new long[count];
+			long val = bottom;
+			for (int i = 0; i < count; i++) {
+				result[i] = val;
+				val += theStep;
+			}
+		}
+
+		return result;
+	}
+
 	public String toString() {
 		final StringBuilder choicesBuilder;
 		if (choices != null) {
@@ -73,7 +121,8 @@ public class CameraConfigEntry {
 		}
 		return String.format("CameraConfigEntry: [%s] %s - %s = %s ", type.name(), key, label, value)
 				+ (printableValue != null ? "(" + printableValue + ") " : "")
-				+ (choices != null ? "[" + choices.length + " choices: " + choicesBuilder.toString() + "] " : "");
+				+ (choices != null ? "[" + choices.length + " choices: " + choicesBuilder.toString() + "] " : "") + (bottom != null ? " bottom=" + bottom : "")
+				+ (top != null ? " top=" + top : "") + (step != null ? " step=" + step : "");
 	}
 
 	@Override
@@ -86,6 +135,9 @@ public class CameraConfigEntry {
 		result = prime * result + ((printableValue == null) ? 0 : printableValue.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		result = prime * result + ((top == null) ? 0 : top.hashCode());
+		result = prime * result + ((bottom == null) ? 0 : bottom.hashCode());
+		result = prime * result + ((step == null) ? 0 : step.hashCode());
 		return result;
 	}
 
@@ -122,6 +174,25 @@ public class CameraConfigEntry {
 				return false;
 		} else if (!value.equals(other.value))
 			return false;
+
+		if (top == null) {
+			if (other.top != null)
+				return false;
+		} else if (!top.equals(other.top))
+			return false;
+
+		if (bottom == null) {
+			if (other.bottom != null)
+				return false;
+		} else if (!bottom.equals(other.bottom))
+			return false;
+
+		if (step == null) {
+			if (other.step != null)
+				return false;
+		} else if (!step.equals(other.step))
+			return false;
+
 		return true;
 	}
 }
