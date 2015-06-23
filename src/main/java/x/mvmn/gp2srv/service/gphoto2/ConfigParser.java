@@ -10,7 +10,7 @@ public class ConfigParser {
 
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator") != null && System.getProperty("line.separator").length() > 0 ? System
 			.getProperty("line.separator") : "\n";
-	private static final String SEPARATOR = ": ";
+	private static final String SEPARATOR = ":";
 
 	public static CameraConfigEntry parseConfigEntry(final String configAsText) throws Exception {
 		final CameraConfigEntry[] results = parseConfigEntries(configAsText);
@@ -46,7 +46,10 @@ public class ConfigParser {
 					} else {
 						final int separatorIndex = line.indexOf(SEPARATOR);
 						final String configType = line.substring(0, separatorIndex);
-						final String configValue = line.substring(separatorIndex + SEPARATOR.length());
+						String configValue = line.substring(separatorIndex + SEPARATOR.length());
+						if (configValue.startsWith(" ")) {
+							configValue = configValue.substring(1);
+						}
 						setSetting(builder, configType, configValue);
 					}
 				}
