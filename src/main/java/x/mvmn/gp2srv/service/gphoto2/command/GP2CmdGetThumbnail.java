@@ -29,7 +29,8 @@ public class GP2CmdGetThumbnail extends AbstractGPhoto2Command<String> {
 	@Override
 	protected String processExecResultInternal(final ExecResult execResult) {
 		String resultFileName = null;
-		final Matcher matcher = RESULT_PATTERN.matcher(execResult.getStandardOutput().split(ConfigParser.LINE_SEPARATOR)[1]);
+		final String[] lines = execResult.getStandardOutput().split(ConfigParser.LINE_SEPARATOR);
+		final Matcher matcher = RESULT_PATTERN.matcher(lines[lines.length > 1 ? 1 : 0]);
 		if (matcher.find()) {
 			resultFileName = matcher.group(1);
 		}
