@@ -141,7 +141,8 @@ public class GP2CmdGetAllCameraConfigurationsTest extends MockGPhoto2ExecTest {
 				.get("/main/status/shuttercounter"));
 		TestCase.assertEquals(new CameraConfigEntry("/main/status/vendorextension", "Vendor Extension", "None", CameraConfigEntryType.TEXT), result.getResult()
 				.get("/main/status/vendorextension"));
-		TestCase.assertEquals(new CameraConfigEntry("/main/other/d126", "Flash Exposure Compensation", "-6", null, CameraConfigEntryType.RANGE, -18L, 6L, 2L),
-				result.getResult().get("/main/other/d126"));
+		TestCase.assertEquals(
+				new CameraConfigEntry("/main/other/d126", "Flash Exposure Compensation", "-6", null, CameraConfigEntryType.RANGE, "-18", "6", "2"), result
+						.getResult().get("/main/other/d126"));
 	}
 }

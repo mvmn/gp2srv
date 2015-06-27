@@ -74,26 +74,29 @@ public class ConfigParser {
 		} else if (configType.equals("Current")) {
 			builder.value = configValue;
 		} else if (configType.equals("Top")) {
-			try {
-				builder.top = Long.parseLong(configValue.trim());
-			} catch (final Exception e) {
-				// TODO: Proper logging
-				System.err.println("Failed to parse Top value: " + configValue);
-			}
+			builder.top = configValue.trim();
+			// try {
+			// builder.top = Long.parseLong(configValue.trim());
+			// } catch (final Exception e) {
+			// // TODO: Proper logging
+			// System.err.println("Failed to parse Top value: " + configValue);
+			// }
 		} else if (configType.equals("Bottom")) {
-			try {
-				builder.bottom = Long.parseLong(configValue.trim());
-			} catch (final Exception e) {
-				// TODO: Proper logging
-				System.err.println("Failed to parse Bottom value: " + configValue);
-			}
+			builder.bottom = configValue.trim();
+			// try {
+			// builder.bottom = Long.parseLong(configValue.trim());
+			// } catch (final Exception e) {
+			// // TODO: Proper logging
+			// System.err.println("Failed to parse Bottom value: " + configValue);
+			// }
 		} else if (configType.equals("Step")) {
-			try {
-				builder.step = Long.parseLong(configValue.trim());
-			} catch (final Exception e) {
-				// TODO: Proper logging
-				System.err.println("Failed to parse Step value: " + configValue);
-			}
+			builder.step = configValue.trim();
+			// try {
+			// builder.step = Long.parseLong(configValue.trim());
+			// } catch (final Exception e) {
+			// // TODO: Proper logging
+			// System.err.println("Failed to parse Step value: " + configValue);
+			// }
 		} else if (configType.equals("Label")) {
 			builder.label = configValue;
 		} else if (configType.equals("Printable")) {
@@ -108,9 +111,9 @@ public class ConfigParser {
 		public String printableValue = null;
 		public CameraConfigEntryType type = null;
 		public final List<String> choices = new LinkedList<String>();
-		public Long bottom;
-		public Long top;
-		public Long step;
+		public String bottom;
+		public String top;
+		public String step;
 
 		public CameraConfigEntry build() {
 			return type.equals(CameraConfigEntryType.RANGE) ? new CameraConfigEntry(key, label, value, printableValue, type, bottom, top, step)

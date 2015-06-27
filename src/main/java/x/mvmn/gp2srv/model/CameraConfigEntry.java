@@ -14,9 +14,9 @@ public class CameraConfigEntry {
 	protected final String printableValue;
 	protected final CameraConfigEntryType type;
 	protected final String[] choices;
-	protected final Long bottom;
-	protected final Long top;
-	protected final Long step;
+	protected final String bottom;
+	protected final String top;
+	protected final String step;
 
 	public CameraConfigEntry(final String key, final String label, final String value, final CameraConfigEntryType type) {
 		this(key, label, value, null, type, null);
@@ -44,7 +44,7 @@ public class CameraConfigEntry {
 	}
 
 	public CameraConfigEntry(final String key, final String label, final String value, final String printableValue, final CameraConfigEntryType type,
-			final Long bottom, final Long top, final Long step) {
+			final String bottom, final String top, final String step) {
 		this.key = key;
 		this.label = label;
 		this.value = value;
@@ -80,34 +80,34 @@ public class CameraConfigEntry {
 		return choices;
 	}
 
-	public Long getBottom() {
+	public String getBottom() {
 		return bottom;
 	}
 
-	public Long getTop() {
+	public String getTop() {
 		return top;
 	}
 
-	public Long getStep() {
+	public String getStep() {
 		return step;
 	}
 
-	public long[] getRangeOptions() {
-		long[] result = null;
-
-		if (top != null && bottom != null && top >= bottom) {
-			long theStep = this.step != null ? this.step : 1L;
-			int count = (int) ((top - bottom) / theStep + 1);
-			result = new long[count];
-			long val = bottom;
-			for (int i = 0; i < count; i++) {
-				result[i] = val;
-				val += theStep;
-			}
-		}
-
-		return result;
-	}
+//	public long[] getRangeOptions() {
+//		long[] result = null;
+//
+//		if (top != null && bottom != null && top >= bottom) {
+//			long theStep = this.step != null ? this.step : 1L;
+//			int count = (int) ((top - bottom) / theStep + 1);
+//			result = new long[count];
+//			long val = bottom;
+//			for (int i = 0; i < count; i++) {
+//				result[i] = val;
+//				val += theStep;
+//			}
+//		}
+//
+//		return result;
+//	}
 
 	public String toString() {
 		final StringBuilder choicesBuilder;
