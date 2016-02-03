@@ -1,5 +1,12 @@
 rm -rf ./target
 mvn clean package dependency:copy-dependencies
-mkdir -p ./target/gp2srv-bin/lib/
-mv ./target/dependency/*.jar ./target/gp2srv-bin/lib/
-mv ./target/*.jar ./target/gp2srv-bin/
+GP2VERSION=$(cat pom.xml| grep version | head -n 1 | cut -d ">" -f 2 | cut -d "<" -f 1)
+GP2FOLDER=gp2srv-$GP2VERSION
+
+mkdir -p ./target/$GP2FOLDER/lib/
+mv ./target/dependency/*.jar ./target/$GP2FOLDER/lib/
+mv ./target/*.jar ./target/$GP2FOLDER/
+
+cd target
+zip -r ./$GP2FOLDER.zip ./$GP2FOLDER
+cd ..
