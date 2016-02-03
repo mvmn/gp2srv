@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.web.servlets;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -31,19 +32,30 @@ import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.lang.util.ImmutablePair;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
+import x.mvmn.util.file.FilesHelper;
 
 public class CameraControlServlet extends AbstractGP2Servlet {
 
 	private static final long serialVersionUID = 7389681375772493366L;
 
+	public static final String THUMB_FILENAME = "thumb.jpg";
+
 	protected final GPhoto2CommandService gphoto2CommandService;
-	private final Properties favouredCamConfSettings;
+	protected final Properties favouredCamConfSettings;
+	protected final File imagesFolder;
 
 	public CameraControlServlet(final GPhoto2CommandService gphoto2CommandService, final Properties favouredCamConfSettings,
-			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
+			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final File imagesFolder,
+			final Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
 		this.gphoto2CommandService = gphoto2CommandService;
 		this.favouredCamConfSettings = favouredCamConfSettings;
+		this.imagesFolder = imagesFolder;
+	}
+
+	protected GPhoto2CommandResult<String> ensureThumbFileName(GPhoto2CommandResult<String> cmdResult) throws Exception {
+		FilesHelper.ensureFileName(imagesFolder, THUMB_FILENAME, cmdResult.getResult());
+		return cmdResult;
 	}
 
 	@Override
@@ -96,7 +108,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				int previewRetriesCount = lastPreviewRetriesCount == null ? 0 : lastPreviewRetriesCount.intValue();
 				boolean success = false;
 				while (!success && previewRetriesCount < 15) {
-					final GPhoto2CommandResult<String> cmdPreviewResult = gphoto2CommandService.executeCommand(new GP2CmdCapturePreview(logger, "thumb.jpg",
+					final GPhoto2CommandResult<String> cmdPreviewResult = gphoto2CommandService.executeCommand(new GP2CmdCapturePreview(logger, THUMB_FILENAME,
 							true, previewRetriesCount));
 					if (cmdPreviewResult.getResult() != null && cmdPreviewResult.getResult().isEmpty()) {
 						previewRetriesCount++;
@@ -105,6 +117,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 							processCommandFailure(cmdPreviewResult, null, request, response, logger);
 							break;
 						} else {
+							ensureThumbFileName(cmdPreviewResult);
 							success = true;
 						}
 					}
@@ -115,9 +128,10 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				}
 			} else if ("/camfilepreview".equals(path)) {
 				final int imgRefId = Integer.parseInt(request.getParameter("imgRefId"));
-				if (!processCommandFailure(
-						gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(request.getParameter("folder"), imgRefId, "thumb.jpg", logger)),
-						makeVelocityContext(request, response), request, response, logger)) {
+				final GPhoto2CommandResult<String> result = gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(request.getParameter("folder"),
+						imgRefId, THUMB_FILENAME, logger));
+				if (!processCommandFailure(result, makeVelocityContext(request, response), request, response, logger)) {
+					ensureThumbFileName(result);
 					redirectLocalSafely(request, response, "/preview");
 				}
 			} else if ("/deletefile".equals(path)) {
@@ -146,10 +160,12 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 						if (filesInFolder != null) {
 							final CameraFileRef resultFileRef = filesInFolder.get(fileName);
 							if (resultFileRef != null) {
-								if (processCommandFailure(
-										gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(folderPath, resultFileRef.getRefId(), "thumb.jpg", logger)),
-										null, request, response, logger)) {
+								GPhoto2CommandResult<String> result = gphoto2CommandService.executeCommand(new GP2CmdGetThumbnail(folderPath, resultFileRef
+										.getRefId(), THUMB_FILENAME, logger));
+								if (processCommandFailure(result, null, request, response, logger)) {
 									proceed = false;
+								} else {
+									ensureThumbFileName(result);
 								}
 							}
 						}

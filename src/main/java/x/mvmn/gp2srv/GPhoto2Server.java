@@ -161,8 +161,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
-			context.addServlet(
-					new ServletHolder(new CameraControlServlet(gphoto2CommandService, favouredCamConfSettings, velocityContextService, this, logger)), "/");
+			context.addServlet(new ServletHolder(new CameraControlServlet(gphoto2CommandService, favouredCamConfSettings, velocityContextService, this,
+					imagesFolder, logger)), "/");
 			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
 			context.setErrorHandler(new ErrorHandler() {
 				private AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
