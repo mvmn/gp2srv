@@ -7,25 +7,16 @@
 	}
 </script>
 #embedSettingChangeScriptAndForm("allsettings")
-<div class="fullWidth">
-	<form id="favsettingform" action="/favsetting" method="POST" style="display: none">
-		<input type="hidden" name="key" />
-		<input type="hidden" name="value" />
-	</form>	
-	<div class="pageHead">Camera Control</div>
-	<div class="pageSubHead">
-		#parse("camera/navigation.vm")
-	</div>
-	<div class="pageContent">
+<form id="favsettingform" action="/favsetting" method="POST" style="display: none">
+	<input type="hidden" name="key" />
+	<input type="hidden" name="value" />
+</form>	
+#pageHead("Camera Control")
 		<div>
 			#foreach($settingEntry in $cameraConfig.entrySet())				
 				#if(!$foreach.first)<hr/>#end
 				#showSettingSelector($cameraConfig $settingEntry.key true $favouredCamConfSettings.keySet())
 			#end
 		</div>
-	</div>
-	<div style="display: none">
-		$cameraConfig
-	</div>	
-</div>
+#pageFoot()
 #parse("camera/foot.vm")

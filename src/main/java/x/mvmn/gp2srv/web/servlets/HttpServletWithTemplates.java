@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 
@@ -59,9 +60,20 @@ public abstract class HttpServletWithTemplates extends HttpServlet {
 
 	public void serveTempalteUTF8(final String tempalteName, final Context context, final HttpServletResponse response) throws IOException {
 		response.setContentType("text/html");
-		Writer writer = new OutputStreamWriter(response.getOutputStream(), "UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		Writer writer = response.getWriter();
 		getTemplateEngine().renderTemplate(tempalteName, "UTF-8", context, writer);
 		writer.flush();
+		IOUtils.closeQuietly(writer);
+	}
+
+	public void serveStrContentUTF8(final String contentType, final String content, final HttpServletResponse response) throws IOException {
+		response.setContentType(contentType);
+		response.setCharacterEncoding("UTF-8");
+		Writer writer = response.getWriter();
+		writer.write(content);
+		writer.flush();
+		IOUtils.closeQuietly(writer);
 	}
 
 	public void serveTempalteSafely(final String tempalteName, final String encoding, final HttpServletRequest request, final HttpServletResponse response,

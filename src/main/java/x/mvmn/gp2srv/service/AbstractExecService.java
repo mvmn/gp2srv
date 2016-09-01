@@ -49,19 +49,11 @@ public abstract class AbstractExecService implements ExecService {
 
 			boolean processFinished = false;
 			while (!processFinished) {
-				final List<String> errorLines = IOUtils.readLines(errorStream);
-				for (String line : errorLines) {
-					errorOutput.append(line).append("\n");
-					if (logger.shouldLog(LogLevel.TRACE)) {
-						logger.trace("Command " + commandDebugInfo + " ERROR output: " + line);
-					}
+				if (stdoutStream.available() > 0) {
+					readStream(stdoutStream, standardOutput, "STANDARD", commandDebugInfo);
 				}
-				final List<String> resultLines = IOUtils.readLines(stdoutStream);
-				for (String line : resultLines) {
-					standardOutput.append(line).append("\n");
-					if (logger.shouldLog(LogLevel.TRACE)) {
-						logger.trace("Command " + commandDebugInfo + " STANDARD output: " + line);
-					}
+				if (errorStream.available() > 0) {
+					readStream(errorStream, errorOutput, "ERROR", commandDebugInfo);
 				}
 				try {
 					processExitValue = process.getProcessExitCode();
@@ -69,6 +61,8 @@ public abstract class AbstractExecService implements ExecService {
 					if (logger.shouldLog(LogLevel.TRACE)) {
 						logger.trace("Command " + commandDebugInfo + " process exited with code " + processExitValue);
 					}
+					readStream(stdoutStream, standardOutput, "STANDARD", commandDebugInfo);
+					readStream(errorStream, errorOutput, "ERROR", commandDebugInfo);
 				} catch (IllegalThreadStateException e) {
 					processFinished = false; // superfluous here, but left to indicate the meaning of the code.
 				}
@@ -81,6 +75,16 @@ public abstract class AbstractExecService implements ExecService {
 		}
 
 		return new ExecResult(standardOutput.toString(), errorOutput.toString(), processExitValue);
+	}
+
+	protected void readStream(InputStream stream, StringBuilder destination, String streamName, String commandDebugInfo) throws IOException {
+		final List<String> lines = IOUtils.readLines(stream);
+		for (String line : lines) {
+			destination.append(line).append("\n");
+			if (logger.shouldLog(LogLevel.TRACE)) {
+				logger.trace("Command " + commandDebugInfo + " " + streamName + " output: " + line);
+			}
+		}
 	}
 
 	/*

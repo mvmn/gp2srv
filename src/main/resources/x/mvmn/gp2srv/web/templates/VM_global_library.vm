@@ -21,6 +21,20 @@
 	<input type="hidden" name="page" />
 </form>
 #end
+
+#macro(pageHead $pageName)
+<div class="fullWidth">
+	<div class="pageHead">$!pageName</div>
+	<div class="pageSubHead">
+		#parse("camera/navigation.vm")
+	</div>
+	<div class="pageContent scroll">
+#end
+#macro(pageFoot)
+	</div>
+</div>
+#end
+
 #macro(showSettingSelector $cameraConfig $settingKey $showFavToggle $favedSelectors)
 	#set($configEntry = $cameraConfig.get($settingKey))
 	<div class="scroll">

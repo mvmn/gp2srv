@@ -1,8 +1,9 @@
 <html>
 	<head>
-		<meta name="viewport" content="width=400">
-		<title>GP2Srv dev mode.</title>
-		<link rel="stylesheet" type="text/css" href="/static/default.css">
+		<meta name="viewport" content="width=400" />
+		<title>GPhoto2Server</title>
+		<link rel="stylesheet" type="text/css" href="/static/default.css" />
+		<script src="/static/jquery-3.1.0.min.js"></script>
 	</head>
 	<body>
 		<div class="statusLine">

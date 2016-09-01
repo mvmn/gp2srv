@@ -4,4 +4,6 @@
 	<span><a href="$!{request.contextPath}/preview">preview</a></span>
 	|
 	<span><a href="$!{request.contextPath}/browse">browse</a></span>
+	|
+	<span><a href="$!{request.contextPath}/automate">automate</a></span>
 </div>

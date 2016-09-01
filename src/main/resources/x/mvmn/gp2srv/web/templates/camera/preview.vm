@@ -1,43 +1,38 @@
 #parse("camera/head.vm")
-
 #embedSettingChangeScriptAndForm("preview")
-<div class="fullWidth">
-	<div class="pageHead">Camera Control</div>
-	<div class="pageSubHead">
-		#parse("camera/navigation.vm")
-	</div>
-	<div class="pageContent">
-		<div>
-			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/refreshpreview">
-				<input type="submit" value="Get preview" />
-			</form>
-			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/capture">
-				<input type="submit" value="Shoot" />
-			</form>			
-			<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/captureandrefreshpreview">
-				<input type="submit" value="Shoot + get thumb" />
-			</form>			
-		</div>
-		<div>
-			<div>Last capture:</div>
-			<div>
-				#set($previewUrl = "/img/thumb.jpg?t=$!currentTimeMillis")
-				<a href="$previewUrl" target="_blank"><img class="fullWidth" src="$previewUrl" /></a>
-			</div>
-		</div>
-		<hr/>
-		<div>
-			#set($keySetSorted = [])
-			#set($suppressOutput = $keySetSorted.addAll($favouredCamConfSettings.keySet()))
-			#set($suppressOutput = $keySetSorted.class.forName("java.util.Collections").sort($keySetSorted))
-			#foreach($settingKey in $keySetSorted)
-				#set($settingValue = "")
-				#set($settingValue = $lastReadCameraConfig.get($settingKey))
-				#if($settingValue != "")
-					#showSettingSelector($lastReadCameraConfig $settingKey false $favouredCamConfSettings.keySet())
-				#end
-			#end
-		</div>
-	</div>	
+#pageHead("Preview")
+
+<div>
+	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/refreshpreview">
+		<input type="submit" value="Get preview" />
+	</form>
+	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/capture">
+		<input type="submit" value="Shoot" />
+	</form>			
+	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/captureandrefreshpreview">
+		<input type="submit" value="Shoot + get thumb" />
+	</form>			
 </div>
+<div>
+	<div>Last capture:</div>
+	<div>
+		#set($previewUrl = "/img/thumb.jpg?t=$!currentTimeMillis")
+		<a href="$previewUrl" target="_blank"><img class="fullWidth" src="$previewUrl" /></a>
+	</div>
+</div>
+<hr/>
+<div>
+	#set($keySetSorted = [])
+	#set($suppressOutput = $keySetSorted.addAll($favouredCamConfSettings.keySet()))
+	#set($suppressOutput = $keySetSorted.class.forName("java.util.Collections").sort($keySetSorted))
+	#foreach($settingKey in $keySetSorted)
+		#set($settingValue = "")
+		#set($settingValue = $lastReadCameraConfig.get($settingKey))
+		#if($settingValue != "")
+			#showSettingSelector($lastReadCameraConfig $settingKey false $favouredCamConfSettings.keySet())
+		#end
+	#end
+</div>
+
+#pageFoot()
 #parse("camera/foot.vm")

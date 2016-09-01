@@ -1,0 +1,185 @@
+#parse("camera/head.vm")
+<script>
+	var config = {};
+	var steps = {};
+	var stepsLastId = 0;
+	var stepKeys = null;
+	var nextStepTimeout = null;
+	var currentStepAjax = null;
+
+	function addStep() {
+		var stepId = stepsLastId++;
+		var stepContainer = $('<div id="step'+stepId+'" class="stepContainer">'
+				+'<select class="stepType" onchange="updateStepContent('+stepId+')">'
+				+'<option value="shoot">Capture</option>'
+				+'<option value="wait">Wait</option>'
+				+'<option value="config">Change Setting</option>'
+				+'</select><span class="stepContent"></span>'
+				+' <span onclick="deleteStep('+stepId+')">x</span>'
+				+'</div>');
+		steps[stepId] = {id:stepId, container:stepContainer};
+		$("#stepsContainer").append(stepContainer);
+		updateStepContent(stepId);
+	}	
+	
+	function deleteStep(stepId) {
+		$(steps[stepId].container).remove();
+		delete steps[stepId];
+	}
+	
+	function updateStepProp(stepId, propName, propVal) {
+		steps[stepId][propName] = propVal;
+	}
+	
+	function updateStepContent(stepId) {
+		var step = steps[stepId];
+		var stepType = $("#step"+stepId+" .stepType").val();
+		step.type = stepType;
+		var stepContent = $("#step"+stepId+" .stepContent");
+		stepContent.html("");
+		if(stepType == 'config') {
+			var configSelect = $('<select class="configSelect" onchange="updateConfigStepContent('+stepId+')"></select><span class="configInput"></span>');
+			var confs = Object.keys(config);
+			for(var k in confs) {
+				var confKey = confs[k];
+				var confElement = config[confKey];
+				configSelect.append($('<option value="'+confKey+'">'+confElement.label+' ('+confKey+')</option>'));
+			}
+			stepContent.append(configSelect);
+			updateConfigStepContent(stepId);
+		} else if(stepType == 'wait') {
+			step.waitTime = 1000;
+			var waitTimeInput = $('<input type="text" value="'+step.waitTime+'" onchange="updateStepProp('+stepId+', \'waitTime\', parseInt(this.value))" />');
+			stepContent.append(waitTimeInput);
+		}
+	}
+	
+	function updateConfigStepContent(stepId) {
+		var step = steps[stepId];
+		var stepContent = $("#step"+stepId+" .stepContent");
+		var configKey = stepContent.find(".configSelect").val();
+		var confElement = config[configKey];
+		
+		step.configKey = configKey;
+		step.configType = confElement.type;
+		step.configVal = confElement.value;
+		
+		var configInputContainer = stepContent.find(".configInput");
+		configInputContainer.html("");
+		if(confElement.type.toLowerCase()=='radio' || confElement.type.toLowerCase()=='menu') {
+			var optSelect = $('<select onchange="updateStepProp('+stepId+', \'configVal\', this.value)"></select>');
+			for(var cidx in confElement.choices) {
+				var choice = confElement.choices[cidx];
+				optSelect.append($('<option value="'+cidx+'">'+choice+'</option>'));
+			}
+			configInputContainer.append(optSelect);
+		} else if(confElement.type.toLowerCase()=='toggle') {
+			configInputContainer.append($('<input type="checkbox" '+(confElement.value == "1"?'selected="selected"':'')+' onchange="updateStepProp('+stepId+', \'configVal\', this.value?1:0)" />'));
+		} else {
+			configInputContainer.append($('<input type="text" value="'+confElement.value+'" onchange="updateStepProp('+stepId+', \'configVal\', this.value)" />'));
+		}
+		
+	}
+	
+	function changeCamSetting(type, key, value, callback) {
+		return $.ajax({
+			method:"POST",
+			url: "/allsettingset",
+			data: { type:type, key:key, value:value, skipRedirect: true }
+		}).always(callback);
+	}
+	
+	function runSteps() {
+		currentStep = null;
+		running = true;
+		stepKeysStr = Object.keys(steps);
+		stepKeys=[];
+		for(var k in stepKeysStr) {
+			stepKeys.push(parseInt(stepKeysStr[k]));
+			stepKeys.sort();
+		}
+		if(stepKeys.length>0) {
+			nextStepTimeout = setTimeout(function() {
+				execStep(0);
+			}, 1);
+		}
+	}
+	
+	function execStep(stepIdIdx) {
+		if(stepIdIdx>=stepKeys.length) {
+			stepIdIdx = 0;
+		}
+		var stepId = stepKeys[stepIdIdx];
+		var step = steps[stepId];
+		$("#step"+stepId).css("background-color", "green");
+		if(step.type == 'shoot') {
+			currentStepAjax = $.ajax({method: "POST", url:"/capture?captureOnly=true"}).always(function() {
+				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, 1);
+				currentStepAjax = null;
+			});
+		} else if(step.type == 'wait') {
+			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, step.waitTime);	
+		} else if(step.type == 'config') {
+			currentStepAjax = changeCamSetting(step.configType, step.configKey, step.configVal, function() {
+				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, 1);
+				currentStepAjax = null;				
+			});
+		} else {
+			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, 1);
+		}
+	}
+	
+	function stopSteps() {
+		if(currentStepAjax!=null) {
+			currentStepAjax.abort();
+			currentStepAjax = null;
+		}
+		if(nextStepTimeout!=null) {
+			clearTimeout(nextStepTimeout);
+			nextStepTimeout = null;
+		}
+		$(".stepContainer").css("background-color", "transparent");
+		updateConfig();
+	}
+	
+	
+	function updateConfig() {
+		$.ajax({
+			cache: false,
+			url: "/cameraConfig.json"
+		}).done(function(data) {
+			config = data;
+			console.log(config);
+		}).fail(function(jqXHR, textStatus) {
+			console.log(jqXHR);
+			alert("Error loading camera config JSON. " + textStatus);
+		});	
+	}
+
+	$(document).ready(function () {
+		updateConfig();
+		$("#btnAddStep").click(addStep);
+		$("#btnRun").click(function() {
+			$("#btnsStopped").hide();
+			runSteps();
+			$("#btnsRunning").show();
+		});
+		$("#btnStop").click(function() {
+			stopSteps();
+			$("#btnsRunning").hide();
+			$("#btnsStopped").show();
+		});
+	});
+</script>
+#pageHead("Automation")
+<div id="stepsContainer">
+</div>
+<hr/>
+<div id="btnsStopped">
+	<div id="btnAddStep">Add step</div>
+	<div id="btnRun">Run</div>
+</div>
+<div id="btnsRunning" style="display: none">
+	<div id="btnStop">Stop</div>
+</div>
+#pageFoot()

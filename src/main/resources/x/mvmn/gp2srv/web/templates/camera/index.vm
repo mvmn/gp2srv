@@ -1,9 +1,8 @@
 #parse("camera/head.vm")
-
-<div class="fullWidth">
-	<div class="pageHead">Camera Control</div>
-	<div class="pageSubHead">
-		#parse("camera/navigation.vm")
-	</div>
+#pageHead("GPhoto2Server")
+<div>
+	<div>Choose an option:</div>
+	#parse("camera/navigation.vm")
 </div>
+#pageFoot()
 #parse("camera/foot.vm")
