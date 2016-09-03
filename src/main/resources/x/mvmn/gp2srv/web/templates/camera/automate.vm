@@ -17,13 +17,13 @@
 				+'</select><span class="stepContent"></span>'
 				+' <span onclick="deleteStep('+stepId+')">x</span>'
 				+'</div>');
-		steps[stepId] = {id:stepId, container:stepContainer};
+		steps[stepId] = {id:stepId};
 		$("#stepsContainer").append(stepContainer);
 		updateStepContent(stepId);
 	}	
 	
 	function deleteStep(stepId) {
-		$(steps[stepId].container).remove();
+		$("#step"+stepId).remove();
 		delete steps[stepId];
 	}
 	
