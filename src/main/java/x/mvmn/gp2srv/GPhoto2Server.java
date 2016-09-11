@@ -1,15 +1,21 @@
 package x.mvmn.gp2srv;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -17,12 +23,6 @@ import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import x.mvmn.gp2srv.service.ExecService;
-import x.mvmn.gp2srv.service.ExecServiceImpl;
-import x.mvmn.gp2srv.service.MockExecService;
-import x.mvmn.gp2srv.service.PathFinderHelper;
-import x.mvmn.gp2srv.service.gphoto2.GPhoto2CommandService;
-import x.mvmn.gp2srv.service.gphoto2.GPhoto2ExecService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
@@ -30,6 +30,7 @@ import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.ImagesServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
+import x.mvmn.jlibgphoto2.GP2Camera;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.PrintStreamLogger;
 import x.mvmn.log.api.Logger;
@@ -44,8 +45,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final Logger logger;
 	private volatile TemplateEngine templateEngine;
 	private final VelocityContextService velocityContextService;
-	private final GPhoto2CommandService gphoto2CommandService;
-	private final String pathToGphoto2;
+	private final GP2Camera camera;
 
 	private final File userHome;
 	private final File appHomeFolder;
@@ -53,36 +53,33 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final File favouredCamConfSettingsFile;
 	private final Properties favouredCamConfSettings;
 
-	public GPhoto2Server(final String pathToGphoto2, final LogLevel logLevel, final boolean mockMode) {
-		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, mockMode);
+	public static final AtomicBoolean liveViewEnabled = new AtomicBoolean(true);
+	public static final AtomicBoolean liveViewInProgress = new AtomicBoolean(false);
+
+	public GPhoto2Server(final LogLevel logLevel, final boolean mockMode) {
+		this(DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, mockMode);
 	}
 
 	public GPhoto2Server(final LogLevel logLevel) {
-		this(null, DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, false);
+		this(DEFAULT_CONTEXT_PATH, DEFAULT_PORT, logLevel, false);
 	}
 
-	public GPhoto2Server(String pathToGphoto2, Integer port, final LogLevel logLevel, final boolean mockMode) {
-		this(pathToGphoto2, DEFAULT_CONTEXT_PATH, port, logLevel, mockMode);
+	public GPhoto2Server(Integer port, final LogLevel logLevel, final boolean mockMode) {
+		this(DEFAULT_CONTEXT_PATH, port, logLevel, mockMode);
 	}
 
 	public GPhoto2Server(Integer port, final LogLevel logLevel) {
-		this(null, DEFAULT_CONTEXT_PATH, port, logLevel, false);
+		this(DEFAULT_CONTEXT_PATH, port, logLevel, false);
 	}
 
-	public GPhoto2Server(String pathToGphoto2, String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode) {
+	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode) {
 		this.logger = makeLogger(logLevel);
+
+		this.camera = new GP2Camera();
 
 		logger.info("Initializing...");
 
 		try {
-			if (pathToGphoto2 == null) {
-				pathToGphoto2 = PathFinderHelper.findInPath("gphoto2", true).getAbsolutePath();
-				if (pathToGphoto2 == null) {
-					throw new RuntimeException("Unable to find gphoto2 in path.");
-				}
-			}
-			this.pathToGphoto2 = pathToGphoto2;
-
 			if (contextPath == null) {
 				contextPath = DEFAULT_CONTEXT_PATH;
 			}
@@ -155,15 +152,6 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 				mockResults = null;
 			}
 
-			final ExecService execService = mockMode ? new MockExecService(mockResults, logger) : new ExecServiceImpl(logger);
-
-			this.gphoto2CommandService = new GPhoto2CommandService(new GPhoto2ExecService(execService, pathToGphoto2, appHomeFolder, imagesFolder));
-
-			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
-			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
-			context.addServlet(new ServletHolder(new CameraControlServlet(gphoto2CommandService, favouredCamConfSettings, velocityContextService, this,
-					imagesFolder, logger)), "/");
-			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
 			context.setErrorHandler(new ErrorHandler() {
 				private AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
 					private static final long serialVersionUID = -30520483617261093L;
@@ -174,6 +162,51 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 					eh.serveGenericErrorPage(request, writer, code, message);
 				}
 			});
+
+			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
+			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
+			context.addServlet(new ServletHolder(new CameraControlServlet(camera, favouredCamConfSettings, velocityContextService, this, imagesFolder, logger)),
+					"/");
+			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
+			final byte[] prefix = ("--BoundaryString\r\n" + "Content-type: image/jpeg\r\n" + "Content-Length: ").getBytes("UTF-8");
+			final byte[] separator = "\r\n\r\n".getBytes("UTF-8");
+			context.addServlet(new ServletHolder(new HttpServlet() {
+				private static final long serialVersionUID = -6610127379314108183L;
+
+				@Override
+				public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+					GPhoto2Server.liveViewEnabled.set(false);
+					try {
+						GPhoto2Server.waitWhileLiveViewInProgress(50);
+					} finally {
+						GPhoto2Server.liveViewEnabled.set(true);
+					}
+					response.setContentType("multipart/x-mixed-replace; boundary=--BoundaryString");
+					final OutputStream outputStream = response.getOutputStream();
+					byte[] jpeg;
+					while (liveViewEnabled.get()) {
+						try {
+							liveViewInProgress.set(true);
+							jpeg = camera.capturePreview();
+							outputStream.write(prefix);
+							outputStream.write(String.valueOf(jpeg.length).getBytes("UTF-8"));
+							outputStream.write(separator);
+							outputStream.write(jpeg);
+							outputStream.write(separator);
+							outputStream.flush();
+							System.gc();
+							Thread.yield();
+						} catch (final EOFException e) {
+							// Ignore - this just means user closed preview
+						} catch (final Exception e) {
+							System.err.println("Live view stopped: " + e.getClass().getName() + " " + e.getMessage());
+							break;
+						} finally {
+							liveViewInProgress.set(false);
+						}
+					}
+				}
+			}), "/stream.mjpeg");
 
 			server.setHandler(context);
 		} catch (Exception e) {
@@ -211,6 +244,16 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		return new TemplateEngine(templatesRegistrations);
 	}
 
+	public static void waitWhileLiveViewInProgress(int waitTime) {
+		while (GPhoto2Server.liveViewInProgress.get() && waitTime-- > 0) {
+			Thread.yield();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
 	public GPhoto2Server start() throws Exception {
 		logger.info("Starting server...");
 		this.server.start();
@@ -232,7 +275,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		return templateEngine;
 	}
 
-	public String getPathToGphoto2() {
-		return pathToGphoto2;
+	public GP2Camera getCamera() {
+		return camera;
 	}
 }

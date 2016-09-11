@@ -6,8 +6,3 @@
 		<script src="/static/jquery-3.1.0.min.js"></script>
 	</head>
 	<body>
-		<div class="statusLine">
-			#if($!commandIsBeingExecuted)
-				Camera command is being executed
-			#end
-		</div>

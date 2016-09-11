@@ -3,21 +3,15 @@
 #pageHead("Preview")
 
 <div>
-	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/refreshpreview">
-		<input type="submit" value="Get preview" />
-	</form>
 	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/capture">
 		<input type="submit" value="Shoot" />
 	</form>			
-	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/captureandrefreshpreview">
-		<input type="submit" value="Shoot + get thumb" />
-	</form>			
 </div>
 <div>
-	<div>Last capture:</div>
+	<div>Live view:</div>
 	<div>
-		#set($previewUrl = "/img/thumb.jpg?t=$!currentTimeMillis")
-		<a href="$previewUrl" target="_blank"><img class="fullWidth" src="$previewUrl" /></a>
+		#set($liveViewUrl = "/stream.mjpeg")
+		<a href="$liveViewUrl" target="_blank"><img id="liveView" class="fullWidth" src="$liveViewUrl" /></a>
 	</div>
 </div>
 <hr/>

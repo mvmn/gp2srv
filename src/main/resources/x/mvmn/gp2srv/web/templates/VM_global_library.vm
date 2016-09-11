@@ -7,6 +7,11 @@
 #macro(embedSettingChangeScriptAndForm $pageParam)
 <script>
 	function onsettingchange(type, key, value, returnTo) {
+		var liveView = document.getElementById("liveView");
+		if(liveView) {
+			liveView.parentElement.removeChild(liveView);
+		}
+	
 		document.forms["setsettingform"]["type"].value=type;
 		document.forms["setsettingform"]["key"].value=key;
 		document.forms["setsettingform"]["value"].value=value;
@@ -42,15 +47,13 @@
 			<span class="headline">$configEntry.label</span>
 			#if($showFavToggle)
 				<span class="">
-					<input type="checkbox" #if($!favedSelectors.contains($settingKey)) checked="checked" #end onchange="saveFavedCamConf('$configEntry.key', this.checked)" />
+					<input type="checkbox" #if($!favedSelectors.contains($settingKey)) checked="checked" #end onchange="saveFavedCamConf('$configEntry.path', this.checked)" />
 				</span>
 			#end
 		</div>
-		<div><span class="smallest">[<span>$configEntry.type.name()</span>: <span>$configEntry.key</span>]</span></div>
+		<div><span class="smallest">[<span>$configEntry.type.name()</span>: <span>$configEntry.path</span>]</span></div>
 		<div class="fullWidth">
-			#if($!configEntry.printableValue)
-				<div class="settingDisplayValueContainer">$!configEntry.printableValue</div>
-			#end
+			<div class="settingDisplayValueContainer">$!configEntry.value</div>
 			#if($configEntry.type.name().equalsIgnoreCase("range"))
 				<div class="settingDisplayValueContainer">From $!{configEntry.bottom} to $!{configEntry.top}, step $!{configEntry.step}</div>
 			#end
@@ -58,7 +61,7 @@
 				<select class="fullWidth" onchange="javascript:onsettingchange('$configEntry.type.name()', '$settingKey', this.options[this.selectedIndex].value)">
 					#foreach($choice in $configEntry.choices)
 						#set($count = $velocityCount - 1)
-						<option value="${count}"
+						<option value="$choice.toString()"
 							#if($configEntry.value.toString().equals($choice.toString()))
 								selected="selected"
 							#end

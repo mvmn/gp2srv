@@ -70,7 +70,7 @@
 			var optSelect = $('<select onchange="updateStepProp('+stepId+', \'configVal\', this.value)"></select>');
 			for(var cidx in confElement.choices) {
 				var choice = confElement.choices[cidx];
-				optSelect.append($('<option value="'+cidx+'">'+choice+'</option>'));
+				optSelect.append($('<option value="'+choice+'">'+choice+'</option>'));
 			}
 			configInputContainer.append(optSelect);
 		} else if(confElement.type.toLowerCase()=='toggle') {

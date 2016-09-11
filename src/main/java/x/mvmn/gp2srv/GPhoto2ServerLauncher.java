@@ -4,7 +4,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
-import x.mvmn.gp2srv.service.PathFinderHelper;
 import x.mvmn.log.api.Logger.LogLevel;
 
 public class GPhoto2ServerLauncher {
@@ -33,14 +32,6 @@ public class GPhoto2ServerLauncher {
 			}
 		}
 
-		final String gphoto2path;
-		if (commandLine.hasOption("gphoto2path") && commandLine.getOptionValue("gphoto2path") != null
-				&& commandLine.getOptionValue("gphoto2path").trim().length() > 0) {
-			gphoto2path = commandLine.getOptionValue("gphoto2path").trim();
-		} else {
-			gphoto2path = PathFinderHelper.findInPath("gphoto2", true).getAbsolutePath();
-		}
-
 		final LogLevel logLevel;
 		if (commandLine.hasOption("logLevel")) {
 			try {
@@ -52,6 +43,6 @@ public class GPhoto2ServerLauncher {
 			logLevel = LogLevel.INFO;
 		}
 
-		new GPhoto2Server(gphoto2path, port, logLevel, commandLine.hasOption("usemocks")).start().join();
+		new GPhoto2Server(port, logLevel, commandLine.hasOption("usemocks")).start().join();
 	}
 }

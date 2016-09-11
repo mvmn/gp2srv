@@ -2,46 +2,35 @@
 #pageHead("Browse")
 
 <form id="actForm" method="POST" action="" class="hidden">
-	<input type="text" name="imgRefId" value="" />
+	<input type="text" name="name" value="" />
 	<input type="text" name="folder" value="" />
 </form>
 <script>
-	function actFormSubmit(action, imgRefId, folder) {
+	function actFormSubmit(action, name, folder) {
 		document.forms["actForm"].action = action;
-		document.forms["actForm"]["imgRefId"].value = imgRefId;
+		document.forms["actForm"]["name"].value = name;
 		document.forms["actForm"]["folder"].value = folder;
 		document.forms["actForm"].submit();
 	}
-	function dldpreview(id, folder) {
-		actFormSubmit("$!request.contextPath/camfilepreview", id, folder)
+	function dldpreview(name, folder) {
+		actFormSubmit("$!request.contextPath/camfilepreview", name, folder)
 	}
-	function deletefile(id, name, folder) {
+	function deletefile(name, folder) {
 		if(confirm("Delete file "+name+"?")) {
-			actFormSubmit("$!request.contextPath/deletefile", id, folder)
+			actFormSubmit("$!request.contextPath/deletefile", name, folder)
 		}
 	}
 </script>
-#set($needsSeparator = false)
-#foreach($filesInFolder in $filesList.byFolder.entrySet())
-	#if($filesInFolder.value.size()>0)
-		#if($needsSeparator) <hr/> #end	
-		#set($needsSeparator = true)
+#if($filesList.size() > 0)
+	#foreach($file in $filesList)
 		<div>
-			<div class="headline">$filesInFolder.key</div>
-			<div>
-				#foreach($fileRef in $filesInFolder.value)
-					#set($odd = $foreach.index % 2)							
-					<div class="fullWidth browseList #if($odd == 1) odd #else even #end">
-						<span>$!fileRef.refId</span>
-						- 
-						<a href="javascript:dldpreview($!fileRef.refId, '$!filesInFolder.key')"><span>$!fileRef.filename</span></a> 
-						<span class="smaller">
-							<span>$!fileRef.filesizestr</span> 
-							[<span>$!fileRef.filetypestr.replaceAll("image/","")</span>]
-							<a href="javascript:deletefile($!fileRef.refId, '$!fileRef.filename', '$!filesInFolder.key')">delete</a>
-						</span>
-					</div>
-				#end
+			#set($odd = $foreach.index % 2)							
+			<div class="fullWidth browseList #if($odd == 1) odd #else even #end">
+				<span>$!file.path</span>
+				<a href="javascript:dldpreview('$!file.name', '$!file.path')"><span>$!file.name</span></a> 
+				<span class="smaller">
+					<a href="javascript:deletefile('$!file.name', '$!file.path')">delete</a>
+				</span>
 			</div>
 		</div>				
 	#end
