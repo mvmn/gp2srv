@@ -1,5 +1,25 @@
 # GPhoto2 Server
 
+## Versions 1.0+
+This is a Jetty-powered WebApp that serves as a web-interface for GPhoto2 program.
+It can be put on any machine that has libgphoto2 and Java 1.5 or above. The calls to GPhoto2 are done using JNA, via https://github.com/mvmn/jlibgphoto2
+
+Command-line arguments:
+- port - TCP port to listen on. 
+Optional. Default port is 8080.
+- logLevel - logging level (one of TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL). 
+Optional. Default is INFO.
+
+Dependencies:
+- LibGPhoto2 - http://www.gphoto.org
+- Java 1.5 and above
+- https://github.com/mvmn/jlibgphoto2
+
+Known issues: 
+On Canon (and possibly other) cameras browsing files requires viewfinder to be closed. Thus one has to close viewfinder (which gets opened by LiveView) before going to browse page.
+I will try to address this issue in the future. 
+
+## Versions before 1.0
 This is a Jetty-powered WebApp that serves as a web-interface for GPhoto2 program.
 It can be put on any machine that has GPhoto2 (usually in PATH) and Java 1.5 or above. The calls to GPhoto2 are done using simple exec.
 
