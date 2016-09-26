@@ -89,9 +89,9 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				}
 				if (updatedConfigEntry != null) {
 					GP2ConfigHelper.setConfig(camera, updatedConfigEntry);
+					getConfigAsMap(false);
 					if (!skipRedirect) {
 						if (page != null && "preview".equals(page)) {
-							getConfigAsMap(false);
 							redirectLocalSafely(request, response, "/preview");
 						} else {
 							redirectLocalSafely(request, response, "/allsettings");
