@@ -9,6 +9,8 @@ Command-line arguments:
 Optional. Default port is 8080.
 - logLevel - logging level (one of TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL). 
 Optional. Default is INFO.
+- auth - username:password
+Optional. Enables basic HTTP authentication with provided credentials.
 
 Dependencies:
 - LibGPhoto2 - http://www.gphoto.org
