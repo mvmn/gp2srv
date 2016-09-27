@@ -8,16 +8,50 @@
 	var nextLoopInterval = null;
 	var currentStepAjax = null;
 	var running = false;
+	var loopCount = 0;
+	
+	function updateLoopCount(count) {	
+		if(count) {
+			loopCount = count;
+		} else {
+			loopCount++;
+		}
+		$("#loopCounterView").val(loopCount);
+	}
+	
+	function enableConditionInputs(enable, stepId) {
+		$('#step'+stepId+'_conditionFrom').prop('disabled', !enable);
+		$('#step'+stepId+'_conditionTo').prop('disabled', !enable);
+		if(enable) {
+			$('#step'+stepId+'_conditionInputs').show();
+		} else {
+			$('#step'+stepId+'_conditionInputs').hide();
+		}
+	}
+	
+	function stepExecutable(stepId) {
+		var conditional = $('#step'+stepId+'_conditional').prop('checked');
+		if(!conditional) {
+			return true;
+		} else {
+			var from = $('#step'+stepId+'_conditionFrom').val();
+			var to = $('#step'+stepId+'_conditionTo').val();
+			return loopCount>=from && loopCount<=to;
+		}
+	}
 
 	function addStep() {
 		var stepId = stepsLastId++;
 		var stepContainer = $('<div id="step'+stepId+'" class="stepContainer">'
+				+'<span onclick="deleteStep('+stepId+')">x</span>&nbsp;'
+				+'<input type="checkbox" id="step'+stepId+'_conditional" onchange="javascript:enableConditionInputs(this.checked, '+stepId+')" /><span class="smaller">&nbsp;looplimit</span> '
+				+'<span id="step'+stepId+'_conditionInputs" style="display: none"><input id="step'+stepId+'_conditionFrom" type="text" value="0" size="6" disabled="disabled" /><span class="smaller">&nbsp;to&nbsp;</span>'
+				+'<input id="step'+stepId+'_conditionTo" type="text" value="10000" size="6" disabled="disabled" /></span>'
 				+'<select class="stepType" onchange="updateStepContent('+stepId+')">'
 				+'<option value="shoot">Capture</option>'
 				+'<option value="wait">Wait</option>'
 				+'<option value="config">Change Setting</option>'
 				+'</select><span class="stepContent"></span>'
-				+' <span onclick="deleteStep('+stepId+')">x</span>'
 				+'</div>');
 		steps[stepId] = {id:stepId};
 		$("#stepsContainer").append(stepContainer);
@@ -25,8 +59,10 @@
 	}	
 	
 	function deleteStep(stepId) {
-		$("#step"+stepId).remove();
-		delete steps[stepId];
+		if(confirm("Delete step?")) {
+			$("#step"+stepId).remove();
+			delete steps[stepId];
+		}
 	}
 	
 	function updateStepProp(stepId, propName, propVal) {
@@ -40,7 +76,7 @@
 		var stepContent = $("#step"+stepId+" .stepContent");
 		stepContent.html("");
 		if(stepType == 'config') {
-			var configSelect = $('<select class="configSelect" onchange="updateConfigStepContent('+stepId+')"></select><span class="configInput"></span>');
+			var configSelect = $('<br/><select class="configSelect" onchange="updateConfigStepContent('+stepId+')"></select><span class="configInput"></span>');
 			var confs = Object.keys(config);
 			for(var k in confs) {
 				var confKey = confs[k];
@@ -51,7 +87,7 @@
 			updateConfigStepContent(stepId);
 		} else if(stepType == 'wait') {
 			step.waitTime = 1000;
-			var waitTimeInput = $('<input type="text" value="'+step.waitTime+'" onchange="updateStepProp('+stepId+', \'waitTime\', parseInt(this.value))" />');
+			var waitTimeInput = $('<input type="text" size="8" value="'+step.waitTime+'" onchange="updateStepProp('+stepId+', \'waitTime\', parseInt(this.value))" />');
 			stepContent.append(waitTimeInput);
 		}
 	}
@@ -65,6 +101,9 @@
 		step.configKey = configKey;
 		step.configType = confElement.type;
 		step.configVal = confElement.value;
+		if(step.configType.toLowerCase() == 'toggle') {
+			step.configVal = confElement.checked? 1 : 0;
+		}
 		
 		var configInputContainer = stepContent.find(".configInput");
 		configInputContainer.html("");
@@ -104,6 +143,7 @@
 	function runStepsRepeat() {
 		currentStep = null;
 		populateStepKeys();
+		updateLoopCount(1);
 		if(stepKeys.length>0) {
 			nextStepTimeout = setTimeout(function() {
 				execStep(0);
@@ -114,6 +154,7 @@
 	function runStepsScheduled(time) {
 		currentStep = null;
 		populateStepKeys();
+		updateLoopCount(1);
 		if(stepKeys.length>0) {
 			nextLoopInterval = setInterval(function() {
 				nextStepTimeout = setTimeout(function() {
@@ -130,6 +171,7 @@
 	function execStep(stepIdIdx, singleRun) {
 		running = true;
 		if(stepIdIdx>=stepKeys.length) {
+			updateLoopCount();
 			if(singleRun) {
 				stopSteps();
 				return;
@@ -139,22 +181,31 @@
 		}
 		var stepId = stepKeys[stepIdIdx];
 		var step = steps[stepId];
-		$("#step"+stepId).css("background-color", "green");
-		if(step.type == 'shoot') {
-			currentStepAjax = $.ajax({method: "POST", url:"/capture?captureOnly=true"}).always(function() {
-				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, 1);
-				currentStepAjax = null;
-			});
-		} else if(step.type == 'wait') {
-			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, step.waitTime);	
-		} else if(step.type == 'config') {
-			currentStepAjax = changeCamSetting(step.configType, step.configKey, step.configVal, function() {
-				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, 1);
-				currentStepAjax = null;				
-			});
+
+		if(!stepExecutable(stepId)) {
+			nextStepTimeout = scheduleNextStep(stepIdIdx, stepId, singleRun, 1); 
 		} else {
-			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, 1);
+			$("#step"+stepId).css("background-color", "green");		
+			if(step.type == 'shoot') {
+				currentStepAjax = $.ajax({method: "POST", url:"/capture?captureOnly=true"}).always(function() {
+					nextStepTimeout = scheduleNextStep(stepIdIdx, stepId, singleRun, 1); 
+					currentStepAjax = null;
+				});
+			} else if(step.type == 'wait') {
+				nextStepTimeout = scheduleNextStep(stepIdIdx, stepId, singleRun, step.waitTime);
+			} else if(step.type == 'config') {
+				currentStepAjax = changeCamSetting(step.configType, step.configKey, step.configVal, function() {
+					nextStepTimeout = scheduleNextStep(stepIdIdx, stepId, singleRun, 1);
+					currentStepAjax = null;				
+				});
+			} else {
+				nextStepTimeout = scheduleNextStep(stepIdIdx, stepId, singleRun, 1);
+			}
 		}
+	}
+	
+	function scheduleNextStep(stepIdIdx, stepId, singleRun, time) {
+		return setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, time);
 	}
 	
 	function stopSteps() {
@@ -216,13 +267,16 @@
 <div id="stepsContainer">
 </div>
 <hr/>
-<div id="btnsStopped">
+<div class="fullWidth" id="btnsStopped">
 	<div id="btnAddStep">Add step</div>
-	<div id="btnRun">Run</div>
-	<div id="btnRunEvery">Run every milliseconds...</div>
-	<input type="text" value="5000" id="runEveryInput" />
+	<hr/>
+	<input type="button" id="btnRun" value="Run" />
+	<input type="button" id="btnRunEvery" value="Run every milliseconds..." />
+	<input type="text" value="5000" size="8" id="runEveryInput" />
 </div>
-<div id="btnsRunning" style="display: none">
-	<div id="btnStop">Stop</div>
+<div class="fullWidth" id="btnsRunning" style="display: none">
+	<div>Loop: <input type="text" id="loopCounterView" value="0" readonly="readonly" size="10" /></div>
+	<hr/>
+	<input type="button" id="btnStop" value="Stop" />	
 </div>
 #pageFoot()
