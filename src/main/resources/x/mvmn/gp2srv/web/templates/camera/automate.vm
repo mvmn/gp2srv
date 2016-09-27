@@ -5,7 +5,9 @@
 	var stepsLastId = 0;
 	var stepKeys = null;
 	var nextStepTimeout = null;
+	var nextLoopInterval = null;
 	var currentStepAjax = null;
+	var running = false;
 
 	function addStep() {
 		var stepId = stepsLastId++;
@@ -88,16 +90,20 @@
 			data: { type:type, key:key, value:value, skipRedirect: true }
 		}).always(callback);
 	}
-	
-	function runSteps() {
-		currentStep = null;
-		running = true;
-		stepKeysStr = Object.keys(steps);
+
+	function populateStepKeys() {
+		var stepKeysStr = Object.keys(steps);
 		stepKeys=[];
 		for(var k in stepKeysStr) {
 			stepKeys.push(parseInt(stepKeysStr[k]));
 			stepKeys.sort();
 		}
+		return stepKeys;
+	}
+	
+	function runStepsRepeat() {
+		currentStep = null;
+		populateStepKeys();
 		if(stepKeys.length>0) {
 			nextStepTimeout = setTimeout(function() {
 				execStep(0);
@@ -105,27 +111,49 @@
 		}
 	}
 	
-	function execStep(stepIdIdx) {
+	function runStepsScheduled(time) {
+		currentStep = null;
+		populateStepKeys();
+		if(stepKeys.length>0) {
+			nextLoopInterval = setInterval(function() {
+				nextStepTimeout = setTimeout(function() {
+					if(running) {
+						console.log("Automation - previous cycle didn't finish. Skipping.");
+					} else {
+						execStep(0, true);
+					}
+				}, 1);
+			}, time);
+		}		
+	}
+	
+	function execStep(stepIdIdx, singleRun) {
+		running = true;
 		if(stepIdIdx>=stepKeys.length) {
-			stepIdIdx = 0;
+			if(singleRun) {
+				stopSteps();
+				return;
+			} else {
+				stepIdIdx = 0;
+			}
 		}
 		var stepId = stepKeys[stepIdIdx];
 		var step = steps[stepId];
 		$("#step"+stepId).css("background-color", "green");
 		if(step.type == 'shoot') {
 			currentStepAjax = $.ajax({method: "POST", url:"/capture?captureOnly=true"}).always(function() {
-				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, 1);
+				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, 1);
 				currentStepAjax = null;
 			});
 		} else if(step.type == 'wait') {
-			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, step.waitTime);	
+			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, step.waitTime);	
 		} else if(step.type == 'config') {
 			currentStepAjax = changeCamSetting(step.configType, step.configKey, step.configVal, function() {
-				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, 1);
+				nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, 1);
 				currentStepAjax = null;				
 			});
 		} else {
-			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx); }, 1);
+			nextStepTimeout = setTimeout(function() { $("#step"+stepId).css("background-color", "transparent"); execStep(++stepIdIdx, singleRun); }, 1);
 		}
 	}
 	
@@ -139,9 +167,16 @@
 			nextStepTimeout = null;
 		}
 		$(".stepContainer").css("background-color", "transparent");
+		running = false;
 		updateConfig();
 	}
 	
+	function stopSchedule() {
+		if(nextLoopInterval!=null) {
+			clearInterval(nextLoopInterval);
+			nextLoopInterval = null;
+		}
+	}	
 	
 	function updateConfig() {
 		$.ajax({
@@ -161,11 +196,17 @@
 		$("#btnAddStep").click(addStep);
 		$("#btnRun").click(function() {
 			$("#btnsStopped").hide();
-			runSteps();
+			runStepsRepeat();
+			$("#btnsRunning").show();
+		});
+		$("#btnRunEvery").click(function() {
+			$("#btnsStopped").hide();
+			runStepsScheduled($("#runEveryInput").val());
 			$("#btnsRunning").show();
 		});
 		$("#btnStop").click(function() {
 			stopSteps();
+			stopSchedule();
 			$("#btnsRunning").hide();
 			$("#btnsStopped").show();
 		});
@@ -178,6 +219,8 @@
 <div id="btnsStopped">
 	<div id="btnAddStep">Add step</div>
 	<div id="btnRun">Run</div>
+	<div id="btnRunEvery">Run every milliseconds...</div>
+	<input type="text" value="5000" id="runEveryInput" />
 </div>
 <div id="btnsRunning" style="display: none">
 	<div id="btnStop">Stop</div>
