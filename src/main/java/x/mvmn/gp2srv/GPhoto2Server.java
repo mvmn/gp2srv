@@ -1,29 +1,17 @@
 package x.mvmn.gp2srv;
 
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
-import java.util.Base64;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -33,15 +21,18 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
+import x.mvmn.gp2srv.web.servlets.BasicAuthFilter;
 import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.ImagesServlet;
+import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.jlibgphoto2.GP2Camera;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.PrintStreamLogger;
 import x.mvmn.log.api.Logger;
 import x.mvmn.log.api.Logger.LogLevel;
+import x.mvmn.util.FileBackedProperties;
 
 public class GPhoto2Server implements Provider<TemplateEngine> {
 
@@ -58,7 +49,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final File appHomeFolder;
 	private final File imagesFolder;
 	private final File favouredCamConfSettingsFile;
-	private final Properties favouredCamConfSettings;
+	private final FileBackedProperties favouredCamConfSettings;
 
 	public static final AtomicBoolean liveViewEnabled = new AtomicBoolean(true);
 	public static final AtomicBoolean liveViewInProgress = new AtomicBoolean(false);
@@ -119,56 +110,11 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			if (!favouredCamConfSettingsFile.exists()) {
 				favouredCamConfSettingsFile.createNewFile();
 			}
-			favouredCamConfSettings = new Properties() {
-				private static final long serialVersionUID = 3248780562679168446L;
-
-				@Override
-				public Object remove(final Object key) {
-					final Object result = super.remove(key);
-					store();
-					return result;
-				}
-
-				@Override
-				public Object setProperty(final String key, final String value) {
-					final Object result = super.setProperty(key, value);
-					store();
-					return result;
-				}
-
-				protected void store() {
-					FileOutputStream tmpFileWriter = null;
-					try {
-						tmpFileWriter = new FileOutputStream(favouredCamConfSettingsFile);
-						this.store(tmpFileWriter, "GPhoto2Server - favoured camera settings");
-					} catch (final Exception e) {
-						throw new RuntimeException("Failed to write favoured camera conf settings file " + favouredCamConfSettingsFile.getAbsolutePath(), e);
-					} finally {
-						IOUtils.closeQuietly(tmpFileWriter);
-					}
-				}
-			};
-			FileReader tmpFileReader = null;
-			try {
-				tmpFileReader = new FileReader(favouredCamConfSettingsFile);
-				favouredCamConfSettings.load(tmpFileReader);
-			} catch (final Exception e) {
-				throw new RuntimeException("Failed to read favoured camera conf settings file " + favouredCamConfSettingsFile.getAbsolutePath(), e);
-			} finally {
-				IOUtils.closeQuietly(tmpFileReader);
-			}
+			favouredCamConfSettings = new FileBackedProperties(favouredCamConfSettingsFile);
 			velocityContextService.getGlobalContext().put("favouredCamConfSettings", favouredCamConfSettings);
 
-			final Properties mockResults;
-			if (mockMode) {
-				mockResults = new Properties();
-				mockResults.load(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/service/gphoto2/gphoto2mocks.properties"));
-			} else {
-				mockResults = null;
-			}
-
 			context.setErrorHandler(new ErrorHandler() {
-				private AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
+				private final AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
 					private static final long serialVersionUID = -30520483617261093L;
 				};
 
@@ -180,97 +126,31 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			if (requireAuthCredentials != null && requireAuthCredentials.length > 1 && requireAuthCredentials[0] != null && requireAuthCredentials[1] != null
 					&& !requireAuthCredentials[0].trim().isEmpty() && !requireAuthCredentials[1].trim().isEmpty()) {
-				context.addFilter(new FilterHolder(new Filter() {
-					public void init(FilterConfig filterConfig) throws ServletException {
-					}
-
-					public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
-							throws IOException, ServletException {
-						if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
-							final HttpServletRequest httpRequest = (HttpServletRequest) request;
-							final HttpServletResponse httpReponse = (HttpServletResponse) response;
-
-							String authHeader = httpRequest.getHeader("Authorization");
-							if (authHeader != null) {
-								String[] splits = authHeader.split(" ");
-								if (splits.length > 1) {
-									String basic = splits[0];
-
-									if (basic.equalsIgnoreCase("Basic")) {
-										String credentials = new String(Base64.getDecoder().decode(splits[1]), "UTF-8");
-										int separatorIndex = credentials.indexOf(":");
-										if (separatorIndex > 0) {
-											final String username = credentials.substring(0, separatorIndex);
-											final String password = credentials.substring(separatorIndex + 1);
-											if (requireAuthCredentials[0].equals(username) && requireAuthCredentials[1].equals(password)) {
-												httpRequest.getSession().setAttribute("loggedin", Boolean.TRUE);
-											}
-										}
-									}
-								}
-							}
-
-							final Object loggedIn = httpRequest.getSession().getAttribute("loggedin");
-							if (loggedIn != null && loggedIn.equals(Boolean.TRUE)) {
-								chain.doFilter(request, response);
-							} else {
-								httpReponse.setStatus(401);
-								httpReponse.setHeader("WWW-Authenticate", "Basic realm=\"User Visible Realm\"");
-							}
-						} else {
-							chain.doFilter(request, response);
-						}
-					}
-
-					public void destroy() {
-					}
-				}), "/*", 0);
+				context.addFilter(new FilterHolder(new BasicAuthFilter(requireAuthCredentials[0], requireAuthCredentials[1])), "/*",
+						EnumSet.of(DispatcherType.REQUEST));
 			}
 
+			// context.addServlet(new ServletHolder(new WebSocketServlet() {
+			// private static final long serialVersionUID = 2418523268586680763L;
+			//
+			// @Override
+			// public void configure(final WebSocketServletFactory factory) {
+			// factory.setCreator(new WebSocketCreator() {
+			// @Override
+			// public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
+			// req.getRequestURI();
+			// // TODO Auto-generated method stub
+			// return null;
+			// }
+			// });
+			// }
+			// }), "/ws/*");
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
 			context.addServlet(new ServletHolder(new CameraControlServlet(camera, favouredCamConfSettings, velocityContextService, this, imagesFolder, logger)),
 					"/");
 			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
-			final byte[] prefix = ("--BoundaryString\r\n" + "Content-type: image/jpeg\r\n" + "Content-Length: ").getBytes("UTF-8");
-			final byte[] separator = "\r\n\r\n".getBytes("UTF-8");
-			context.addServlet(new ServletHolder(new HttpServlet() {
-				private static final long serialVersionUID = -6610127379314108183L;
-
-				@Override
-				public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-					GPhoto2Server.liveViewEnabled.set(false);
-					try {
-						GPhoto2Server.waitWhileLiveViewInProgress(50);
-					} finally {
-						GPhoto2Server.liveViewEnabled.set(true);
-					}
-					response.setContentType("multipart/x-mixed-replace; boundary=--BoundaryString");
-					final OutputStream outputStream = response.getOutputStream();
-					byte[] jpeg;
-					while (liveViewEnabled.get()) {
-						try {
-							liveViewInProgress.set(true);
-							jpeg = camera.capturePreview();
-							outputStream.write(prefix);
-							outputStream.write(String.valueOf(jpeg.length).getBytes("UTF-8"));
-							outputStream.write(separator);
-							outputStream.write(jpeg);
-							outputStream.write(separator);
-							outputStream.flush();
-							System.gc();
-							Thread.yield();
-						} catch (final EOFException e) {
-							// Ignore - this just means user closed preview
-						} catch (final Exception e) {
-							System.err.println("Live view stopped: " + e.getClass().getName() + " " + e.getMessage());
-							break;
-						} finally {
-							liveViewInProgress.set(false);
-						}
-					}
-				}
-			}), "/stream.mjpeg");
+			context.addServlet(new ServletHolder(new LiveViewServlet(camera)), "/stream.mjpeg");
 
 			server.setHandler(context);
 		} catch (Exception e) {

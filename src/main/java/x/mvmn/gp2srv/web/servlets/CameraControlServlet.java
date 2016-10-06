@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -186,11 +187,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			try {
 				GPhoto2Server.liveViewEnabled.set(false);
 				GPhoto2Server.waitWhileLiveViewInProgress(50);
-				List<CameraConfigEntryBean> config = GP2ConfigHelper.getConfig(camera);
-				configAsMap = new TreeMap<String, CameraConfigEntryBean>();
-				for (final CameraConfigEntryBean configEntry : config) {
-					configAsMap.put(configEntry.getPath(), configEntry);
-				}
+				configAsMap = GP2ConfigHelper.getConfig(camera).stream().collect(Collectors.toMap(CameraConfigEntryBean::getPath, Function.identity()));
 				velocityContextService.getGlobalContext().put("lastReadCameraConfig", configAsMap);
 			} finally {
 				GPhoto2Server.liveViewEnabled.set(true);
