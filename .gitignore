@@ -1,10 +1,10 @@
+## Eclipse
 .classpath
 .project
 .settings/
 bin/
 
-# OS generated files #
-######################
+## OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -14,15 +14,12 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
-# Submodules #
-##############
-MvmnJavaLangUtil/
-SimpleEventBus-API/
-SimpleEventBus/
-
-# Maven #
-#########
+## Maven
 /target
 dependency-reduced-pom.xml
 
+## JVM crash dumps
 hs_err_*.log
+
+## Bower
+src/main/resources/x/mvmn/gp2srv/web/static/js
