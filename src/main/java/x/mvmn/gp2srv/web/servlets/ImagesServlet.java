@@ -9,8 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
+import com.github.jknack.handlebars.Context;
+
 import x.mvmn.gp2srv.web.MimeTypesHelper;
-import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
+import x.mvmn.gp2srv.web.service.TemplateEngine;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
 
@@ -18,10 +20,9 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 
 	private static final long serialVersionUID = -2923068775778250752L;
 
-	// private final File imagesFolder;
 	private final String imagesFolderCanonicalPath;
 
-	public ImagesServlet(final Provider<TemplateEngine> templateEngineProvider, final File imagesFolder, Logger logger) throws IOException {
+	public ImagesServlet(final Provider<TemplateEngine<Context>> templateEngineProvider, final File imagesFolder, Logger logger) throws IOException {
 		super(templateEngineProvider, logger);
 
 		if (!imagesFolder.exists()) {
@@ -30,7 +31,6 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 		if (!imagesFolder.isDirectory()) {
 			throw new RuntimeException("Images folder path doesn't point to a folder (must be a file)");
 		}
-		// this.imagesFolder = imagesFolder;
 		imagesFolderCanonicalPath = imagesFolder.getCanonicalPath();
 	}
 
@@ -64,7 +64,6 @@ public class ImagesServlet extends AbstractErrorHandlingServlet {
 		File file = processRequest(request, response);
 		if (file != null && file.length() < Integer.MAX_VALUE) {
 			response.setContentLength((int) file.length());
-			// response.setContentLengthLong(file.length());
 		}
 	}
 

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import x.mvmn.gp2srv.GPhoto2Server;
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.web.service.CameraService;
 
 public final class LiveViewServlet extends HttpServlet {
 	private static final byte[] PREFIX;

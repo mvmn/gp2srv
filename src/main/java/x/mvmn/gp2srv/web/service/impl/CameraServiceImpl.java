@@ -3,7 +3,7 @@ package x.mvmn.gp2srv.web.service.impl;
 import java.io.Closeable;
 import java.util.List;
 
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.web.service.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera;

@@ -1,15 +1,14 @@
 package x.mvmn.gp2srv.web.servlets;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.context.Context;
+import com.github.jknack.handlebars.Context;
 
-import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
-import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
+import x.mvmn.gp2srv.web.service.TemplateEngine;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
 
@@ -23,23 +22,20 @@ import x.mvmn.log.api.Logger;
 public class AbstractGP2Servlet extends AbstractErrorHandlingServlet {
 	private static final long serialVersionUID = 7210482012835862732L;
 
-	protected VelocityContextService velocityContextService;
-
-	public AbstractGP2Servlet(final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
+	public AbstractGP2Servlet(final Provider<TemplateEngine<Context>> templateEngineProvider, final Logger logger) {
 		super(templateEngineProvider, logger);
-		this.velocityContextService = velocityContextService;
 	}
 
 	@Override
-	public Context createContext(final HttpServletRequest request, final HttpServletResponse response) {
-		Context result = new VelocityContext(velocityContextService.getGlobalContext());
+	public Map<String, Object> createContext(final HttpServletRequest request, final HttpServletResponse response) {
+		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("request", request);
 		result.put("response", response);
 		return result;
 	}
 
-	public Context createContext(final HttpServletRequest request, final HttpServletResponse response, final Map<String, Object> values) {
-		Context result = new VelocityContext(values, velocityContextService.getGlobalContext());
+	public Map<String, Object> createContext(final HttpServletRequest request, final HttpServletResponse response, final Map<String, Object> values) {
+		Map<String, Object> result = new HashMap<String, Object>(values);
 		result.put("request", request);
 		result.put("response", response);
 		return result;

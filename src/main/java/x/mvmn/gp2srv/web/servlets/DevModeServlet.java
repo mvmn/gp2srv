@@ -1,11 +1,10 @@
 package x.mvmn.gp2srv.web.servlets;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.velocity.context.Context;
 
 import x.mvmn.gp2srv.GPhoto2Server;
 
@@ -22,7 +21,7 @@ public class DevModeServlet extends AbstractErrorHandlingServlet {
 
 	@Override
 	public void doGet(final HttpServletRequest request, final HttpServletResponse response) {
-		final Context context = createContext(request, response);
+		final Map<String, Object> context = createContext(request, response);
 		if ("/rst".equals(request.getPathInfo())) {
 			gPhoto2Server.reReadTemplates();
 			try {

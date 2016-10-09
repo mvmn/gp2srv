@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.DispatcherType;
@@ -18,16 +15,17 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import com.github.jknack.handlebars.Context;
+
 import x.mvmn.gp2srv.mock.service.impl.MockCameraServiceImpl;
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.web.service.CameraService;
+import x.mvmn.gp2srv.web.service.TemplateEngine;
 import x.mvmn.gp2srv.web.service.impl.CameraServiceImpl;
-import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
-import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
+import x.mvmn.gp2srv.web.service.impl.HandlebarsTemplateEngineImpl;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
 import x.mvmn.gp2srv.web.servlets.BasicAuthFilter;
 import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
-import x.mvmn.gp2srv.web.servlets.ImagesServlet;
 import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.jlibgphoto2.GP2Camera;
@@ -37,20 +35,21 @@ import x.mvmn.log.api.Logger;
 import x.mvmn.log.api.Logger.LogLevel;
 import x.mvmn.util.FileBackedProperties;
 
-public class GPhoto2Server implements Provider<TemplateEngine> {
+public class GPhoto2Server implements Provider<TemplateEngine<Context>> {
+
+	public static final String STATIC_RESOURCES_CLASSPATH_PREFIX = "/x/mvmn/gp2srv/web/static";
+	public static final String TEMPLATE_RESOURCES_CLASSPATH_PREFIX = "/x/mvmn/gp2srv/web/templates";
 
 	private static final String DEFAULT_CONTEXT_PATH = "/";
 	private static final int DEFAULT_PORT = 8080;
 
 	private final Server server;
 	private final Logger logger;
-	private volatile TemplateEngine templateEngine;
-	private final VelocityContextService velocityContextService;
+	private final TemplateEngine<Context> templateEngine;
 	private final GP2Camera camera;
 
 	private final File userHome;
 	private final File appHomeFolder;
-	private final File imagesFolder;
 	private final File favouredCamConfSettingsFile;
 	private final FileBackedProperties favouredCamConfSettings;
 
@@ -97,7 +96,6 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			}
 
 			this.templateEngine = makeTemplateEngine();
-			this.velocityContextService = new VelocityContextService();
 
 			this.server = new Server(port);
 			this.server.setStopAtShutdown(true);
@@ -107,14 +105,15 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			userHome = new File(System.getProperty("user.home"));
 			appHomeFolder = new File(userHome, ".gp2srv");
 			appHomeFolder.mkdir();
-			imagesFolder = new File(appHomeFolder, "img");
-			imagesFolder.mkdirs();
+
 			favouredCamConfSettingsFile = new File(appHomeFolder, "favouredConfs.properties");
 			if (!favouredCamConfSettingsFile.exists()) {
 				favouredCamConfSettingsFile.createNewFile();
 			}
 			favouredCamConfSettings = new FileBackedProperties(favouredCamConfSettingsFile);
-			velocityContextService.getGlobalContext().put("favouredCamConfSettings", favouredCamConfSettings);
+
+			// TODO: Provide to camera control servlet
+			// velocityContextService.getGlobalContext().put("favouredCamConfSettings", favouredCamConfSettings);
 
 			context.setErrorHandler(new ErrorHandler() {
 				private final AbstractErrorHandlingServlet eh = new AbstractErrorHandlingServlet(GPhoto2Server.this, GPhoto2Server.this.getLogger()) {
@@ -151,13 +150,11 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(camera);
 
-			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
-			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
-			context.addServlet(
-					new ServletHolder(new CameraControlServlet(cameraService, favouredCamConfSettings, velocityContextService, this, imagesFolder, logger)),
-					"/");
-			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
+			// context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new LiveViewServlet(cameraService)), "/stream.mjpeg");
+			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
+			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
+			context.addServlet(new ServletHolder(new CameraControlServlet(cameraService, favouredCamConfSettings, this, logger)), "/*");
 
 			server.setHandler(context);
 		} catch (Exception e) {
@@ -167,11 +164,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	}
 
 	public void reReadTemplates() {
-		try {
-			this.templateEngine = makeTemplateEngine();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		// TODO: Implement
 	}
 
 	protected Logger makeLogger(final LogLevel logLevel) {
@@ -182,17 +175,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		return this.logger;
 	}
 
-	protected TemplateEngine makeTemplateEngine() throws IOException {
-		final Map<String, String> templatesRegistrations = new HashMap<String, String>();
-		{
-			final Properties templatesListProps = new Properties();
-			templatesListProps.load(GPhoto2Server.class.getResourceAsStream(TemplateEngine.DEFAULT_TEMPLATES_CLASSPATH_PREFIX + "templates_list.properties"));
-			for (Object templateNameObj : templatesListProps.keySet()) {
-				String key = templateNameObj.toString();
-				templatesRegistrations.put(key, templatesListProps.getProperty(key));
-			}
-		}
-		return new TemplateEngine(templatesRegistrations);
+	protected TemplateEngine<Context> makeTemplateEngine() throws IOException {
+		return new HandlebarsTemplateEngineImpl();
 	}
 
 	public static void waitWhileLiveViewInProgress(int waitTime) {
@@ -222,7 +206,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 		return this;
 	}
 
-	public TemplateEngine provide() {
+	public TemplateEngine<Context> provide() {
 		return templateEngine;
 	}
 
