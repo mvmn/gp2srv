@@ -1,12 +1,10 @@
 package x.mvmn.gp2srv.web.servlets;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,14 +16,16 @@ import org.apache.velocity.context.Context;
 import com.google.gson.Gson;
 
 import x.mvmn.gp2srv.GPhoto2Server;
-import x.mvmn.gp2srv.web.CameraService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
+import x.mvmn.gphoto2.jna.Gphoto2Library.CameraEventType;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean.CameraConfigEntryType;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
-import x.mvmn.jlibgphoto2.exception.GP2Exception;
+import x.mvmn.jlibgphoto2.GP2Camera;
+import x.mvmn.jlibgphoto2.GP2CameraFilesHelper;
+import x.mvmn.jlibgphoto2.GP2ConfigHelper;
+import x.mvmn.jlibgphoto2.exception.GPhotoException;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
 
@@ -33,17 +33,18 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 	private static final long serialVersionUID = 7389681375772493366L;
 
+	public static final String THUMB_FILENAME = "thumb.jpg";
+
 	protected static final Gson GSON = new Gson();
 
-	protected final CameraService camera;
+	protected final GP2Camera camera;
 	protected final Properties favouredCamConfSettings;
 	protected final File imagesFolder;
 
-	public CameraControlServlet(final CameraService cameraService, final Properties favouredCamConfSettings,
-			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final File imagesFolder,
-			final Logger logger) {
+	public CameraControlServlet(final GP2Camera camera, final Properties favouredCamConfSettings, final VelocityContextService velocityContextService,
+			final Provider<TemplateEngine> templateEngineProvider, final File imagesFolder, final Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
-		this.camera = cameraService;
+		this.camera = camera;
 		this.favouredCamConfSettings = favouredCamConfSettings;
 		this.imagesFolder = imagesFolder;
 	}
@@ -88,7 +89,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					break;
 				}
 				if (updatedConfigEntry != null) {
-					camera.setConfig(updatedConfigEntry);
+					GP2ConfigHelper.setConfig(camera, updatedConfigEntry);
 					getConfigAsMap(false);
 					if (!skipRedirect) {
 						if (page != null && "preview".equals(page)) {
@@ -102,7 +103,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
 
-				byte[] fileContents = camera.fileGetContents(filePath, fileName);
+				byte[] fileContents = GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName);
 
 				response.setContentType("image/jpeg");
 				response.getOutputStream().write(fileContents);
@@ -111,12 +112,12 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
 
-				camera.fileDelete(filePath, fileName);
+				GP2CameraFilesHelper.deleteCameraFile(camera, filePath, fileName);
 
 				redirectLocalSafely(request, response, "/browse");
 			} else if ("/capture".equals(path)) {
 				camera.capture();
-				camera.waitForSpecificEvent(1000, GP2CameraEventType.CAPTURE_COMPLETE);
+				camera.waitForSpecificEvent(1000, CameraEventType.GP_EVENT_CAPTURE_COMPLETE);
 				if (!(request.getParameter("captureOnly") != null && Boolean.parseBoolean(request.getParameter("captureOnly")))) {
 					getConfigAsMap(false);
 					redirectLocalSafely(request, response, "/preview");
@@ -159,17 +160,8 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				velocityContext.put("cameraConfig", cameraConfig);
 				serveTempalteUTF8Safely("camera/allsettings.vm", velocityContext, response, logger);
 			} else if (requestPath.equals("/browse")) {
-				String path = request.getParameter("path");
-				if (path == null || path.trim().isEmpty()) {
-					path = "/";
-				}
-				velocityContext.put("currentBrowsePath", path);
-				final List<CameraFileSystemEntryBean> fileList = camera.filesList(path, true, false, false);
-				Collections.sort(fileList);
+				final List<CameraFileSystemEntryBean> fileList = GP2CameraFilesHelper.list(camera, "/", false, true);
 				velocityContext.put("filesList", fileList);
-				final List<CameraFileSystemEntryBean> folderList = camera.filesList("/", false, true, true);
-				Collections.sort(folderList);
-				velocityContext.put("folderList", folderList);
 				serveTempalteUTF8Safely("camera/browse.vm", velocityContext, response, logger);
 			} else if (requestPath.equals("/preview")) {
 				getConfigAsMap(true);
@@ -177,7 +169,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			} else {
 				returnNotFound(request, response);
 			}
-		} catch (final GP2Exception e) {
+		} catch (final GPhotoException e) {
 			serveGenericErrorPage(request, response, e.getCode(), e.getMessage());
 		} catch (final Exception e) {
 			logger.error("Error processing GET to " + requestPath, e);
@@ -195,7 +187,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			try {
 				GPhoto2Server.liveViewEnabled.set(false);
 				GPhoto2Server.waitWhileLiveViewInProgress(50);
-				configAsMap = new TreeMap<>(camera.getConfig().stream().collect(Collectors.toMap(CameraConfigEntryBean::getPath, Function.identity())));
+				configAsMap = GP2ConfigHelper.getConfig(camera).stream().collect(Collectors.toMap(CameraConfigEntryBean::getPath, Function.identity()));
 				velocityContextService.getGlobalContext().put("lastReadCameraConfig", configAsMap);
 			} finally {
 				GPhoto2Server.liveViewEnabled.set(true);

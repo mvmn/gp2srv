@@ -2,13 +2,13 @@
 #embedSettingChangeScriptAndForm("preview")
 #pageHead("Preview")
 
-<div class="buttonPanel">
+<div>
 	<form class="inlineBlock" id="refreshPreview" method="POST" action="$!request.contextPath/capture">
 		<input type="submit" value="Shoot" />
 	</form>			
 </div>
 <div>
-	<div class="buttonPanel">Live view</div>
+	<div>Live view:</div>
 	<div>
 		#set($liveViewUrl = "/stream.mjpeg")
 		<a href="$liveViewUrl" target="_blank"><img id="liveView" class="fullWidth" src="$liveViewUrl" /></a>
@@ -19,13 +19,10 @@
 	#set($keySetSorted = [])
 	#set($suppressOutput = $keySetSorted.addAll($favouredCamConfSettings.keySet()))
 	#set($suppressOutput = $keySetSorted.class.forName("java.util.Collections").sort($keySetSorted))
-	#set($idx = 0)
 	#foreach($settingKey in $keySetSorted)
 		#set($settingValue = "")
 		#set($settingValue = $lastReadCameraConfig.get($settingKey))
 		#if($settingValue != "")
-			#set($idx = $idx + 1)
-			#set($odd = $idx % 2)	
 			#showSettingSelector($lastReadCameraConfig $settingKey false $favouredCamConfSettings.keySet())
 		#end
 	#end

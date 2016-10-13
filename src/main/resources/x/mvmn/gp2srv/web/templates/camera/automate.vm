@@ -267,14 +267,14 @@
 <div id="stepsContainer">
 </div>
 <hr/>
-<div class="fullWidth buttonPanel" id="btnsStopped">
+<div class="fullWidth" id="btnsStopped">
 	<div id="btnAddStep">Add step</div>
 	<hr/>
 	<input type="button" id="btnRun" value="Run" />
 	<input type="button" id="btnRunEvery" value="Run every milliseconds..." />
 	<input type="text" value="5000" size="8" id="runEveryInput" />
 </div>
-<div class="fullWidth buttonPanel" id="btnsRunning" style="display: none">
+<div class="fullWidth" id="btnsRunning" style="display: none">
 	<div>Loop: <input type="text" id="loopCounterView" value="0" readonly="readonly" size="10" /></div>
 	<hr/>
 	<input type="button" id="btnStop" value="Stop" />	

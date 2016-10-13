@@ -18,9 +18,6 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import x.mvmn.gp2srv.mock.service.impl.MockCameraServiceImpl;
-import x.mvmn.gp2srv.web.CameraService;
-import x.mvmn.gp2srv.web.service.impl.CameraServiceImpl;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
@@ -84,7 +81,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials) {
 		this.logger = makeLogger(logLevel);
 
-		this.camera = mockMode ? null : new GP2Camera();
+		this.camera = new GP2Camera();
 
 		logger.info("Initializing...");
 
@@ -148,16 +145,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			// });
 			// }
 			// }), "/ws/*");
-
-			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(camera);
-
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
-			context.addServlet(
-					new ServletHolder(new CameraControlServlet(cameraService, favouredCamConfSettings, velocityContextService, this, imagesFolder, logger)),
+			context.addServlet(new ServletHolder(new CameraControlServlet(camera, favouredCamConfSettings, velocityContextService, this, imagesFolder, logger)),
 					"/");
 			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
-			context.addServlet(new ServletHolder(new LiveViewServlet(cameraService)), "/stream.mjpeg");
+			context.addServlet(new ServletHolder(new LiveViewServlet(camera)), "/stream.mjpeg");
 
 			server.setHandler(context);
 		} catch (Exception e) {

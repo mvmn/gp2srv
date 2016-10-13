@@ -33,17 +33,6 @@ body {
 	width: 100%;
 }
 
-.settingDisplayContainer {
-	padding: 10px;
-}
-
-.settingDisplayContainer.odd {
-	background-color: #F0FFF0;
-}
-.settingDisplayContainer.even {
-	background-color: #F0F0FF;
-}
-
 .tableCell {
 	display: table-cell;
 }
@@ -88,7 +77,7 @@ body {
 	border: solid 1px black;
 	background-color: white;
 	color: black;
-	padding: 0pt;
+	padding: 10pt;
 	font-size: 14pt;	
 }
 
@@ -110,12 +99,9 @@ body {
 	font-weight: bold;
 }
 
-.buttonPanel, .stepContainer, .browseListItem {
-	padding: 2px 10px 2px 10px;
-}
-.browseListItem.odd {
+.browseList.odd {
 	background-color: #F0F0FF;
 }
-.browseListItem.even {
+.browseList.even {
 	background-color: #E0E0FF;
 }

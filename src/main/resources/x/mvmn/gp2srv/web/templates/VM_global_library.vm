@@ -1,3 +1,7 @@
+#macro(testGlobalMacro)
+	Hi there from testGlobalMacro. 
+#end
+
 #macro(outputBr $obj)$!obj.toString().replaceAll("[\r\n]","<br/>")#end
 
 #macro(embedSettingChangeScriptAndForm $pageParam)
@@ -38,7 +42,7 @@
 
 #macro(showSettingSelector $cameraConfig $settingKey $showFavToggle $favedSelectors)
 	#set($configEntry = $cameraConfig.get($settingKey))
-	<div class="scroll settingDisplayContainer #if($odd == 1) odd #else even #end">
+	<div class="scroll">
 		<div>
 			<span class="headline">$configEntry.label</span>
 			#if($showFavToggle)

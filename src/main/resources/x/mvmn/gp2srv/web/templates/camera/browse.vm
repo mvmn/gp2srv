@@ -21,23 +21,18 @@
 		}
 	}
 </script>
-<div class="buttonPanel">
-	<select onchange="javascript:window.location.href='browse?path='+encodeURIComponent(this.value)">
-		#foreach($folder in $folderList)
-			#set($fullPath = "$!{folder.path}$!{folder.name}")
-			<option value="$fullPath" #if($currentBrowsePath == $fullPath) selected="selected" #end >${fullPath}</option>
-		#end
-	</select>
-</div>
 #if($filesList.size() > 0)
 	#foreach($file in $filesList)
-		#set($odd = $foreach.index % 2)		
-		<div class="fullWidth scroll browseListItem #if($odd == 1) odd #else even #end">
-			<a href="javascript:dldpreview('$!file.name', '$!file.path')"><span>$!{file.name}</span></a> 
-			<span class="smaller">
-				<a href="javascript:deletefile('$!file.name', '$!file.path')">delete</a>
-			</span>
-		</div>
+		<div>
+			#set($odd = $foreach.index % 2)							
+			<div class="fullWidth browseList #if($odd == 1) odd #else even #end">
+				<span>$!file.path</span>
+				<a href="javascript:dldpreview('$!file.name', '$!file.path')"><span>$!file.name</span></a> 
+				<span class="smaller">
+					<a href="javascript:deletefile('$!file.name', '$!file.path')">delete</a>
+				</span>
+			</div>
+		</div>				
 	#end
 #end
 

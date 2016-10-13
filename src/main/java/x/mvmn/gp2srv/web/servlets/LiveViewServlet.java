@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import x.mvmn.gp2srv.GPhoto2Server;
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.jlibgphoto2.GP2Camera;
 
 public final class LiveViewServlet extends HttpServlet {
 	private static final byte[] PREFIX;
@@ -30,10 +30,10 @@ public final class LiveViewServlet extends HttpServlet {
 		SEPARATOR = separator;
 	}
 	private static final long serialVersionUID = -6610127379314108183L;
-	private final CameraService cameraService;
+	private final GP2Camera camera;
 
-	public LiveViewServlet(final CameraService cameraService) {
-		this.cameraService = cameraService;
+	public LiveViewServlet(final GP2Camera camera) {
+		this.camera = camera;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public final class LiveViewServlet extends HttpServlet {
 		while (GPhoto2Server.liveViewEnabled.get()) {
 			try {
 				GPhoto2Server.liveViewInProgress.set(true);
-				jpeg = cameraService.capturePreview();
+				jpeg = camera.capturePreview();
 				outputStream.write(PREFIX);
 				outputStream.write(String.valueOf(jpeg.length).getBytes("UTF-8"));
 				outputStream.write(SEPARATOR);
@@ -62,7 +62,6 @@ public final class LiveViewServlet extends HttpServlet {
 			} catch (final EOFException e) {
 				// Ignore - this just means user closed preview
 			} catch (final Exception e) {
-				e.printStackTrace();
 				System.err.println("Live view stopped: " + e.getClass().getName() + " " + e.getMessage());
 				break;
 			} finally {
