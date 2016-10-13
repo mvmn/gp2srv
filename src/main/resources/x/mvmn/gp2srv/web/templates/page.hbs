@@ -2,8 +2,12 @@
 	<head>
 		<meta name="viewport" content="width=400" />
 		<title>GPhoto2Server</title>
-		<link rel="stylesheet" type="text/css" href="/static/default.css" />
-		<script src="/static/jquery-3.1.0.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="{{request.contextPath}}/static/default.css" />
+		<script src="{{request.contextPath}}/static/js/jquery/dist/jquery.min.js"></script>
+		<script src="{{request.contextPath}}/static/js/ember/ember.min.js"></script>
+		<script>
+			window.App = Ember.Application.create();
+		</script>
 	</head>
 	<body>
 		{{> @partial-block }}

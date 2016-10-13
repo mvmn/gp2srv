@@ -1,5 +1,3 @@
-#macro(outputBr $obj)$!obj.toString().replaceAll("[\r\n]","<br/>")#end
-
 #macro(embedSettingChangeScriptAndForm $pageParam)
 <script>
 	function onsettingchange(type, key, value, returnTo) {
@@ -21,19 +19,6 @@
 	<input type="hidden" name="value" />
 	<input type="hidden" name="page" />
 </form>
-#end
-
-#macro(pageHead $pageName)
-<div class="fullWidth">
-	<div class="pageHead">$!pageName</div>
-	<div class="pageSubHead">
-		#parse("camera/navigation.vm")
-	</div>
-	<div class="pageContent scroll">
-#end
-#macro(pageFoot)
-	</div>
-</div>
 #end
 
 #macro(showSettingSelector $cameraConfig $settingKey $showFavToggle $favedSelectors)
