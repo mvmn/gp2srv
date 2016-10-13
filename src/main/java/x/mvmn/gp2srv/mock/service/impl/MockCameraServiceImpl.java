@@ -2,12 +2,11 @@ package x.mvmn.gp2srv.mock.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 
@@ -26,17 +25,18 @@ public class MockCameraServiceImpl implements CameraService {
 
 	protected volatile boolean closed = false;
 	protected final Map<String, CameraConfigEntryBean> initialConfig;
-	protected final Map<String, CameraConfigEntryBean> config = new ConcurrentHashMap<>();
-	protected final Map<String, CameraFileSystemEntryBean> fsEntries = new ConcurrentHashMap<>();
+	protected final Map<String, CameraConfigEntryBean> config = new ConcurrentHashMap<String, CameraConfigEntryBean>();
+	protected final Map<String, CameraFileSystemEntryBean> fsEntries = new ConcurrentHashMap<String, CameraFileSystemEntryBean>();
 	protected final AtomicInteger counter = new AtomicInteger(0);
 	protected final byte[] mockPicture;
 
 	public MockCameraServiceImpl() {
 		try {
-			initialConfig = Collections
-					.unmodifiableMap(new Gson().fromJson(IOUtils.toString(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/mock/config.json")),
-							new TypeToken<Map<String, CameraConfigEntryBean>>() {
-							}.getType()));
+			final Map<String, CameraConfigEntryBean> mockConfig = new Gson().fromJson(
+					IOUtils.toString(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/mock/config.json")),
+					new TypeToken<Map<String, CameraConfigEntryBean>>() {
+					}.getType());
+			initialConfig = Collections.unmodifiableMap(mockConfig);
 			mockPicture = IOUtils.toByteArray(this.getClass().getResourceAsStream("/x/mvmn/gp2srv/mock/picture.jpg"));
 			reset();
 		} catch (Exception e) {
@@ -59,25 +59,21 @@ public class MockCameraServiceImpl implements CameraService {
 		counter.set(0);
 	}
 
-	@Override
 	public void close() {
 		checkClosed();
 		this.closed = true;
 	}
 
-	@Override
 	public byte[] capturePreview() {
 		checkClosed();
 		return mockPicture;
 	}
 
-	@Override
 	public byte[] fileGetContents(String filePath, String fileName) {
 		checkFileExists(filePath, fileName);
 		return capturePreview();
 	}
 
-	@Override
 	public CameraFileSystemEntryBean capture() {
 		checkClosed();
 		CameraFileSystemEntryBean newCapture = new CameraFileSystemEntryBean(String.format("photo%08d", counter.incrementAndGet()), "/photos/", false);
@@ -85,7 +81,6 @@ public class MockCameraServiceImpl implements CameraService {
 		return null;
 	}
 
-	@Override
 	public CameraFileSystemEntryBean capture(GP2CameraCaptureType captureType) {
 		if (!captureType.equals(GP2CameraCaptureType.IMAGE)) {
 			throw new UnsupportedOperationException();
@@ -93,19 +88,16 @@ public class MockCameraServiceImpl implements CameraService {
 		return capture();
 	}
 
-	@Override
 	public String getSummary() {
 		checkClosed();
 		return "Mock";
 	}
 
-	@Override
 	public GP2CameraEventType waitForSpecificEvent(int timeout, GP2CameraEventType expectedEventType) {
 		checkClosed();
 		return null;
 	}
 
-	@Override
 	public GP2CameraEventType waitForEvent(int timeout) {
 		checkClosed();
 		return null;
@@ -119,7 +111,6 @@ public class MockCameraServiceImpl implements CameraService {
 		return fsEntry;
 	}
 
-	@Override
 	public CameraService fileDelete(String filePath, String fileName) {
 		checkClosed();
 		final CameraFileSystemEntryBean fsEntry = checkFileExists(filePath, fileName);
@@ -127,31 +118,31 @@ public class MockCameraServiceImpl implements CameraService {
 		return this;
 	}
 
-	@Override
 	public List<CameraFileSystemEntryBean> filesList(String path, boolean includeFiles, boolean includeFolders, boolean recursive) {
 		checkClosed();
-		return fsEntries.values().stream().filter(new Predicate<CameraFileSystemEntryBean>() {
-			@Override
-			public boolean test(CameraFileSystemEntryBean t) {
-				return (t.isFile() && includeFiles) || (t.isFolder() && includeFolders);
+
+		final List<CameraFileSystemEntryBean> result = new ArrayList<CameraFileSystemEntryBean>(fsEntries.values());
+		for (Iterator<CameraFileSystemEntryBean> iterator = result.iterator(); iterator.hasNext();) {
+			CameraFileSystemEntryBean t = iterator.next();
+			if (!((t.isFile() && includeFiles) || (t.isFolder() && includeFolders))) {
+				iterator.remove();
 			}
-		}).collect(Collectors.toList());
+		}
+
+		return result;
 	}
 
-	@Override
 	public List<CameraConfigEntryBean> getConfig() {
 		checkClosed();
-		return new ArrayList<>(config.values());
+		return new ArrayList<CameraConfigEntryBean>(config.values());
 	}
 
-	@Override
 	public CameraService setConfig(CameraConfigEntryBean configEntry) {
 		checkClosed();
 		config.put(configEntry.getPath(), configEntry);
 		return this;
 	}
 
-	@Override
 	public CameraService releaseCamera() {
 		checkClosed();
 		return this;

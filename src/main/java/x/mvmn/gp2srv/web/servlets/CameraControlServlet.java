@@ -22,10 +22,7 @@ import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean.CameraConfigEntryType;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
-import x.mvmn.jlibgphoto2.GP2CameraFilesHelper;
-import x.mvmn.jlibgphoto2.GP2ConfigHelper;
 import x.mvmn.jlibgphoto2.exception.GP2Exception;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
@@ -196,7 +193,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			try {
 				GPhoto2Server.liveViewEnabled.set(false);
 				GPhoto2Server.waitWhileLiveViewInProgress(50);
-				final List<CameraConfigEntryBean> config = GP2ConfigHelper.getConfig(camera);
+				final List<CameraConfigEntryBean> config = camera.getConfig();
 				final Map<String, CameraConfigEntryBean> configMap = new TreeMap<String, CameraConfigEntryBean>();
 				for (CameraConfigEntryBean configEntry : config) {
 					configMap.put(configEntry.getPath(), configEntry);
