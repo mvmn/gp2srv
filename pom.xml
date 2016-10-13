@@ -72,6 +72,14 @@
 	</dependencies>
 
 	<build>
+		<!-- pluginManagement> <plugins> <plugin> <groupId>org.eclipse.m2e</groupId> 
+			<artifactId>lifecycle-mapping</artifactId> <version>1.0.0</version> <configuration> 
+			<lifecycleMappingMetadata> <pluginExecutions> <pluginExecution> <pluginExecutionFilter> 
+			<groupid>org.codehaus.mojo</groupid> <artifactid>exec-maven-plugin</artifactid> 
+			<versionrange>[1.2.1,)</versionrange> <goals> <goal>exec</goal> </goals> 
+			</pluginExecutionFilter> <action> <ignore></ignore> </action> </pluginExecution> 
+			</pluginExecutions> </lifecycleMappingMetadata> </configuration> </plugin> 
+			</plugins> </pluginManagement -->
 		<plugins>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -94,6 +102,19 @@
 					<execution>
 						<goals>
 							<goal>java</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>exec-bower-install</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<executable>bower</executable>
+							<arguments>
+								<argument>install</argument>
+							</arguments>
+						</configuration>
+						<goals>
+							<goal>exec</goal>
 						</goals>
 					</execution>
 				</executions>

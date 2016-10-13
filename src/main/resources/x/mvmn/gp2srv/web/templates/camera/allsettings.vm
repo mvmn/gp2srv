@@ -14,7 +14,7 @@
 #pageHead("Camera Control")
 		<div>
 			#foreach($settingEntry in $cameraConfig.entrySet())				
-				#if(!$foreach.first)<hr/>#end
+				#set($odd = $foreach.index % 2)
 				#showSettingSelector($cameraConfig $settingEntry.key true $favouredCamConfSettings.keySet())
 			#end
 		</div>

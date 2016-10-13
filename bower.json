@@ -1,0 +1,23 @@
+{
+  "name": "gphoto2server",
+  "homepage": "https://github.com/mvmn/gp2srv",
+  "authors": [
+    "Mykola Makhin <mvmn.inbox@gmail.com>"
+  ],
+  "description": "Java-based web frontend for libgphoto2 controlled camera",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/main/resources/x/mvmn/gp2srv/web/static/js",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ember": "^2.8.1",
+    "jquery": "^3.1.1"
+  }
+}

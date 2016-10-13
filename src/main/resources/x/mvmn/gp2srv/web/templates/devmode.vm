@@ -6,20 +6,11 @@
 	</head>
 	<body class="adminPage">
 		<div class="fullWidth">
-			#if($commandSuccess)
-				<div class="pageHead">Success</div>
-				<div class="pageSubHead">
-					$!toolDateHelper.getDateSortFriendlyStr() - <b>$!{message}</b>
-					<div class="actionLink"><a href="">Repeat</a></div>
-					<div class="actionLink backLink"><a href="$!{request.contextPath}/devmode">Go back</a></div>
-				</div>
-			#else
-				<div class="pageHead">Admin</div>
-				<div class="pageSubHead">
-					Choose action
-					<div class="actionLink"><a href="$!{request.contextPath}/devmode/rst">Re-read templates</a></div>
-				</div>
-			#end
+			<div class="pageHead">Admin</div>
+			<div class="pageSubHead">
+				Choose action
+				<div class="actionLink"><a href="$!{request.contextPath}/devmode/rst">Re-read templates</a></div>
+			</div>
 		</div>
 	</body>
 </html>

@@ -25,8 +25,6 @@ public class DevModeServlet extends AbstractErrorHandlingServlet {
 		final Context context = createContext(request, response);
 		if ("/rst".equals(request.getPathInfo())) {
 			gPhoto2Server.reReadTemplates();
-			context.put("commandSuccess", true);
-			context.put("message", "Templates reloaded");
 			try {
 				response.sendRedirect(request.getContextPath() + "/devmode");
 			} catch (IOException e) {
