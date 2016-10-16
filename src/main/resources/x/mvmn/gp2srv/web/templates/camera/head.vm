@@ -4,5 +4,6 @@
 		<title>GPhoto2Server</title>
 		<link rel="stylesheet" type="text/css" href="/static/default.css" />
 		<script src="/static/jquery-3.1.0.min.js"></script>
+		<script src="/static/ractive.min.js"></script>
 	</head>
 	<body>

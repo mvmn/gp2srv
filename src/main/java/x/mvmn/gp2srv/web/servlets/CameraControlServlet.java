@@ -55,12 +55,13 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			if ("/favsetting".equals(path)) {
 				final String key = request.getParameter("key");
 				final String value = request.getParameter("value");
-				if (Boolean.valueOf(value.toLowerCase())) {
+				final Boolean valueToSet = Boolean.valueOf(value.toLowerCase());
+				if (valueToSet) {
 					favouredCamConfSettings.setProperty(key, Boolean.TRUE.toString());
 				} else {
 					favouredCamConfSettings.remove(key);
 				}
-				redirectLocalSafely(request, response, "/allsettings");
+				serveStrContentUTF8("application/json", GSON.toJson(valueToSet), response);
 			} else if ("/allsettingset".equals(path)) {
 				final String type = request.getParameter("type");
 				final String key = request.getParameter("key");
@@ -119,6 +120,8 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					getConfigAsMap(false);
 					redirectLocalSafely(request, response, "/preview");
 				}
+			} else {
+				returnNotFound(request, response);
 			}
 		} catch (final Exception e) {
 			logger.error("Error processing POST to " + path, e);
@@ -150,8 +153,11 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			} else if (requestPath.equals("/automate")) {
 				serveTempalteUTF8Safely("camera/automate.vm", velocityContext, response, logger);
 			} else if (requestPath.equals("/cameraConfig.json")) {
-				final Map<String, CameraConfigEntryBean> cameraConfig = getConfigAsMap(true);
+				final boolean reRead = Boolean.parseBoolean(request.getParameter("reRead"));
+				final Map<String, CameraConfigEntryBean> cameraConfig = getConfigAsMap(!reRead);
 				serveStrContentUTF8("application/json", GSON.toJson(cameraConfig), response);
+			} else if (requestPath.equals("/favedConfigs.json")) {
+				serveStrContentUTF8("application/json", GSON.toJson(favouredCamConfSettings), response);
 			} else if (requestPath.equals("/allsettings")) {
 				final Map<String, CameraConfigEntryBean> cameraConfig = getConfigAsMap(true);
 				velocityContext.put("cameraConfig", cameraConfig);

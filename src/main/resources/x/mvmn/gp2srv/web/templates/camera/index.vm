@@ -1,8 +1,164 @@
 #parse("camera/head.vm")
-#pageHead("GPhoto2Server")
-<div>
-	<div>Choose an option:</div>
-	#parse("camera/navigation.vm")
+<script>
+	function nav(elem) {
+		$(".sitesection").hide();
+		$("#section_"+elem).show();
+	}
+	
+	function initUi() {
+		var helpers = Ractive.defaults.data;
+		helpers.lowercase = function(str) { return str?str.toLowerCase():str };
+		helpers.uppercase = function(str) { return str?str.toUpperCase():str };
+	
+		$(".sitesection").hide();
+		getJson("$!{request.contextPath}/cameraConfig.json?reRead=true", function(config) {
+			console.log(config);
+			getJson("$!{request.contextPath}/favedConfigs.json?", function(favedConfigs) {
+				console.log(favedConfigs);
+				var section_set = $("#section_set");
+				section_set.html('');
+				var idx = 0;
+				for(var confPath in config) {
+					idx++;
+					var confEntry = config[confPath];
+					confEntry.faved = favedConfigs[confEntry.path];
+					var oddEven = (idx % 2 == 0)? "even" : "odd";
+					var containerId = 'section_set_configelement_' + confEntry.id;
+					var container = $('<div id="' + containerId + '" class="scroll settingDisplayContainer ' + oddEven + '"></div>');
+					section_set.append(container);
+				    var ractive = new Ractive({
+						el: '#' + container.attr('id'),
+						template: '#tplCameraConfigSetting',
+						data: {confEntry: confEntry, showFavToggle: true, favInProgress: false, favError: false}
+					});
+					ractive.on({
+						handleChange: function(event) {
+							console.log("handleChange");
+							console.log(event);
+						},
+						handleFav: function(event) {
+							var ractive = this;
+							var favPath = this.get("confEntry").path;
+							var favVal = event.node.checked ? "true":"false";
+							var url = "$!{request.contextPath}/favsetting?key=" + encodeURIComponent(favPath)
+									+ "&value=" + encodeURIComponent(favVal);
+							ractive.set("favError", false);
+							ractive.set("favInProgress", true);
+							$.ajax({
+								method: "POST",
+								cache: false,
+								url: url
+							}).fail(function(jqXHR, textStatus) {
+								ractive.set("favInProgress", false);
+								ractive.set("favError", true);
+								console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
+							}).done(function(data) {
+								ractive.set("favInProgress", false);
+								var confEntry = ractive.get("confEntry");
+								confEntry.faved = (data===true);
+								ractive.set("confEntry", confEntry);
+							});
+						}
+					});
+				}
+			}, function() { alert('Error loading faved config elements.') });
+		}, function() { alert('Error loading config.') });
+	}
+	
+	function getJson(url, successCallback, errorCallback) {
+		$.ajax({
+			cache: false,
+			url: url
+		}).done(function(data) {
+			successCallback(data);
+		}).fail(function(jqXHR, textStatus) {
+			console.error("Error obtaining JSON from "+url+". " + textStatus);
+			if(errorCallback) {
+				errorCallback(textStatus);
+			}
+		});	
+	}	
+	
+	function saveFavedCamConf(key, value) {
+		// TODO: AJAX
+	}
+	
+	$(document).ready(initUi);
+</script>
+#set( $HASH = '#' )
+<script type="text/ractive" id="tplCameraConfigSetting">
+	<div>
+		<span class="headline">{{confEntry.label}}</span>
+		{{${HASH}if showFavToggle}}
+			<span class="favToggleContainer">
+				{{${HASH}if !favInProgress}}
+					<input type="checkbox" {{${HASH}if confEntry.faved}} checked="checked" {{/if}} on-change="handleFav" />
+				{{/if}}
+				{{${HASH}if favInProgress}}
+					<img class="favToggleLoadingIndicator" src="$!{request.contextPath}/static/ajax-loader.gif" />
+				{{/if}}
+				{{${HASH}favError}}
+					<img class="favToggleWarningIcon" src="$!{request.contextPath}/static/warning.png" />
+				{{/favError}}
+			</span>
+		{{/if}}
+	</div>
+	<div>
+		<span class="smallest">
+			[<span>{{confEntry.type}}</span>: <span>{{confEntry.path}}</span>]
+		</span>
+	</div>
+	<div class="fullWidth">
+		<div class="settingDisplayValueContainer">{{confEntry.strValue}}{{confEntry.intValue}}{{confEntry.floatValue}}</div>
+		{{${HASH}if lowercase(confEntry.type) == "range"}}
+			<div class="settingDisplayValueContainer">From {{confEntry.bottom}} to {{confEntry.top}}, step {{confEntry.step}}</div>
+		{{/if}}
+		{{${HASH}if lowercase(confEntry.type) == "radio" || lowercase(confEntry.type) == "menu" }}
+			<select class="fullWidth" on-change="handleChange">
+				{{${HASH}confEntry.choices:idx}}
+					<option value="{{.}}" {{${HASH}if confEntry.strValue == . }} selected="selected" {{/if}}>{{.}}</option>
+				{{/choices}}
+			</select>
+		{{elseif lowercase(confEntry.type) == "toggle" }}
+			<div class="inlineBlock halfWidth"><!--
+				--><input class="fullWidth {{${HASH}if confEntry.intValue == 1}} selectedButton {{/if}}" type="button" value="On" on-click="handleChange" /><!--
+			--></div><!--
+			--><div class="inlineBlock halfWidth"><!--
+				--><input class="fullWidth {{${HASH}if confEntry.intValue === 0}} selectedButton {{/if}}" type="button" value="Off" on-click="handleChange" /><!--
+			--></div>
+		{{elseif lowercase(confEntry.type) == "text" || lowercase(confEntry.type) == "date" || lowercase(confEntry.type) == "range" }}
+			<div class="tableCell">
+				<input type="button" value="Set" on-click="handleChange" />
+			</div>
+			<div class="tableCell fullWidth">
+				<input class="fullWidth" type="text" value="{{confEntry.intValue}}{{confEntry.floatValue}}{{confEntry.strValue}}" />
+			</div>
+		{{/if}}
+	</div>
+</script>
+<div class="fullWidth">
+	<div class="pageHead">GPhoto2Server</div>
+	<div class="pageSubHead">
+		<div class="navigationContainer">
+			#foreach($navopt in ["set", "view", "browse", "script"])
+				#if($foreach.count>1)
+					|
+				#end
+				<span><a href="#$!navopt" onclick="javascript:nav('$!navopt');return false">$!navopt</a></span>
+			#end
+		</div>
+	</div>
+	<div class="sitesection pageContent scroll" id="section_set">
+		set
+	</div>
+	<div class="sitesection pageContent scroll" id="section_view">
+		view
+	</div>
+	<div class="sitesection pageContent scroll" id="section_browse">
+		browse
+	</div>
+	<div class="sitesection pageContent scroll" id="section_script">
+		script
+	</div>
 </div>
-#pageFoot()
 #parse("camera/foot.vm")
