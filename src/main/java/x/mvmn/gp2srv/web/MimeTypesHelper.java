@@ -33,7 +33,7 @@ public class MimeTypesHelper {
 			String extension;
 			int indexOfDot = resourceName.lastIndexOf('.');
 			if (indexOfDot >= 0) {
-				extension = resourceName.substring(indexOfDot).trim();
+				extension = resourceName.substring(indexOfDot + 1).trim();
 			} else {
 				extension = resourceName;
 			}

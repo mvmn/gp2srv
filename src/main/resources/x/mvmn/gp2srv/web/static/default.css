@@ -37,10 +37,10 @@ body {
 	padding: 10px;
 }
 
-.settingDisplayContainer.odd {
+.settingDisplayContainerContainer:nth-child(odd) {
 	background-color: #F0FFF0;
 }
-.settingDisplayContainer.even {
+.settingDisplayContainerContainer:nth-child(even) {
 	background-color: #F0F0FF;
 }
 

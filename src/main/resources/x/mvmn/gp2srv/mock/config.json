@@ -1,755 +1,814 @@
-{
-  "/main/actions/autofocusdrive": {
-    "id": 4,
-    "path": "/main/actions/autofocusdrive",
-    "label": "Drive Canon DSLR Autofocus",
-    "info": "",
-    "type": "TOGGLE",
-    "intValue": 0
-  },
-  "/main/actions/cancelautofocus": {
-    "id": 6,
-    "path": "/main/actions/cancelautofocus",
-    "label": "Cancel Canon DSLR Autofocus",
-    "info": "",
-    "type": "TOGGLE",
-    "intValue": 0
-  },
-  "/main/actions/eosremoterelease": {
-    "id": 10,
-    "path": "/main/actions/eosremoterelease",
-    "label": "Canon EOS Remote Release",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "None",
-    "choices": [
-      "None",
-      "Press Half",
-      "Press Full",
-      "Release Half",
-      "Release Full",
-      "Immediate",
-      "Press 1",
-      "Press 2",
-      "Press 3",
-      "Release 1",
-      "Release 2",
-      "Release 3"
-    ]
-  },
-  "/main/actions/eoszoom": {
-    "id": 7,
-    "path": "/main/actions/eoszoom",
-    "label": "Canon EOS Zoom",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0"
-  },
-  "/main/actions/eoszoomposition": {
-    "id": 8,
-    "path": "/main/actions/eoszoomposition",
-    "label": "Canon EOS Zoom Position",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0,0"
-  },
-  "/main/actions/manualfocusdrive": {
-    "id": 5,
-    "path": "/main/actions/manualfocusdrive",
-    "label": "Drive Canon DSLR Manual focus",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "None",
-    "choices": [
-      "Near 1",
-      "Near 2",
-      "Near 3",
-      "None",
-      "Far 1",
-      "Far 2",
-      "Far 3"
-    ]
-  },
-  "/main/actions/opcode": {
-    "id": 11,
-    "path": "/main/actions/opcode",
-    "label": "PTP Opcode",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0x1001,0xparam1,0xparam2"
-  },
-  "/main/actions/syncdatetime": {
-    "id": 2,
-    "path": "/main/actions/syncdatetime",
-    "label": "Synchronize camera date and time with PC",
-    "info": "",
-    "type": "TOGGLE",
-    "intValue": 0
-  },
-  "/main/actions/uilock": {
-    "id": 3,
-    "path": "/main/actions/uilock",
-    "label": "UI Lock",
-    "info": "",
-    "type": "TOGGLE",
-    "intValue": 2
-  },
-  "/main/actions/viewfinder": {
-    "id": 9,
-    "path": "/main/actions/viewfinder",
-    "label": "Canon EOS Viewfinder",
-    "info": "",
-    "type": "TOGGLE",
-    "intValue": 2
-  },
-  "/main/capturesettings/aeb": {
-    "id": 59,
-    "path": "/main/capturesettings/aeb",
-    "label": "Auto Exposure Bracketing",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "off",
-    "choices": [
-      "off",
-      "+/- 1/3",
-      "+/- 2/3",
-      "+/- 1",
-      "+/- 1 1/3",
-      "+/- 1 2/3",
-      "+/- 2"
-    ]
-  },
-  "/main/capturesettings/aperture": {
-    "id": 55,
-    "path": "/main/capturesettings/aperture",
-    "label": "Aperture",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "4.5",
-    "choices": [
-      "4",
-      "4.5",
-      "5",
-      "5.6",
-      "6.3",
-      "7.1",
-      "8",
-      "9",
-      "10",
-      "11",
-      "13",
-      "14",
-      "16",
-      "18",
-      "20",
-      "22"
-    ]
-  },
-  "/main/capturesettings/autoexposuremode": {
-    "id": 52,
-    "path": "/main/capturesettings/autoexposuremode",
-    "label": "Canon Auto Exposure Mode",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Manual",
-    "choices": [
-      "P",
-      "TV",
-      "AV",
-      "Manual",
-      "Bulb",
-      "A_DEP",
-      "DEP",
-      "Custom",
-      "Lock",
-      "Green",
-      "Night Portrait",
-      "Sports",
-      "Portrait",
-      "Landscape",
-      "Closeup",
-      "Flash Off"
-    ]
-  },
-  "/main/capturesettings/bracketmode": {
-    "id": 58,
-    "path": "/main/capturesettings/bracketmode",
-    "label": "Bracket Mode",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0"
-  },
-  "/main/capturesettings/drivemode": {
-    "id": 53,
-    "path": "/main/capturesettings/drivemode",
-    "label": "Drive Mode",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Continuous",
-    "choices": [
-      "Single",
-      "Continuous",
-      "Timer 10 sec",
-      "Timer 2 sec",
-      "Unknown value 0007"
-    ]
-  },
-  "/main/capturesettings/focusmode": {
-    "id": 51,
-    "path": "/main/capturesettings/focusmode",
-    "label": "Focus Mode",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Manual",
-    "choices": [
-      "One Shot",
-      "AI Focus",
-      "AI Servo",
-      "Manual"
-    ]
-  },
-  "/main/capturesettings/meteringmode": {
-    "id": 57,
-    "path": "/main/capturesettings/meteringmode",
-    "label": "Metering Mode",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Partial",
-    "choices": [
-      "Evaluative",
-      "Partial",
-      "Spot",
-      "Center-weighted average"
-    ]
-  },
-  "/main/capturesettings/picturestyle": {
-    "id": 54,
-    "path": "/main/capturesettings/picturestyle",
-    "label": "Picture Style",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "User defined 1",
-    "choices": [
-      "Standard",
-      "Portrait",
-      "Landscape",
-      "Neutral",
-      "Faithful",
-      "Monochrome",
-      "Auto",
-      "User defined 1",
-      "User defined 2",
-      "User defined 3"
-    ]
-  },
-  "/main/capturesettings/shutterspeed": {
-    "id": 56,
-    "path": "/main/capturesettings/shutterspeed",
-    "label": "Shutter Speed",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "1/4",
-    "choices": [
-      "bulb",
-      "30",
-      "25",
-      "20",
-      "15",
-      "13",
-      "10",
-      "8",
-      "6",
-      "5",
-      "4",
-      "3.2",
-      "2.5",
-      "2",
-      "1.6",
-      "1.3",
-      "1",
-      "0.8",
-      "0.6",
-      "0.5",
-      "0.4",
-      "0.3",
-      "1/4",
-      "1/5",
-      "1/6",
-      "1/8",
-      "1/10",
-      "1/13",
-      "1/15",
-      "1/20",
-      "1/25",
-      "1/30",
-      "1/40",
-      "1/50",
-      "1/60",
-      "1/80",
-      "1/100",
-      "1/125",
-      "1/160",
-      "1/200",
-      "1/250",
-      "1/320",
-      "1/400",
-      "1/500",
-      "1/640",
-      "1/800",
-      "1/1000",
-      "1/1250",
-      "1/1600",
-      "1/2000",
-      "1/2500",
-      "1/3200",
-      "1/4000"
-    ]
-  },
-  "/main/imgsettings/colorspace": {
-    "id": 49,
-    "path": "/main/imgsettings/colorspace",
-    "label": "Color Space",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "sRGB",
-    "choices": [
-      "sRGB",
-      "AdobeRGB"
-    ]
-  },
-  "/main/imgsettings/imageformat": {
-    "id": 41,
-    "path": "/main/imgsettings/imageformat",
-    "label": "Image Format",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "RAW + Large Fine JPEG",
-    "choices": [
-      "Large Fine JPEG",
-      "Large Normal JPEG",
-      "Medium Fine JPEG",
-      "Medium Normal JPEG",
-      "Small Fine JPEG",
-      "Small Normal JPEG",
-      "Smaller JPEG",
-      "Tiny JPEG",
-      "RAW + Large Fine JPEG",
-      "RAW"
-    ]
-  },
-  "/main/imgsettings/imageformatsd": {
-    "id": 42,
-    "path": "/main/imgsettings/imageformatsd",
-    "label": "Image Format SD",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "RAW + Large Fine JPEG",
-    "choices": [
-      "Large Fine JPEG",
-      "Large Normal JPEG",
-      "Medium Fine JPEG",
-      "Medium Normal JPEG",
-      "Small Fine JPEG",
-      "Small Normal JPEG",
-      "Smaller JPEG",
-      "Tiny JPEG",
-      "RAW + Large Fine JPEG",
-      "RAW"
-    ]
-  },
-  "/main/imgsettings/iso": {
-    "id": 43,
-    "path": "/main/imgsettings/iso",
-    "label": "ISO Speed",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "100",
-    "choices": [
-      "Auto",
-      "100",
-      "200",
-      "400",
-      "800",
-      "1600",
-      "3200",
-      "6400",
-      "12800"
-    ]
-  },
-  "/main/imgsettings/whitebalance": {
-    "id": 44,
-    "path": "/main/imgsettings/whitebalance",
-    "label": "WhiteBalance",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Auto",
-    "choices": [
-      "Auto",
-      "Daylight",
-      "Shadow",
-      "Cloudy",
-      "Tungsten",
-      "Fluorescent",
-      "Flash",
-      "Manual"
-    ]
-  },
-  "/main/imgsettings/whitebalanceadjusta": {
-    "id": 45,
-    "path": "/main/imgsettings/whitebalanceadjusta",
-    "label": "WhiteBalance Adjust A",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "0",
-    "choices": [
-      "-9",
-      "-8",
-      "-7",
-      "-6",
-      "-5",
-      "-4",
-      "-3",
-      "-2",
-      "-1",
-      "0",
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9"
-    ]
-  },
-  "/main/imgsettings/whitebalanceadjustb": {
-    "id": 46,
-    "path": "/main/imgsettings/whitebalanceadjustb",
-    "label": "WhiteBalance Adjust B",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "0",
-    "choices": [
-      "-9",
-      "-8",
-      "-7",
-      "-6",
-      "-5",
-      "-4",
-      "-3",
-      "-2",
-      "-1",
-      "0",
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9"
-    ]
-  },
-  "/main/imgsettings/whitebalancexa": {
-    "id": 47,
-    "path": "/main/imgsettings/whitebalancexa",
-    "label": "WhiteBalance X A",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0"
-  },
-  "/main/imgsettings/whitebalancexb": {
-    "id": 48,
-    "path": "/main/imgsettings/whitebalancexb",
-    "label": "WhiteBalance X B",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0"
-  },
-  "/main/other/5001": {
-    "id": 65,
-    "path": "/main/other/5001",
-    "label": "Battery Level",
-    "info": "",
-    "type": "MENU",
-    "strValue": "100",
-    "choices": [
-      "100",
-      "0",
-      "75",
-      "0",
-      "50"
-    ]
-  },
-  "/main/other/d303": {
-    "id": 64,
-    "path": "/main/other/d303",
-    "label": "PTP Property 0xd303",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "1"
-  },
-  "/main/other/d402": {
-    "id": 61,
-    "path": "/main/other/d402",
-    "label": "PTP Property 0xd402",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "Canon EOS 600D"
-  },
-  "/main/other/d406": {
-    "id": 63,
-    "path": "/main/other/d406",
-    "label": "PTP Property 0xd406",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "Unknown Initiator"
-  },
-  "/main/other/d407": {
-    "id": 62,
-    "path": "/main/other/d407",
-    "label": "PTP Property 0xd407",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "1"
-  },
-  "/main/settings/artist": {
-    "id": 19,
-    "path": "/main/settings/artist",
-    "label": "Artist",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "MVMn"
-  },
-  "/main/settings/autopoweroff": {
-    "id": 23,
-    "path": "/main/settings/autopoweroff",
-    "label": "Auto Power Off",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0"
-  },
-  "/main/settings/capture": {
-    "id": 26,
-    "path": "/main/settings/capture",
-    "label": "Capture",
-    "info": "",
-    "type": "TOGGLE",
-    "intValue": 0
-  },
-  "/main/settings/capturetarget": {
-    "id": 25,
-    "path": "/main/settings/capturetarget",
-    "label": "Capture Target",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Memory card",
-    "choices": [
-      "Internal RAM",
-      "Memory card"
-    ]
-  },
-  "/main/settings/copyright": {
-    "id": 20,
-    "path": "/main/settings/copyright",
-    "label": "Copyright",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "MVMn"
-  },
-  "/main/settings/customfuncex": {
-    "id": 21,
-    "path": "/main/settings/customfuncex",
-    "label": "Custom Functions Ex",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "c8,4,1,2c,3,101,1,0,103,1,1,10f,1,0,2,2c,3,201,1,0,202,1,3,203,1,0,3,20,2,50e,1,1,60f,1,0,4,38,4,701,1,0,704,1,0,811,1,0,80f,1,0,"
-  },
-  "/main/settings/datetime": {
-    "id": 13,
-    "path": "/main/settings/datetime",
-    "label": "Camera Date and Time",
-    "info": "",
-    "type": "DATE",
-    "intValue": 1475838663
-  },
-  "/main/settings/depthoffield": {
-    "id": 24,
-    "path": "/main/settings/depthoffield",
-    "label": "Depth of Field",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "0"
-  },
-  "/main/settings/evfmode": {
-    "id": 17,
-    "path": "/main/settings/evfmode",
-    "label": "EVF Mode",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "1",
-    "choices": [
-      "0",
-      "1"
-    ]
-  },
-  "/main/settings/focusinfo": {
-    "id": 22,
-    "path": "/main/settings/focusinfo",
-    "label": "Focus Info",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "eosversion\u003d0,size\u003d5184x3456,size2\u003d5184x3456,points\u003d{{-1477,0,186,139},{-886,418,186,139},{-886,-418,186,139},{0,787,127,196},{0,0,231,238},{0,-787,127,196},{886,418,186,139},{886,-418,186,139},{1477,0,186,139}},select\u003d{},unknown\u003d{ff010000ffff}"
-  },
-  "/main/settings/movierecordtarget": {
-    "id": 16,
-    "path": "/main/settings/movierecordtarget",
-    "label": "Recording Destination",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "None",
-    "choices": [
-      "Card",
-      "None"
-    ]
-  },
-  "/main/settings/output": {
-    "id": 15,
-    "path": "/main/settings/output",
-    "label": "Camera Output",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "Off",
-    "choices": [
-      "TFT",
-      "PC",
-      "TFT + PC",
-      "Setting 4",
-      "Setting 5",
-      "Setting 6",
-      "Setting 7",
-      "Off"
-    ]
-  },
-  "/main/settings/ownername": {
-    "id": 18,
-    "path": "/main/settings/ownername",
-    "label": "Owner Name",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "MVMn"
-  },
-  "/main/settings/reviewtime": {
-    "id": 14,
-    "path": "/main/settings/reviewtime",
-    "label": "Quick Review Time",
-    "info": "",
-    "type": "RADIO",
-    "strValue": "None",
-    "choices": [
-      "None",
-      "2 seconds",
-      "4 seconds",
-      "8 seconds",
-      "Hold"
-    ]
-  },
-  "/main/status/availableshots": {
-    "id": 39,
-    "path": "/main/status/availableshots",
-    "label": "Available Shots",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "936"
-  },
-  "/main/status/batterylevel": {
-    "id": 35,
-    "path": "/main/status/batterylevel",
-    "label": "Battery Level",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "100%"
-  },
-  "/main/status/cameramodel": {
-    "id": 30,
-    "path": "/main/status/cameramodel",
-    "label": "Camera Model",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "Canon EOS 600D"
-  },
-  "/main/status/deviceversion": {
-    "id": 31,
-    "path": "/main/status/deviceversion",
-    "label": "Device Version",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "3-1.0.2"
-  },
-  "/main/status/eosserialnumber": {
-    "id": 37,
-    "path": "/main/status/eosserialnumber",
-    "label": "Serial Number",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "228076076384"
-  },
-  "/main/status/lensname": {
-    "id": 36,
-    "path": "/main/status/lensname",
-    "label": "Lens Name",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "12-24mm"
-  },
-  "/main/status/manufacturer": {
-    "id": 29,
-    "path": "/main/status/manufacturer",
-    "label": "Camera Manufacturer",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "Canon Inc."
-  },
-  "/main/status/model": {
-    "id": 33,
-    "path": "/main/status/model",
-    "label": "Camera Model",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "2147484294"
-  },
-  "/main/status/ptpversion": {
-    "id": 34,
-    "path": "/main/status/ptpversion",
-    "label": "PTP Version",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "256"
-  },
-  "/main/status/serialnumber": {
-    "id": 28,
-    "path": "/main/status/serialnumber",
-    "label": "Serial Number",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "None"
-  },
-  "/main/status/shuttercounter": {
-    "id": 38,
-    "path": "/main/status/shuttercounter",
-    "label": "Shutter Counter",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "23718"
-  },
-  "/main/status/vendorextension": {
-    "id": 32,
-    "path": "/main/status/vendorextension",
-    "label": "Vendor Extension",
-    "info": "",
-    "type": "TEXT",
-    "strValue": "None"
-  }
+{  
+   "/main/actions/autofocusdrive":{  
+      "id":4,
+      "path":"/main/actions/autofocusdrive",
+      "label":"Drive Canon DSLR Autofocus",
+      "info":"",
+      "type":"TOGGLE",
+      "valueType":"INT",
+      "intValue":0
+   },
+   "/main/actions/cancelautofocus":{  
+      "id":6,
+      "path":"/main/actions/cancelautofocus",
+      "label":"Cancel Canon DSLR Autofocus",
+      "info":"",
+      "type":"TOGGLE",
+      "valueType":"INT",
+      "intValue":0
+   },
+   "/main/actions/eosremoterelease":{  
+      "id":10,
+      "path":"/main/actions/eosremoterelease",
+      "label":"Canon EOS Remote Release",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"None",
+      "choices":[  
+         "None",
+         "Press Half",
+         "Press Full",
+         "Release Half",
+         "Release Full",
+         "Immediate",
+         "Press 1",
+         "Press 2",
+         "Press 3",
+         "Release 1",
+         "Release 2",
+         "Release 3"
+      ]
+   },
+   "/main/actions/eoszoom":{  
+      "id":7,
+      "path":"/main/actions/eoszoom",
+      "label":"Canon EOS Zoom",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0"
+   },
+   "/main/actions/eoszoomposition":{  
+      "id":8,
+      "path":"/main/actions/eoszoomposition",
+      "label":"Canon EOS Zoom Position",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0,0"
+   },
+   "/main/actions/manualfocusdrive":{  
+      "id":5,
+      "path":"/main/actions/manualfocusdrive",
+      "label":"Drive Canon DSLR Manual focus",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"None",
+      "choices":[  
+         "Near 1",
+         "Near 2",
+         "Near 3",
+         "None",
+         "Far 1",
+         "Far 2",
+         "Far 3"
+      ]
+   },
+   "/main/actions/opcode":{  
+      "id":11,
+      "path":"/main/actions/opcode",
+      "label":"PTP Opcode",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0x1001,0xparam1,0xparam2"
+   },
+   "/main/actions/syncdatetime":{  
+      "id":2,
+      "path":"/main/actions/syncdatetime",
+      "label":"Synchronize camera date and time with PC",
+      "info":"",
+      "type":"TOGGLE",
+      "valueType":"INT",
+      "intValue":0
+   },
+   "/main/actions/uilock":{  
+      "id":3,
+      "path":"/main/actions/uilock",
+      "label":"UI Lock",
+      "info":"",
+      "type":"TOGGLE",
+      "valueType":"INT",
+      "intValue":2
+   },
+   "/main/actions/viewfinder":{  
+      "id":9,
+      "path":"/main/actions/viewfinder",
+      "label":"Canon EOS Viewfinder",
+      "info":"",
+      "type":"TOGGLE",
+      "valueType":"INT",
+      "intValue":2
+   },
+   "/main/capturesettings/aeb":{  
+      "id":59,
+      "path":"/main/capturesettings/aeb",
+      "label":"Auto Exposure Bracketing",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"off",
+      "choices":[  
+         "off",
+         "+/- 1/3",
+         "+/- 2/3",
+         "+/- 1",
+         "+/- 1 1/3",
+         "+/- 1 2/3",
+         "+/- 2"
+      ]
+   },
+   "/main/capturesettings/aperture":{  
+      "id":55,
+      "path":"/main/capturesettings/aperture",
+      "label":"Aperture",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"4.5",
+      "choices":[  
+         "4",
+         "4.5",
+         "5",
+         "5.6",
+         "6.3",
+         "7.1",
+         "8",
+         "9",
+         "10",
+         "11",
+         "13",
+         "14",
+         "16",
+         "18",
+         "20",
+         "22"
+      ]
+   },
+   "/main/capturesettings/autoexposuremode":{  
+      "id":52,
+      "path":"/main/capturesettings/autoexposuremode",
+      "label":"Canon Auto Exposure Mode",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Manual",
+      "choices":[  
+         "P",
+         "TV",
+         "AV",
+         "Manual",
+         "Bulb",
+         "A_DEP",
+         "DEP",
+         "Custom",
+         "Lock",
+         "Green",
+         "Night Portrait",
+         "Sports",
+         "Portrait",
+         "Landscape",
+         "Closeup",
+         "Flash Off"
+      ]
+   },
+   "/main/capturesettings/bracketmode":{  
+      "id":58,
+      "path":"/main/capturesettings/bracketmode",
+      "label":"Bracket Mode",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0"
+   },
+   "/main/capturesettings/drivemode":{  
+      "id":53,
+      "path":"/main/capturesettings/drivemode",
+      "label":"Drive Mode",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Continuous",
+      "choices":[  
+         "Single",
+         "Continuous",
+         "Timer 10 sec",
+         "Timer 2 sec",
+         "Unknown value 0007"
+      ]
+   },
+   "/main/capturesettings/focusmode":{  
+      "id":51,
+      "path":"/main/capturesettings/focusmode",
+      "label":"Focus Mode",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Manual",
+      "choices":[  
+         "One Shot",
+         "AI Focus",
+         "AI Servo",
+         "Manual"
+      ]
+   },
+   "/main/capturesettings/meteringmode":{  
+      "id":57,
+      "path":"/main/capturesettings/meteringmode",
+      "label":"Metering Mode",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Partial",
+      "choices":[  
+         "Evaluative",
+         "Partial",
+         "Spot",
+         "Center-weighted average"
+      ]
+   },
+   "/main/capturesettings/picturestyle":{  
+      "id":54,
+      "path":"/main/capturesettings/picturestyle",
+      "label":"Picture Style",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"User defined 1",
+      "choices":[  
+         "Standard",
+         "Portrait",
+         "Landscape",
+         "Neutral",
+         "Faithful",
+         "Monochrome",
+         "Auto",
+         "User defined 1",
+         "User defined 2",
+         "User defined 3"
+      ]
+   },
+   "/main/capturesettings/shutterspeed":{  
+      "id":56,
+      "path":"/main/capturesettings/shutterspeed",
+      "label":"Shutter Speed",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"1/4",
+      "choices":[  
+         "bulb",
+         "30",
+         "25",
+         "20",
+         "15",
+         "13",
+         "10",
+         "8",
+         "6",
+         "5",
+         "4",
+         "3.2",
+         "2.5",
+         "2",
+         "1.6",
+         "1.3",
+         "1",
+         "0.8",
+         "0.6",
+         "0.5",
+         "0.4",
+         "0.3",
+         "1/4",
+         "1/5",
+         "1/6",
+         "1/8",
+         "1/10",
+         "1/13",
+         "1/15",
+         "1/20",
+         "1/25",
+         "1/30",
+         "1/40",
+         "1/50",
+         "1/60",
+         "1/80",
+         "1/100",
+         "1/125",
+         "1/160",
+         "1/200",
+         "1/250",
+         "1/320",
+         "1/400",
+         "1/500",
+         "1/640",
+         "1/800",
+         "1/1000",
+         "1/1250",
+         "1/1600",
+         "1/2000",
+         "1/2500",
+         "1/3200",
+         "1/4000"
+      ]
+   },
+   "/main/imgsettings/colorspace":{  
+      "id":49,
+      "path":"/main/imgsettings/colorspace",
+      "label":"Color Space",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"sRGB",
+      "choices":[  
+         "sRGB",
+         "AdobeRGB"
+      ]
+   },
+   "/main/imgsettings/imageformat":{  
+      "id":41,
+      "path":"/main/imgsettings/imageformat",
+      "label":"Image Format",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"RAW + Large Fine JPEG",
+      "choices":[  
+         "Large Fine JPEG",
+         "Large Normal JPEG",
+         "Medium Fine JPEG",
+         "Medium Normal JPEG",
+         "Small Fine JPEG",
+         "Small Normal JPEG",
+         "Smaller JPEG",
+         "Tiny JPEG",
+         "RAW + Large Fine JPEG",
+         "RAW"
+      ]
+   },
+   "/main/imgsettings/imageformatsd":{  
+      "id":42,
+      "path":"/main/imgsettings/imageformatsd",
+      "label":"Image Format SD",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"RAW + Large Fine JPEG",
+      "choices":[  
+         "Large Fine JPEG",
+         "Large Normal JPEG",
+         "Medium Fine JPEG",
+         "Medium Normal JPEG",
+         "Small Fine JPEG",
+         "Small Normal JPEG",
+         "Smaller JPEG",
+         "Tiny JPEG",
+         "RAW + Large Fine JPEG",
+         "RAW"
+      ]
+   },
+   "/main/imgsettings/iso":{  
+      "id":43,
+      "path":"/main/imgsettings/iso",
+      "label":"ISO Speed",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"100",
+      "choices":[  
+         "Auto",
+         "100",
+         "200",
+         "400",
+         "800",
+         "1600",
+         "3200",
+         "6400",
+         "12800"
+      ]
+   },
+   "/main/imgsettings/whitebalance":{  
+      "id":44,
+      "path":"/main/imgsettings/whitebalance",
+      "label":"WhiteBalance",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Auto",
+      "choices":[  
+         "Auto",
+         "Daylight",
+         "Shadow",
+         "Cloudy",
+         "Tungsten",
+         "Fluorescent",
+         "Flash",
+         "Manual"
+      ]
+   },
+   "/main/imgsettings/whitebalanceadjusta":{  
+      "id":45,
+      "path":"/main/imgsettings/whitebalanceadjusta",
+      "label":"WhiteBalance Adjust A",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"0",
+      "choices":[  
+         "-9",
+         "-8",
+         "-7",
+         "-6",
+         "-5",
+         "-4",
+         "-3",
+         "-2",
+         "-1",
+         "0",
+         "1",
+         "2",
+         "3",
+         "4",
+         "5",
+         "6",
+         "7",
+         "8",
+         "9"
+      ]
+   },
+   "/main/imgsettings/whitebalanceadjustb":{  
+      "id":46,
+      "path":"/main/imgsettings/whitebalanceadjustb",
+      "label":"WhiteBalance Adjust B",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"0",
+      "choices":[  
+         "-9",
+         "-8",
+         "-7",
+         "-6",
+         "-5",
+         "-4",
+         "-3",
+         "-2",
+         "-1",
+         "0",
+         "1",
+         "2",
+         "3",
+         "4",
+         "5",
+         "6",
+         "7",
+         "8",
+         "9"
+      ]
+   },
+   "/main/imgsettings/whitebalancexa":{  
+      "id":47,
+      "path":"/main/imgsettings/whitebalancexa",
+      "label":"WhiteBalance X A",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0"
+   },
+   "/main/imgsettings/whitebalancexb":{  
+      "id":48,
+      "path":"/main/imgsettings/whitebalancexb",
+      "label":"WhiteBalance X B",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0"
+   },
+   "/main/other/5001":{  
+      "id":65,
+      "path":"/main/other/5001",
+      "label":"Battery Level",
+      "info":"",
+      "type":"MENU",
+      "valueType":"STRING",
+      "strValue":"100",
+      "choices":[  
+         "100",
+         "0",
+         "75",
+         "0",
+         "50"
+      ]
+   },
+   "/main/other/d303":{  
+      "id":64,
+      "path":"/main/other/d303",
+      "label":"PTP Property 0xd303",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"1"
+   },
+   "/main/other/d402":{  
+      "id":61,
+      "path":"/main/other/d402",
+      "label":"PTP Property 0xd402",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"Canon EOS 600D"
+   },
+   "/main/other/d406":{  
+      "id":63,
+      "path":"/main/other/d406",
+      "label":"PTP Property 0xd406",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"Unknown Initiator"
+   },
+   "/main/other/d407":{  
+      "id":62,
+      "path":"/main/other/d407",
+      "label":"PTP Property 0xd407",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"1"
+   },
+   "/main/settings/artist":{  
+      "id":19,
+      "path":"/main/settings/artist",
+      "label":"Artist",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"MVMn"
+   },
+   "/main/settings/autopoweroff":{  
+      "id":23,
+      "path":"/main/settings/autopoweroff",
+      "label":"Auto Power Off",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0"
+   },
+   "/main/settings/capture":{  
+      "id":26,
+      "path":"/main/settings/capture",
+      "label":"Capture",
+      "info":"",
+      "type":"TOGGLE",
+      "valueType":"INT",
+      "intValue":0
+   },
+   "/main/settings/capturetarget":{  
+      "id":25,
+      "path":"/main/settings/capturetarget",
+      "label":"Capture Target",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Memory card",
+      "choices":[  
+         "Internal RAM",
+         "Memory card"
+      ]
+   },
+   "/main/settings/copyright":{  
+      "id":20,
+      "path":"/main/settings/copyright",
+      "label":"Copyright",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"MVMn"
+   },
+   "/main/settings/customfuncex":{  
+      "id":21,
+      "path":"/main/settings/customfuncex",
+      "label":"Custom Functions Ex",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"c8,4,1,2c,3,101,1,0,103,1,1,10f,1,0,2,2c,3,201,1,0,202,1,3,203,1,0,3,20,2,50e,1,1,60f,1,0,4,38,4,701,1,0,704,1,0,811,1,0,80f,1,0,"
+   },
+   "/main/settings/datetime":{  
+      "id":13,
+      "path":"/main/settings/datetime",
+      "label":"Camera Date and Time",
+      "info":"",
+      "type":"DATE",
+      "valueType":"INT",
+      "intValue":1475838663
+   },
+   "/main/settings/depthoffield":{  
+      "id":24,
+      "path":"/main/settings/depthoffield",
+      "label":"Depth of Field",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"0"
+   },
+   "/main/settings/evfmode":{  
+      "id":17,
+      "path":"/main/settings/evfmode",
+      "label":"EVF Mode",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"1",
+      "choices":[  
+         "0",
+         "1"
+      ]
+   },
+   "/main/settings/focusinfo":{  
+      "id":22,
+      "path":"/main/settings/focusinfo",
+      "label":"Focus Info",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"eosversion\u003d0,size\u003d5184x3456,size2\u003d5184x3456,points\u003d{{-1477,0,186,139},{-886,418,186,139},{-886,-418,186,139},{0,787,127,196},{0,0,231,238},{0,-787,127,196},{886,418,186,139},{886,-418,186,139},{1477,0,186,139}},select\u003d{},unknown\u003d{ff010000ffff}"
+   },
+   "/main/settings/movierecordtarget":{  
+      "id":16,
+      "path":"/main/settings/movierecordtarget",
+      "label":"Recording Destination",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"None",
+      "choices":[  
+         "Card",
+         "None"
+      ]
+   },
+   "/main/settings/output":{  
+      "id":15,
+      "path":"/main/settings/output",
+      "label":"Camera Output",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"Off",
+      "choices":[  
+         "TFT",
+         "PC",
+         "TFT + PC",
+         "Setting 4",
+         "Setting 5",
+         "Setting 6",
+         "Setting 7",
+         "Off"
+      ]
+   },
+   "/main/settings/ownername":{  
+      "id":18,
+      "path":"/main/settings/ownername",
+      "label":"Owner Name",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"MVMn"
+   },
+   "/main/settings/reviewtime":{  
+      "id":14,
+      "path":"/main/settings/reviewtime",
+      "label":"Quick Review Time",
+      "info":"",
+      "type":"RADIO",
+      "valueType":"STRING",
+      "strValue":"None",
+      "choices":[  
+         "None",
+         "2 seconds",
+         "4 seconds",
+         "8 seconds",
+         "Hold"
+      ]
+   },
+   "/main/status/availableshots":{  
+      "id":39,
+      "path":"/main/status/availableshots",
+      "label":"Available Shots",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"936"
+   },
+   "/main/status/batterylevel":{  
+      "id":35,
+      "path":"/main/status/batterylevel",
+      "label":"Battery Level",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"100%"
+   },
+   "/main/status/cameramodel":{  
+      "id":30,
+      "path":"/main/status/cameramodel",
+      "label":"Camera Model",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"Canon EOS 600D"
+   },
+   "/main/status/deviceversion":{  
+      "id":31,
+      "path":"/main/status/deviceversion",
+      "label":"Device Version",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"3-1.0.2"
+   },
+   "/main/status/eosserialnumber":{  
+      "id":37,
+      "path":"/main/status/eosserialnumber",
+      "label":"Serial Number",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"228076076384"
+   },
+   "/main/status/lensname":{  
+      "id":36,
+      "path":"/main/status/lensname",
+      "label":"Lens Name",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"12-24mm"
+   },
+   "/main/status/manufacturer":{  
+      "id":29,
+      "path":"/main/status/manufacturer",
+      "label":"Camera Manufacturer",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"Canon Inc."
+   },
+   "/main/status/model":{  
+      "id":33,
+      "path":"/main/status/model",
+      "label":"Camera Model",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"2147484294"
+   },
+   "/main/status/ptpversion":{  
+      "id":34,
+      "path":"/main/status/ptpversion",
+      "label":"PTP Version",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"256"
+   },
+   "/main/status/serialnumber":{  
+      "id":28,
+      "path":"/main/status/serialnumber",
+      "label":"Serial Number",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"None"
+   },
+   "/main/status/shuttercounter":{  
+      "id":38,
+      "path":"/main/status/shuttercounter",
+      "label":"Shutter Counter",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"23718"
+   },
+   "/main/status/vendorextension":{  
+      "id":32,
+      "path":"/main/status/vendorextension",
+      "label":"Vendor Extension",
+      "info":"",
+      "type":"TEXT",
+      "valueType":"STRING",
+      "strValue":"None"
+   }
 }

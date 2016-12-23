@@ -66,8 +66,6 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				final String type = request.getParameter("type");
 				final String key = request.getParameter("key");
 				final String value = request.getParameter("value");
-				final String page = request.getParameter("page");
-				final boolean skipRedirect = request.getParameter("skipRedirect") != null && Boolean.parseBoolean(request.getParameter("skipRedirect"));
 
 				final Map<String, CameraConfigEntryBean> configAsMap = getConfigAsMap(true);
 				final CameraConfigEntryBean configEntry = configAsMap.get(key);
@@ -89,13 +87,6 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				if (updatedConfigEntry != null) {
 					camera.setConfig(updatedConfigEntry);
 					getConfigAsMap(false);
-					if (!skipRedirect) {
-						if (page != null && "preview".equals(page)) {
-							redirectLocalSafely(request, response, "/preview");
-						} else {
-							redirectLocalSafely(request, response, "/allsettings");
-						}
-					}
 				}
 			} else if ("/camfilepreview".equals(path)) {
 				final String fileName = request.getParameter("name");
@@ -158,10 +149,6 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				serveStrContentUTF8("application/json", GSON.toJson(cameraConfig), response);
 			} else if (requestPath.equals("/favedConfigs.json")) {
 				serveStrContentUTF8("application/json", GSON.toJson(favouredCamConfSettings), response);
-			} else if (requestPath.equals("/allsettings")) {
-				final Map<String, CameraConfigEntryBean> cameraConfig = getConfigAsMap(true);
-				velocityContext.put("cameraConfig", cameraConfig);
-				serveTempalteUTF8Safely("camera/allsettings.vm", velocityContext, response, logger);
 			} else if (requestPath.equals("/browse")) {
 				String path = request.getParameter("path");
 				if (path == null || path.trim().isEmpty()) {

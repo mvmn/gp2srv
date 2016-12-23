@@ -1,8 +1,16 @@
 #parse("camera/head.vm")
 <script>
+	var configRactives = [];
+	
 	function nav(elem) {
 		$(".sitesection").hide();
 		$("#section_"+elem).show();
+	}
+	
+	function setFavOnlyView(viewFavOnly) {
+		for(var i in configRactives) {
+			configRactives[i].set("showOnlyFaved", viewFavOnly);
+		}
 	}
 	
 	function initUi() {
@@ -16,25 +24,63 @@
 			getJson("$!{request.contextPath}/favedConfigs.json?", function(favedConfigs) {
 				console.log(favedConfigs);
 				var section_set = $("#section_set");
-				section_set.html('');
+				section_set.html('<div>Show faved only <input type="checkbox" onchange="setFavOnlyView(this.checked)"></input></div>');
 				var idx = 0;
 				for(var confPath in config) {
 					idx++;
 					var confEntry = config[confPath];
 					confEntry.faved = favedConfigs[confEntry.path];
-					var oddEven = (idx % 2 == 0)? "even" : "odd";
 					var containerId = 'section_set_configelement_' + confEntry.id;
-					var container = $('<div id="' + containerId + '" class="scroll settingDisplayContainer ' + oddEven + '"></div>');
+					var container = $('<div id="' + containerId + '" class="settingDisplayContainerContainer"></div>');
 					section_set.append(container);
 				    var ractive = new Ractive({
 						el: '#' + container.attr('id'),
 						template: '#tplCameraConfigSetting',
 						data: {confEntry: confEntry, showFavToggle: true, favInProgress: false, favError: false}
 					});
+					configRactives.push(ractive);
 					ractive.on({
-						handleChange: function(event) {
-							console.log("handleChange");
-							console.log(event);
+						handleChange: function(event, elem, val) {
+							var ractive = this;
+							var confEntry = this.get("confEntry");
+							if(val === undefined) {
+								if(confEntry.intValue === 0) {
+									val = 0;
+								} else {
+									val = confEntry.intValue || confEntry.strValue || confEntry.floatValue;
+								}
+							}
+							if(confEntry.valueType == "INT") {
+								confEntry.intValue = val;
+							} else if(confEntry.valueType == "FLOAT") {
+								confEntry.floatValue = val;
+							} else if(confEntry.valueType == "STRING") {
+								confEntry.strValue = val;
+							}
+							var url = "$!{request.contextPath}/allsettingset";
+							ractive.set("setError", false);
+							ractive.set("setInProgress", true);
+							ractive.set("confEntry", confEntry);
+							
+							$.ajax({
+								method: "POST",
+								cache: false,
+								url: url,
+								data: {
+									type: confEntry.type,
+									key: confEntry.path,
+									value: val
+								}
+							}).fail(function(jqXHR, textStatus) {
+								ractive.set("setInProgress", false);
+								ractive.set("setError", true);
+								console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
+							}).done(function(data) {
+								ractive.set("setInProgress", false);
+								var confEntry = ractive.get("confEntry");
+								confEntry.faved = (data === true);
+								ractive.set("confEntry", confEntry);
+							});							
 						},
 						handleFav: function(event) {
 							var ractive = this;
@@ -77,64 +123,72 @@
 				errorCallback(textStatus);
 			}
 		});	
-	}	
-	
-	function saveFavedCamConf(key, value) {
-		// TODO: AJAX
 	}
 	
 	$(document).ready(initUi);
 </script>
 #set( $HASH = '#' )
 <script type="text/ractive" id="tplCameraConfigSetting">
-	<div>
-		<span class="headline">{{confEntry.label}}</span>
-		{{${HASH}if showFavToggle}}
-			<span class="favToggleContainer">
-				{{${HASH}if !favInProgress}}
-					<input type="checkbox" {{${HASH}if confEntry.faved}} checked="checked" {{/if}} on-change="handleFav" />
-				{{/if}}
-				{{${HASH}if favInProgress}}
-					<img class="favToggleLoadingIndicator" src="$!{request.contextPath}/static/ajax-loader.gif" />
-				{{/if}}
-				{{${HASH}favError}}
-					<img class="favToggleWarningIcon" src="$!{request.contextPath}/static/warning.png" />
-				{{/favError}}
+	{{${HASH}if confEntry.faved || !showOnlyFaved}}
+	<div class="scroll settingDisplayContainer">
+		<div>
+			<span class="headline">{{confEntry.label}}</span>
+			{{${HASH}if showFavToggle}}
+				<span class="favToggleContainer">
+					{{${HASH}if !favInProgress}}
+						<input type="checkbox" {{${HASH}if confEntry.faved}} checked="checked" {{/if}} on-change="handleFav" />
+					{{/if}}
+					{{${HASH}if favInProgress}}
+						<img class="favToggleLoadingIndicator" src="$!{request.contextPath}/static/ajax-loader.gif" />
+					{{/if}}
+					{{${HASH}favError}}
+						<img class="favToggleWarningIcon" src="$!{request.contextPath}/static/warning.png" />
+					{{/favError}}
+				</span>
+			{{/if}}
+		</div>
+		<div>
+			<span class="smallest">
+				[<span>{{confEntry.type}}</span>: <span>{{confEntry.path}}</span>]
 			</span>
-		{{/if}}
-	</div>
-	<div>
-		<span class="smallest">
-			[<span>{{confEntry.type}}</span>: <span>{{confEntry.path}}</span>]
-		</span>
-	</div>
-	<div class="fullWidth">
-		<div class="settingDisplayValueContainer">{{confEntry.strValue}}{{confEntry.intValue}}{{confEntry.floatValue}}</div>
-		{{${HASH}if lowercase(confEntry.type) == "range"}}
-			<div class="settingDisplayValueContainer">From {{confEntry.bottom}} to {{confEntry.top}}, step {{confEntry.step}}</div>
-		{{/if}}
-		{{${HASH}if lowercase(confEntry.type) == "radio" || lowercase(confEntry.type) == "menu" }}
-			<select class="fullWidth" on-change="handleChange">
-				{{${HASH}confEntry.choices:idx}}
-					<option value="{{.}}" {{${HASH}if confEntry.strValue == . }} selected="selected" {{/if}}>{{.}}</option>
-				{{/choices}}
-			</select>
-		{{elseif lowercase(confEntry.type) == "toggle" }}
-			<div class="inlineBlock halfWidth"><!--
-				--><input class="fullWidth {{${HASH}if confEntry.intValue == 1}} selectedButton {{/if}}" type="button" value="On" on-click="handleChange" /><!--
-			--></div><!--
-			--><div class="inlineBlock halfWidth"><!--
-				--><input class="fullWidth {{${HASH}if confEntry.intValue === 0}} selectedButton {{/if}}" type="button" value="Off" on-click="handleChange" /><!--
-			--></div>
-		{{elseif lowercase(confEntry.type) == "text" || lowercase(confEntry.type) == "date" || lowercase(confEntry.type) == "range" }}
+		</div>
+		<div class="fullWidth">
+			<div class="settingDisplayValueContainer">{{confEntry.strValue}}{{confEntry.intValue}}{{confEntry.floatValue}}</div>
+			{{${HASH}if lowercase(confEntry.type) == "range"}}
+				<div class="settingDisplayValueContainer">From {{confEntry.bottom}} to {{confEntry.top}}, step {{confEntry.step}}</div>
+			{{/if}}
 			<div class="tableCell">
-				<input type="button" value="Set" on-click="handleChange" />
-			</div>
+				{{${HASH}if !setInProgress}}
+					<input type="button" value="Set" on-click="handleChange" />
+				{{/if}}
+				{{${HASH}if setInProgress}}
+					<img class="setLoadingIndicator" src="$!{request.contextPath}/static/ajax-loader.gif" />
+				{{/if}}
+				{{${HASH}setError}}
+					<img class="setWarningIcon" src="$!{request.contextPath}/static/warning.png" />
+				{{/setError}}		
+			</div>		
 			<div class="tableCell fullWidth">
-				<input class="fullWidth" type="text" value="{{confEntry.intValue}}{{confEntry.floatValue}}{{confEntry.strValue}}" />
+				{{${HASH}if lowercase(confEntry.type) == "radio" || lowercase(confEntry.type) == "menu" }}
+					<select class="fullWidth" on-change="@this.fire('handleChange', event, this, event.node.value)">
+						{{${HASH}confEntry.choices:idx}}
+							<option value="{{.}}" {{${HASH}if confEntry.strValue == . }} selected="selected" {{/if}}>{{.}}</option>
+						{{/choices}}
+					</select>
+				{{elseif lowercase(confEntry.type) == "toggle" }}
+					<div class="inlineBlock halfWidth"><!--
+						--><input class="fullWidth {{${HASH}if confEntry.intValue == 1}} selectedButton {{/if}}" type="button" value="On" on-click="@this.fire('handleChange', event, this, 1)" /><!--
+					--></div><!--
+					--><div class="inlineBlock halfWidth"><!--
+						--><input class="fullWidth {{${HASH}if confEntry.intValue === 0}} selectedButton {{/if}}" type="button" value="Off" on-click="@this.fire('handleChange', event, this, 0)" /><!--
+					--></div>
+				{{elseif lowercase(confEntry.type) == "text" || lowercase(confEntry.type) == "date" || lowercase(confEntry.type) == "range" }}
+					<input class="fullWidth" type="text" on-change="@this.fire('handleChange', event, this, event.node.value)" value="{{confEntry.intValue}}{{confEntry.floatValue}}{{confEntry.strValue}}" />
+				{{/if}}
 			</div>
-		{{/if}}
+		</div>
 	</div>
+	{{/if}}
 </script>
 <div class="fullWidth">
 	<div class="pageHead">GPhoto2Server</div>
