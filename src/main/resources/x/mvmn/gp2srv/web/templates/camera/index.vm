@@ -1,16 +1,8 @@
 #parse("camera/head.vm")
 <script>
-	var configRactives = [];
-	
 	function nav(elem) {
 		$(".sitesection").hide();
 		$("#section_"+elem).show();
-	}
-	
-	function setFavOnlyView(viewFavOnly) {
-		for(var i in configRactives) {
-			configRactives[i].set("showOnlyFaved", viewFavOnly);
-		}
 	}
 	
 	function initUi() {
@@ -24,89 +16,101 @@
 			getJson("$!{request.contextPath}/favedConfigs.json?", function(favedConfigs) {
 				console.log(favedConfigs);
 				var section_set = $("#section_set");
-				section_set.html('<div>Show faved only <input type="checkbox" onchange="setFavOnlyView(this.checked)"></input></div>');
+				section_set.html('');
 				var idx = 0;
+
+				var entries = []; 
 				for(var confPath in config) {
 					idx++;
 					var confEntry = config[confPath];
 					confEntry.faved = favedConfigs[confEntry.path];
-					var containerId = 'section_set_configelement_' + confEntry.id;
-					var container = $('<div id="' + containerId + '" class="settingDisplayContainerContainer"></div>');
-					section_set.append(container);
-				    var ractive = new Ractive({
-						el: '#' + container.attr('id'),
-						template: '#tplCameraConfigSetting',
-						data: {confEntry: confEntry, showFavToggle: true, favInProgress: false, favError: false}
-					});
-					configRactives.push(ractive);
-					ractive.on({
-						handleChange: function(event, elem, val) {
-							var ractive = this;
-							var confEntry = this.get("confEntry");
-							if(val === undefined) {
-								if(confEntry.intValue === 0) {
-									val = 0;
-								} else {
-									val = confEntry.intValue || confEntry.strValue || confEntry.floatValue;
-								}
-							}
-							if(confEntry.valueType == "INT") {
-								confEntry.intValue = val;
-							} else if(confEntry.valueType == "FLOAT") {
-								confEntry.floatValue = val;
-							} else if(confEntry.valueType == "STRING") {
-								confEntry.strValue = val;
-							}
-							var url = "$!{request.contextPath}/allsettingset";
-							ractive.set("setError", false);
-							ractive.set("setInProgress", true);
-							ractive.set("confEntry", confEntry);
-							
-							$.ajax({
-								method: "POST",
-								cache: false,
-								url: url,
-								data: {
-									type: confEntry.type,
-									key: confEntry.path,
-									value: val
-								}
-							}).fail(function(jqXHR, textStatus) {
-								ractive.set("setInProgress", false);
-								ractive.set("setError", true);
-								console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
-							}).done(function(data) {
-								ractive.set("setInProgress", false);
-								var confEntry = ractive.get("confEntry");
-								confEntry.faved = (data === true);
-								ractive.set("confEntry", confEntry);
-							});							
-						},
-						handleFav: function(event) {
-							var ractive = this;
-							var favPath = this.get("confEntry").path;
-							var favVal = event.node.checked ? "true":"false";
-							var url = "$!{request.contextPath}/favsetting?key=" + encodeURIComponent(favPath)
-									+ "&value=" + encodeURIComponent(favVal);
-							ractive.set("favError", false);
-							ractive.set("favInProgress", true);
-							$.ajax({
-								method: "POST",
-								cache: false,
-								url: url
-							}).fail(function(jqXHR, textStatus) {
-								ractive.set("favInProgress", false);
-								ractive.set("favError", true);
-								console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
-							}).done(function(data) {
-								ractive.set("favInProgress", false);
-								var confEntry = ractive.get("confEntry");
-								confEntry.faved = (data===true);
-								ractive.set("confEntry", confEntry);
-							});
-						}
-					});
+
+					entries.push({confEntry: confEntry, favInProgress: false, favError: false});
 				}
+				var ractive = new Ractive({
+					el: '#section_set',
+					template: '#tplCameraConfigSetting',
+					data: {entries: entries, showFavToggle: true, contextPath:"$!{request.contextPath}"}
+				});
+				ractive.on({
+					handleShowFavOnly: function(event, value) {
+						var boolVal = !!value; 
+						ractive.set('showOnlyFaved', boolVal);
+						ractive.set('showFavToggle', !boolVal); 
+					},
+					handleChange: function(event, entryIndex, val) {
+						var ractive = this;
+						var allEntries = this.get("entries");
+						var entry = allEntries[entryIndex];
+						var confEntry = entry.confEntry;
+						if(confEntry.type.toString().toLowerCase() == "toggle" && (val === 0 || val) && val == confEntry.intValue) {
+							val = 2;
+						}
+						if(val === undefined) {
+							if(confEntry.intValue === 0) {
+								val = 0;
+							} else {
+								val = confEntry.intValue || confEntry.strValue || confEntry.floatValue;
+							}
+						}
+						if(confEntry.valueType == "INT") {
+							confEntry.intValue = val;
+						} else if(confEntry.valueType == "FLOAT") {
+							confEntry.floatValue = val;
+						} else if(confEntry.valueType == "STRING") {
+							confEntry.strValue = val;
+						}
+						var url = "$!{request.contextPath}/allsettingset";
+						entry.setError = false;
+						entry.setInProgress = true;
+						ractive.update("entries");
+						
+						$.ajax({
+							method: "POST",
+							cache: false,
+							url: url,
+							data: {
+								type: confEntry.type,
+								key: confEntry.path,
+								value: val
+							}
+						}).fail(function(jqXHR, textStatus) {
+							entry.setInProgress = false;
+							entry.setError = true;
+							console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
+							ractive.update("entries");
+						}).done(function(data) {
+							entry.setInProgress = false;
+							allEntries[entryIndex].confEntry = data;
+							ractive.update("entries");
+						});							
+					},
+					handleFav: function(event, entryIndex) {
+						var ractive = this;
+						var entry = this.get("entries")[entryIndex];
+						var favPath = entry.confEntry.path;
+						var favVal = event.node.checked ? "true":"false";
+						var url = "$!{request.contextPath}/favsetting?key=" + encodeURIComponent(favPath)
+								+ "&value=" + encodeURIComponent(favVal);
+						entry.favError = false;
+						entry.favInProgress = true;
+						ractive.update("entries");
+						$.ajax({
+							method: "POST",
+							cache: false,
+							url: url
+						}).fail(function(jqXHR, textStatus) {
+							entry.favInProgress = false;
+							entry.favError = true;
+							console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
+							ractive.update("entries");
+						}).done(function(data) {
+							entry.favInProgress = false;
+							entry.confEntry.faved = (data===true);
+							ractive.update("entries");
+						});
+					}
+				});
 			}, function() { alert('Error loading faved config elements.') });
 		}, function() { alert('Error loading config.') });
 	}
@@ -129,66 +133,17 @@
 </script>
 #set( $HASH = '#' )
 <script type="text/ractive" id="tplCameraConfigSetting">
-	{{${HASH}if confEntry.faved || !showOnlyFaved}}
-	<div class="scroll settingDisplayContainer">
-		<div>
-			<span class="headline">{{confEntry.label}}</span>
-			{{${HASH}if showFavToggle}}
-				<span class="favToggleContainer">
-					{{${HASH}if !favInProgress}}
-						<input type="checkbox" {{${HASH}if confEntry.faved}} checked="checked" {{/if}} on-change="handleFav" />
-					{{/if}}
-					{{${HASH}if favInProgress}}
-						<img class="favToggleLoadingIndicator" src="$!{request.contextPath}/static/ajax-loader.gif" />
-					{{/if}}
-					{{${HASH}favError}}
-						<img class="favToggleWarningIcon" src="$!{request.contextPath}/static/warning.png" />
-					{{/favError}}
-				</span>
-			{{/if}}
-		</div>
-		<div>
-			<span class="smallest">
-				[<span>{{confEntry.type}}</span>: <span>{{confEntry.path}}</span>]
-			</span>
-		</div>
-		<div class="fullWidth">
-			<div class="settingDisplayValueContainer">{{confEntry.strValue}}{{confEntry.intValue}}{{confEntry.floatValue}}</div>
-			{{${HASH}if lowercase(confEntry.type) == "range"}}
-				<div class="settingDisplayValueContainer">From {{confEntry.bottom}} to {{confEntry.top}}, step {{confEntry.step}}</div>
-			{{/if}}
-			<div class="tableCell">
-				{{${HASH}if !setInProgress}}
-					<input type="button" value="Set" on-click="handleChange" />
-				{{/if}}
-				{{${HASH}if setInProgress}}
-					<img class="setLoadingIndicator" src="$!{request.contextPath}/static/ajax-loader.gif" />
-				{{/if}}
-				{{${HASH}setError}}
-					<img class="setWarningIcon" src="$!{request.contextPath}/static/warning.png" />
-				{{/setError}}		
-			</div>		
-			<div class="tableCell fullWidth">
-				{{${HASH}if lowercase(confEntry.type) == "radio" || lowercase(confEntry.type) == "menu" }}
-					<select class="fullWidth" on-change="@this.fire('handleChange', event, this, event.node.value)">
-						{{${HASH}confEntry.choices:idx}}
-							<option value="{{.}}" {{${HASH}if confEntry.strValue == . }} selected="selected" {{/if}}>{{.}}</option>
-						{{/choices}}
-					</select>
-				{{elseif lowercase(confEntry.type) == "toggle" }}
-					<div class="inlineBlock halfWidth"><!--
-						--><input class="fullWidth {{${HASH}if confEntry.intValue == 1}} selectedButton {{/if}}" type="button" value="On" on-click="@this.fire('handleChange', event, this, 1)" /><!--
-					--></div><!--
-					--><div class="inlineBlock halfWidth"><!--
-						--><input class="fullWidth {{${HASH}if confEntry.intValue === 0}} selectedButton {{/if}}" type="button" value="Off" on-click="@this.fire('handleChange', event, this, 0)" /><!--
-					--></div>
-				{{elseif lowercase(confEntry.type) == "text" || lowercase(confEntry.type) == "date" || lowercase(confEntry.type) == "range" }}
-					<input class="fullWidth" type="text" on-change="@this.fire('handleChange', event, this, event.node.value)" value="{{confEntry.intValue}}{{confEntry.floatValue}}{{confEntry.strValue}}" />
-				{{/if}}
-			</div>
-		</div>
+<div class="siteContentElementContainer">
+	<div class="fullWidth">
+		<input type="button" value="All" class="halfWidth {{${HASH}if !showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, false)" />
+		<input type="button" value="Favorite" class="halfWidth {{${HASH}if showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, true)" />
 	</div>
+</div>
+{{${HASH}each entries:entryIndex}}
+	{{${HASH}if confEntry.faved || !showOnlyFaved}}
+		#include("camera/configsetting.ractive")
 	{{/if}}
+{{/each}}	
 </script>
 <div class="fullWidth">
 	<div class="pageHead">GPhoto2Server</div>
@@ -203,16 +158,12 @@
 		</div>
 	</div>
 	<div class="sitesection pageContent scroll" id="section_set">
-		set
 	</div>
 	<div class="sitesection pageContent scroll" id="section_view">
-		view
 	</div>
 	<div class="sitesection pageContent scroll" id="section_browse">
-		browse
 	</div>
 	<div class="sitesection pageContent scroll" id="section_script">
-		script
 	</div>
 </div>
 #parse("camera/foot.vm")

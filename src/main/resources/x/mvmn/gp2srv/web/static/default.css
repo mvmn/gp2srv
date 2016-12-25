@@ -37,10 +37,14 @@ body {
 	padding: 10px;
 }
 
-.settingDisplayContainerContainer:nth-child(odd) {
+.siteContentElementContainer {
+	padding: 10px;
+}
+
+.settingDisplayContainer:nth-child(odd) {
 	background-color: #F0FFF0;
 }
-.settingDisplayContainerContainer:nth-child(even) {
+.settingDisplayContainer:nth-child(even) {
 	background-color: #F0F0FF;
 }
 

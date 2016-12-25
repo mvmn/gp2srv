@@ -42,6 +42,8 @@ public abstract class AbstractErrorHandlingServlet extends HttpServletWithTempla
 		VelocityContext context = new VelocityContext();
 		if (errorMessage == null && errorCode == 404) {
 			errorMessage = "not found";
+		}
+		if (errorCode == 404) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		} else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

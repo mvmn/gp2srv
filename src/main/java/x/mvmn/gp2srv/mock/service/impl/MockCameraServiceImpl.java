@@ -56,6 +56,8 @@ public class MockCameraServiceImpl implements CameraService {
 		config.putAll(initialConfig);
 		fsEntries.clear();
 		fsEntries.put("/photos", new CameraFileSystemEntryBean("photos", "/", true));
+		fsEntries.put("/photos/stuff", new CameraFileSystemEntryBean("stuff", "/photos/", true));
+		fsEntries.put("/photos/stuff/image00.jpg", new CameraFileSystemEntryBean("image00.jpg", "/photos/stuff", false));
 		counter.set(0);
 	}
 

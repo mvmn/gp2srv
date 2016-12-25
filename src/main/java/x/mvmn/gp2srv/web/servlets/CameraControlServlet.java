@@ -88,6 +88,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					camera.setConfig(updatedConfigEntry);
 					getConfigAsMap(false);
 				}
+				serveStrContentUTF8("application/json", GSON.toJson(updatedConfigEntry), response);
 			} else if ("/camfilepreview".equals(path)) {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
@@ -139,7 +140,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 	protected void processRequestByPath(final String requestPath, final Context velocityContext, final HttpServletRequest request,
 			final HttpServletResponse response, final Logger logger) {
 		try {
-			if (requestPath.equals("/") || requestPath.equals("")) {
+			if (requestPath.equals("/") || requestPath.equals("") || requestPath.equals("/index") || requestPath.equals("/index.html")) {
 				serveTempalteUTF8Safely("camera/index.vm", velocityContext, response, logger);
 			} else if (requestPath.equals("/automate")) {
 				serveTempalteUTF8Safely("camera/automate.vm", velocityContext, response, logger);

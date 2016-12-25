@@ -1,0 +1,59 @@
+
+<div class="scroll settingDisplayContainer">
+	<div>
+		<span class="headline">{{confEntry.label}}</span>
+		{{#if showFavToggle}}
+			<span class="favToggleContainer">
+				{{#if !favInProgress}}
+					<input type="checkbox" {{#if confEntry.faved}} checked="checked" {{/if}} on-change="@this.fire('handleFav', event, entryIndex)" />
+				{{/if}}
+				{{#if favInProgress}}
+					<img class="favToggleLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+				{{/if}}
+				{{#favError}}
+					<img class="favToggleWarningIcon" src="{{contextPath}}/static/warning.png" />
+				{{/favError}}
+			</span>
+		{{/if}}
+	</div>
+	<div>
+		<span class="smallest">
+			[<span>{{confEntry.type}}</span>: <span>{{confEntry.path}}</span>]
+		</span>
+	</div>
+	<div class="fullWidth">
+		<div class="settingDisplayValueContainer">{{confEntry.strValue}}{{confEntry.intValue}}{{confEntry.floatValue}}</div>
+		{{#if lowercase(confEntry.type) == "range"}}
+			<div class="settingDisplayValueContainer">From {{confEntry.bottom}} to {{confEntry.top}}, step {{confEntry.step}}</div>
+		{{/if}}
+		<div class="tableCell">
+			{{#if !setInProgress}}
+				<input type="button" value="Set" on-click="@this.fire('handleChange', event, entryIndex)" />
+			{{/if}}
+			{{#if setInProgress}}
+				<img class="setLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+			{{/if}}
+			{{#setError}}
+				<img class="setWarningIcon" src="{{contextPath}}/static/warning.png" />
+			{{/setError}}
+		</div>		
+		<div class="tableCell fullWidth">
+			{{#if lowercase(confEntry.type) == "radio" || lowercase(confEntry.type) == "menu" }}
+				<select class="fullWidth" on-change="@this.fire('handleChange', event, entryIndex, event.node.value)">
+					{{#confEntry.choices:idx}}
+						<option value="{{.}}" {{#if confEntry.strValue == . }} selected="selected" {{/if}}>{{.}}</option>
+					{{/choices}}
+				</select>
+			{{elseif lowercase(confEntry.type) == "toggle" }}
+				<div class="inlineBlock halfWidth"><!--
+					--><input class="fullWidth {{#if confEntry.intValue == 1}} selectedButton {{/if}}" type="button" value="On" on-click="@this.fire('handleChange', event, entryIndex, 1)" /><!--
+				--></div><!--
+				--><div class="inlineBlock halfWidth"><!--
+					--><input class="fullWidth {{#if confEntry.intValue === 0}} selectedButton {{/if}}" type="button" value="Off" on-click="@this.fire('handleChange', event, entryIndex, 0)" /><!--
+				--></div>
+			{{elseif lowercase(confEntry.type) == "text" || lowercase(confEntry.type) == "date" || lowercase(confEntry.type) == "range" }}
+				<input class="fullWidth" type="text" on-change="@this.fire('handleChange', event, entryIndex, event.node.value)" value="{{confEntry.intValue}}{{confEntry.floatValue}}{{confEntry.strValue}}" />
+			{{/if}}
+		</div>
+	</div>
+</div>

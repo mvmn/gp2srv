@@ -16,6 +16,7 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
 import x.mvmn.gp2srv.GPhoto2Server;
+import x.mvmn.lang.util.DateHelper;
 
 public class TemplateEngine {
 
@@ -23,6 +24,17 @@ public class TemplateEngine {
 
 	private final VelocityEngine engine;
 	private final String templatesClasspathPrefix;
+
+	protected static class StaticToolsHelper {
+
+		private static final Class<?> TOOLS[] = new Class<?>[] { DateHelper.class };
+
+		public static void populateTools(final Context context) {
+			for (final Class<?> toolClass : TOOLS) {
+				context.put("tool" + toolClass.getSimpleName(), toolClass);
+			}
+		}
+	}
 
 	public TemplateEngine(Map<String, String> pathToTempalteMapping) {
 		this(DEFAULT_TEMPLATES_CLASSPATH_PREFIX, pathToTempalteMapping);
@@ -41,14 +53,14 @@ public class TemplateEngine {
 	private StringResourceRepository initStringResourceRepository(Map<String, String> pathToTempalteMapping) throws IOException {
 		StringResourceRepository result = new StringResourceRepositoryImpl();
 		StringResourceLoader.setRepository(StringResourceLoader.REPOSITORY_NAME_DEFAULT, result);
-		registerTemplate(result, RuntimeConstants.VM_LIBRARY_DEFAULT, RuntimeConstants.VM_LIBRARY_DEFAULT);
+		registerResource(result, RuntimeConstants.VM_LIBRARY_DEFAULT, RuntimeConstants.VM_LIBRARY_DEFAULT);
 		for (Map.Entry<String, String> pathToTempalteMappingItem : pathToTempalteMapping.entrySet()) {
-			registerTemplate(result, pathToTempalteMappingItem.getKey(), pathToTempalteMappingItem.getValue());
+			registerResource(result, pathToTempalteMappingItem.getKey(), pathToTempalteMappingItem.getValue());
 		}
 		return result;
 	}
 
-	private void registerTemplate(StringResourceRepository repo, String registeredName, String relativeClasspathRef) throws IOException {
+	private void registerResource(StringResourceRepository repo, String registeredName, String relativeClasspathRef) throws IOException {
 		String templateClasspathRef = templatesClasspathPrefix + relativeClasspathRef.replaceAll("\\.\\./", "");
 		InputStream templateBodyInputStream = GPhoto2Server.class.getResourceAsStream(templateClasspathRef);
 		String templateBodyString = IOUtils.toString(templateBodyInputStream, "UTF-8");
@@ -69,6 +81,7 @@ public class TemplateEngine {
 	}
 
 	public void renderTemplate(String tempalteName, String encoding, Context context, Writer output) {
+		StaticToolsHelper.populateTools(context);
 		engine.mergeTemplate(tempalteName, encoding, context, output);
 	}
 }
