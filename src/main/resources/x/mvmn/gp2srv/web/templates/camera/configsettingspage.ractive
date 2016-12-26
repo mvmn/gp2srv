@@ -1,0 +1,12 @@
+
+<div class="siteContentElementContainer">
+	<div class="fullWidth">
+		<input type="button" value="All" class="halfWidth {{#if !showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, false)" />
+		<input type="button" value="Favorite" class="halfWidth {{#if showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, true)" />
+	</div>
+</div>
+{{#each entries:entryIndex}}
+	{{#if confEntry.faved || !showOnlyFaved}}
+		{{>tplConfigSetting}}
+	{{/if}}
+{{/each}}

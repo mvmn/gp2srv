@@ -12,6 +12,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 
+import com.google.gson.Gson;
+
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
@@ -19,6 +21,9 @@ import x.mvmn.log.api.Logger;
 public abstract class HttpServletWithTemplates extends HttpServlet {
 
 	private static final long serialVersionUID = -6614624652923805723L;
+
+	protected static final Gson GSON = new Gson();
+
 	protected final Provider<TemplateEngine> templateEngineProvider;
 
 	public HttpServletWithTemplates(final Provider<TemplateEngine> templateEngineProvider) {
@@ -63,6 +68,10 @@ public abstract class HttpServletWithTemplates extends HttpServlet {
 		getTemplateEngine().renderTemplate(tempalteName, "UTF-8", context, writer);
 		writer.flush();
 		IOUtils.closeQuietly(writer);
+	}
+
+	public void serveJson(final Object result, final HttpServletResponse response) throws IOException {
+		serveStrContentUTF8("application/json", GSON.toJson(result), response);
 	}
 
 	public void serveStrContentUTF8(final String contentType, final String content, final HttpServletResponse response) throws IOException {

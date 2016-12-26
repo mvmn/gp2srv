@@ -1,9 +1,0 @@
-<div class="navigationContainer">
-	<span><a href="$!{request.contextPath}/allsettings">settings</a></span>
-	|
-	<span><a href="$!{request.contextPath}/preview">view</a></span>
-	|
-	<span><a href="$!{request.contextPath}/browse">browse</a></span>
-	|
-	<span><a href="$!{request.contextPath}/automate">automate</a></span>
-</div>

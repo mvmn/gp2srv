@@ -1,0 +1,17 @@
+<img id="browseErrorIndicator" src="{{contextPath}}/static/warning.png" />
+<img id="browseLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+<div id="browseNavigation">
+	{{#each pathElements:pathElIndex}}
+		<a href="#" on-click="@this.fire('browseFolder', event, pathElements.slice(0, pathElIndex+1).join('/'))">{{.}}/</a>&nbsp;&gt;&nbsp;
+	{{/each}}
+</div>
+<div id="browseContent">
+	{{#each browseData.folderList}}
+		<div>
+			<a href="#" on-click="@this.fire('browseFolder', event, path+name)">{{name}}</a>	
+		</div>
+	{{/each}}
+	{{#each browseData.filesList}}
+		{{name}}
+	{{/each}}
+</div>

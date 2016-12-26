@@ -7,8 +7,9 @@
 	
 	function initUi() {
 		var helpers = Ractive.defaults.data;
-		helpers.lowercase = function(str) { return str?str.toLowerCase():str };
-		helpers.uppercase = function(str) { return str?str.toUpperCase():str };
+		Ractive.partials.tplConfigSetting = Ractive.parse($('#tplConfigSetting').text());
+		helpers.lowercase = function(str) { return str? str.toLowerCase() : str };
+		helpers.uppercase = function(str) { return str? str.toUpperCase() : str };
 	
 		$(".sitesection").hide();
 		getJson("$!{request.contextPath}/cameraConfig.json?reRead=true", function(config) {
@@ -17,11 +18,9 @@
 				console.log(favedConfigs);
 				var section_set = $("#section_set");
 				section_set.html('');
-				var idx = 0;
 
 				var entries = []; 
 				for(var confPath in config) {
-					idx++;
 					var confEntry = config[confPath];
 					confEntry.faved = favedConfigs[confEntry.path];
 
@@ -29,7 +28,7 @@
 				}
 				var ractive = new Ractive({
 					el: '#section_set',
-					template: '#tplCameraConfigSetting',
+					template: '#tplCameraConfigSettings',
 					data: {entries: entries, showFavToggle: true, contextPath:"$!{request.contextPath}"}
 				});
 				ractive.on({
@@ -113,6 +112,28 @@
 				});
 			}, function() { alert('Error loading faved config elements.') });
 		}, function() { alert('Error loading config.') });
+		
+		//var pathElements = ;
+		var navRactive = new Ractive({
+			el: '#section_browse',
+			template: '#tplBrowseSection',
+			data: {contextPath:"$!{request.contextPath}", browseData:{"currentBrowsePath":"/", "filesList":[], "folderList":[]}, pathElements:[""]}
+		});
+		$("#browseErrorIndicator").hide();
+		$("#browseLoadingIndicator").hide();
+		navRactive.on({
+			browseFolder: function(event, browsePath) {
+				$("#browseLoadingIndicator").show();
+				getJson("$!{request.contextPath}/browse.json?path=" + encodeURIComponent(browsePath), function(browseData) {
+					$("#browseLoadingIndicator").hide();
+					navRactive.set("pathElements", browseData.currentBrowsePath.replace(/\/$/g,'').split("/"));
+					navRactive.set("browseData", browseData);
+				}, function() {
+					$("#browseLoadingIndicator").hide();
+					$("#browseErrorIndicator").show();
+				});
+			}
+		});	
 	}
 	
 	function getJson(url, successCallback, errorCallback) {
@@ -127,32 +148,25 @@
 				errorCallback(textStatus);
 			}
 		});	
-	}
+	}	
 	
 	$(document).ready(initUi);
 </script>
-#set( $HASH = '#' )
-<script type="text/ractive" id="tplCameraConfigSetting">
-<div class="siteContentElementContainer">
-	<div class="fullWidth">
-		<input type="button" value="All" class="halfWidth {{${HASH}if !showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, false)" />
-		<input type="button" value="Favorite" class="halfWidth {{${HASH}if showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, true)" />
-	</div>
-</div>
-{{${HASH}each entries:entryIndex}}
-	{{${HASH}if confEntry.faved || !showOnlyFaved}}
-		#include("camera/configsetting.ractive")
-	{{/if}}
-{{/each}}	
+<script type="text/ractive" id="tplConfigSetting">
+	#include("camera/configsetting.ractive")
+</script>
+<script type="text/ractive" id="tplCameraConfigSettings">
+	#include("camera/configsettingspage.ractive")
+</script>
+<script type="text/ractive" id="tplBrowseSection">
+	#include("camera/browsesection.ractive")
 </script>
 <div class="fullWidth">
 	<div class="pageHead">GPhoto2Server</div>
 	<div class="pageSubHead">
 		<div class="navigationContainer">
 			#foreach($navopt in ["set", "view", "browse", "script"])
-				#if($foreach.count>1)
-					|
-				#end
+				#if($foreach.count>1) | #end
 				<span><a href="#$!navopt" onclick="javascript:nav('$!navopt');return false">$!navopt</a></span>
 			#end
 		</div>
