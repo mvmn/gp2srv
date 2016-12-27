@@ -123,3 +123,10 @@ body {
 .browseListItem.even {
 	background-color: #E0E0FF;
 }
+.browseNavigation a {
+    color: white;
+}
+.browseNavigation {
+    background-color: black;
+    color: gray;
+}

@@ -1,17 +1,32 @@
-<img id="browseErrorIndicator" src="{{contextPath}}/static/warning.png" />
-<img id="browseLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
-<div id="browseNavigation">
-	{{#each pathElements:pathElIndex}}
-		<a href="#" on-click="@this.fire('browseFolder', event, pathElements.slice(0, pathElIndex+1).join('/'))">{{.}}/</a>&nbsp;&gt;&nbsp;
-	{{/each}}
+<div class="siteContentElementContainer browseNavigation">
+	<div id="browseNavigation" class="fullWidth">
+		&gt;&nbsp;
+		{{#each pathElements:pathElIndex}}
+			<a href="#" on-click="@this.fire('browseFolder', event, pathElements.slice(0, pathElIndex+1).join('/'))">{{ . == ""? "/" : . }}</a>&nbsp;&gt;&nbsp;
+		{{/each}}
+	</div>
 </div>
-<div id="browseContent">
-	{{#each browseData.folderList}}
+<div class="siteContentElementContainer">
+	<img id="browseErrorIndicator" src="{{contextPath}}/static/warning.png" />
+	<img id="browseLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+	<div id="browseContent">
 		<div>
-			<a href="#" on-click="@this.fire('browseFolder', event, path+name)">{{name}}</a>	
+			{{#each browseData.folderList}}
+				<div class="fullWidth">
+					<a href="#" on-click="@this.fire('browseFolder', event, path.replace(/\/$/g,'')+'/'+name.replace(/^\//g,'').replace(/\/$/g,''))">{{name.replace(/^\//g,'').replace(/\/$/g,'')}}/</a>	
+				</div>
+			{{/each}}
 		</div>
-	{{/each}}
-	{{#each browseData.filesList}}
-		{{name}}
-	{{/each}}
+		<div style="padding-top: 6px">
+			{{#each browseData.filesList}}
+				<div class="fullWidth">
+					[
+						<a href="#" on-click="@this.fire('deleteFile', event, path, name)">x</a>
+						<img style="display: none" class="deleteLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+					]
+					<a target="_blank" href="{{contextPath}}/camfilepreview?folder={{encodeURIComponent(path)}}&name={{encodeURIComponent(name)}}">{{name}}</a>
+				</div>
+			{{/each}}
+		</div>
+	</div>
 </div>

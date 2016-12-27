@@ -85,15 +85,6 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					getConfigAsMap(false);
 				}
 				serveJson(updatedConfigEntry, response);
-			} else if ("/camfilepreview".equals(path)) {
-				final String fileName = request.getParameter("name");
-				final String filePath = request.getParameter("folder");
-
-				byte[] fileContents = camera.fileGetContents(filePath, fileName);
-
-				response.setContentType("image/jpeg");
-				response.getOutputStream().write(fileContents);
-				response.flushBuffer();
 			} else if ("/deletefile".equals(path)) {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
@@ -158,10 +149,19 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				final List<CameraFileSystemEntryBean> fileList = camera.filesList(path, true, false, false);
 				Collections.sort(fileList);
 				result.put("filesList", fileList);
-				final List<CameraFileSystemEntryBean> folderList = camera.filesList("/", false, true, true);
+				final List<CameraFileSystemEntryBean> folderList = camera.filesList(path, false, true, false);
 				Collections.sort(folderList);
 				result.put("folderList", folderList);
 				serveJson(result, response);
+			} else if ("/camfilepreview".equals(requestPath)) {
+				final String fileName = request.getParameter("name");
+				final String filePath = request.getParameter("folder");
+
+				byte[] fileContents = camera.fileGetContents(filePath, fileName);
+
+				response.setContentType("image/jpeg");
+				response.getOutputStream().write(fileContents);
+				response.flushBuffer();
 			} else {
 				returnNotFound(request, response);
 			}

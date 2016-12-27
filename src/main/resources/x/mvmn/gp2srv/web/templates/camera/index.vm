@@ -5,13 +5,7 @@
 		$("#section_"+elem).show();
 	}
 	
-	function initUi() {
-		var helpers = Ractive.defaults.data;
-		Ractive.partials.tplConfigSetting = Ractive.parse($('#tplConfigSetting').text());
-		helpers.lowercase = function(str) { return str? str.toLowerCase() : str };
-		helpers.uppercase = function(str) { return str? str.toUpperCase() : str };
-	
-		$(".sitesection").hide();
+	function reReadConfig() {
 		getJson("$!{request.contextPath}/cameraConfig.json?reRead=true", function(config) {
 			console.log(config);
 			getJson("$!{request.contextPath}/favedConfigs.json?", function(favedConfigs) {
@@ -32,6 +26,9 @@
 					data: {entries: entries, showFavToggle: true, contextPath:"$!{request.contextPath}"}
 				});
 				ractive.on({
+					refreshConfig: function(event) {
+						reReadConfig();
+					},
 					handleShowFavOnly: function(event, value) {
 						var boolVal = !!value; 
 						ractive.set('showOnlyFaved', boolVal);
@@ -112,12 +109,22 @@
 				});
 			}, function() { alert('Error loading faved config elements.') });
 		}, function() { alert('Error loading config.') });
+	}
+	
+	function initUi() {
+		var helpers = Ractive.defaults.data;
+		Ractive.partials.tplConfigSetting = Ractive.parse($('#tplConfigSetting').text());
+		helpers.lowercase = function(str) { return str? str.toLowerCase() : str };
+		helpers.uppercase = function(str) { return str? str.toUpperCase() : str };
+	
+		$(".sitesection").hide();
+		reReadConfig();
 		
 		//var pathElements = ;
 		var navRactive = new Ractive({
 			el: '#section_browse',
 			template: '#tplBrowseSection',
-			data: {contextPath:"$!{request.contextPath}", browseData:{"currentBrowsePath":"/", "filesList":[], "folderList":[]}, pathElements:[""]}
+			data: {contextPath:"$!{request.contextPath}", browseData:{"currentBrowsePath":"", "filesList":[], "folderList":[{name:"/", path:"", folder:true}]}, pathElements:[]}
 		});
 		$("#browseErrorIndicator").hide();
 		$("#browseLoadingIndicator").hide();
@@ -132,6 +139,29 @@
 					$("#browseLoadingIndicator").hide();
 					$("#browseErrorIndicator").show();
 				});
+			},
+			deleteFile: function(event, path, name) {
+				if(confirm("Delete file "+path+"/"+name+"?")) {
+					var ractive = this;
+					var deleteLink = $(event.node);
+					var loadingIndicator = $(event.node).parent().find(".deleteLoadingIndicator");
+					deleteLink.hide();
+					loadingIndicator.show();
+					$.ajax({
+						cache: false,
+						url: '$!{request.contextPath}/deletefile?name='+encodeURIComponent(name)+'&folder='+encodeURIComponent(path),
+						method: 'POST'
+					}).done(function() {
+						deleteLink.show();
+						loadingIndicator.hide();
+						ractive.fire('browseFolder', event, path.replace(/\/$/g,''));
+					}).fail(function(jqXHR, textStatus) {
+						deleteLink.show();
+						loadingIndicator.hide();
+						console.log(jqXHR);
+						alert("Error deleting file: "+textStatus);
+					});
+				}		
 			}
 		});	
 	}

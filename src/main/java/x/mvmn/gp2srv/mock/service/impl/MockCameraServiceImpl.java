@@ -1,5 +1,9 @@
 package x.mvmn.gp2srv.mock.service.impl;
 
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -7,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.IOUtils;
 
@@ -56,8 +62,14 @@ public class MockCameraServiceImpl implements CameraService {
 		config.putAll(initialConfig);
 		fsEntries.clear();
 		fsEntries.put("/photos", new CameraFileSystemEntryBean("photos", "/", true));
-		fsEntries.put("/photos/stuff", new CameraFileSystemEntryBean("stuff", "/photos/", true));
+		fsEntries.put("/photos/image10.jpg", new CameraFileSystemEntryBean("image10.jpg", "/photos", false));
+		fsEntries.put("/photos/image11.jpg", new CameraFileSystemEntryBean("image11.jpg", "/photos", false));
+		fsEntries.put("/photos/image12.jpg", new CameraFileSystemEntryBean("image12.jpg", "/photos", false));
+		fsEntries.put("/photos/empty", new CameraFileSystemEntryBean("empty", "/photos", true));
+		fsEntries.put("/photos/stuff", new CameraFileSystemEntryBean("stuff", "/photos", true));
 		fsEntries.put("/photos/stuff/image00.jpg", new CameraFileSystemEntryBean("image00.jpg", "/photos/stuff", false));
+		fsEntries.put("/photos/stuff/image01.jpg", new CameraFileSystemEntryBean("image01.jpg", "/photos/stuff", false));
+		fsEntries.put("/photos/stuff/image02.jpg", new CameraFileSystemEntryBean("image02.jpg", "/photos/stuff", false));
 		counter.set(0);
 	}
 
@@ -68,7 +80,22 @@ public class MockCameraServiceImpl implements CameraService {
 
 	public byte[] capturePreview() {
 		checkClosed();
-		return mockPicture;
+
+		byte[] result = mockPicture;
+
+		if (System.getProperty("gp2mock.screengrab") != null) {
+			try {
+				Rectangle screenRect = new Rectangle(800, 600);
+				BufferedImage capture = new Robot().createScreenCapture(screenRect);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write(capture, "jpg", baos);
+				result = baos.toByteArray();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		return result;
 	}
 
 	public byte[] fileGetContents(String filePath, String fileName) {
@@ -106,6 +133,12 @@ public class MockCameraServiceImpl implements CameraService {
 	}
 
 	protected CameraFileSystemEntryBean checkFileExists(String filePath, String fileName) {
+		if (!filePath.endsWith("/")) {
+			filePath = filePath + "/";
+		}
+		if (!filePath.startsWith("/")) {
+			filePath = "/" + filePath;
+		}
 		final CameraFileSystemEntryBean fsEntry = fsEntries.get(filePath + fileName);
 		if (fsEntry == null || !fsEntry.isFile()) {
 			throw new GP2Exception(Gphoto2Library.GP_ERROR_FILE_NOT_FOUND, "File not found");
@@ -115,15 +148,37 @@ public class MockCameraServiceImpl implements CameraService {
 
 	public CameraService fileDelete(String filePath, String fileName) {
 		checkClosed();
+		if (!filePath.endsWith("/")) {
+			filePath = filePath + "/";
+		}
+		if (!filePath.startsWith("/")) {
+			filePath = "/" + filePath;
+		}
 		final CameraFileSystemEntryBean fsEntry = checkFileExists(filePath, fileName);
-		fsEntries.remove(fsEntry.getPath() + fsEntry.getName());
+		fsEntries.remove(fsEntry.getPath() + "/" + fsEntry.getName());
 		return this;
 	}
 
 	public List<CameraFileSystemEntryBean> filesList(String path, boolean includeFiles, boolean includeFolders, boolean recursive) {
 		checkClosed();
 
-		final List<CameraFileSystemEntryBean> result = new ArrayList<CameraFileSystemEntryBean>(fsEntries.values());
+		final List<CameraFileSystemEntryBean> result;
+		if (recursive) {
+			result = new ArrayList<CameraFileSystemEntryBean>(fsEntries.values());
+		} else {
+			result = new ArrayList<CameraFileSystemEntryBean>();
+			if (path.endsWith("/")) {
+				path = path.substring(0, path.length() - 1);
+			}
+			if (!path.startsWith("/")) {
+				path = "/" + path;
+			}
+			for (CameraFileSystemEntryBean cfseb : fsEntries.values()) {
+				if (cfseb.getPath().equals(path)) {
+					result.add(cfseb);
+				}
+			}
+		}
 		for (Iterator<CameraFileSystemEntryBean> iterator = result.iterator(); iterator.hasNext();) {
 			CameraFileSystemEntryBean t = iterator.next();
 			if (!((t.isFile() && includeFiles) || (t.isFolder() && includeFolders))) {
