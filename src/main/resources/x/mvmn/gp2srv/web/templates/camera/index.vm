@@ -5,6 +5,12 @@
 		$("#section_"+elem).show();
 	}
 	
+	function restartLiveView() {
+		$("#liveViewContainer img").each(function (idx, el) {
+			el.src='$!{request.contextPath}/stream.mjpeg?t=' + Date.now();
+		});
+	}
+	
 	function reReadConfig() {
 		getJson("$!{request.contextPath}/cameraConfig.json?reRead=true", function(config) {
 			console.log(config);
@@ -35,8 +41,10 @@
 							captureButton.enabled = true;
 							console.log(jqXHR);
 							alert("Error occurred: "+textStatus);
+							restartLiveView();
 						}).done(function() {
 							captureButton.enabled = true;
+							restartLiveView();
 						});
 					},
 					toggleLiveView: function(event) {
@@ -45,11 +53,10 @@
 					setLiveView: function(event) {
 						if(event.node.checked) {
 							$("#liveViewContainer").show();
-							$("#liveViewContainer").html('<img class="fullWidth" style="width: 100%" src="$!{request.contextPath}/stream.mjpeg" />');
+							$("#liveViewContainer").html('<img class="fullWidth" style="width: 100%" src="$!{request.contextPath}/stream.mjpeg?t=' + Date.now() + '" />');
 						} else {
 							$("#liveViewContainer").hide();
 							$("#liveViewContainer img").attr("src", "");
-							$("#liveViewContainer").html('');
 						}
 					},
 					refreshConfig: function(event) {
@@ -101,10 +108,12 @@
 							entry.setError = true;
 							console.log("Error " + jqXHR.status + " on setting faved status for camera config entry: " + jqXHR.statusText);
 							ractive.update("entries");
+							restartLiveView();
 						}).done(function(data) {
 							entry.setInProgress = false;
 							allEntries[entryIndex].confEntry = data;
 							ractive.update("entries");
+							restartLiveView();
 						});							
 					},
 					handleFav: function(event, entryIndex) {

@@ -60,7 +60,8 @@ public final class LiveViewServlet extends HttpServlet {
 				System.gc();
 				Thread.yield();
 			} catch (final EOFException e) {
-				// Ignore - this just means user closed preview
+				// This just means user closed preview
+				break;
 			} catch (final Exception e) {
 				e.printStackTrace();
 				System.err.println("Live view stopped: " + e.getClass().getName() + " " + e.getMessage());
