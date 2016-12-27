@@ -1,16 +1,29 @@
-
-<div class="siteContentElementContainer">
-	<div class="fullWidth">
-		<input type="button" value="Reload" class="fullWidth" on-click="@this.fire('refreshConfig')" />
-	</div>
-	<hr/>
-	<div class="fullWidth">
-		<input type="button" value="All" class="halfWidth {{#if !showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, false)" />
-		<input type="button" value="Favorites" class="halfWidth {{#if showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, true)" />
+<div class="pageContent scroll">
+	<div class="siteContentElementContainer">
+		<div class="fullWidth">
+			<input type="button" value="Capture" class="fullWidth" on-click="doCapture" /><br/>
+		</div>
+		<div class="fullWidth" style="padding-top: 10px">
+			<input type="checkbox" on-change="setLiveView" />&nbsp;<span class="headline" on-click="toggleLiveView">Live view</span>		
+		</div>
 	</div>
 </div>
-{{#each entries:entryIndex}}
-	{{#if confEntry.faved || !showOnlyFaved}}
-		{{> tplConfigSetting}}
-	{{/if}}
-{{/each}}
+<div id="liveViewContainer" style="display: none">
+</div>
+<div class="pageContent scroll">
+	<div class="siteContentElementContainer">
+		<div class="fullWidth">
+			<input type="button" value="Reload" class="fullWidth" on-click="refreshConfig" />
+		</div>
+		<hr/>
+		<div class="fullWidth">
+			<input type="button" value="All" class="halfWidth {{#if !showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, false)" />
+			<input type="button" value="Favorites" class="halfWidth {{#if showOnlyFaved}}selectedButton{{/if}}" on-click="@this.fire('handleShowFavOnly', event, true)" />
+		</div>
+	</div>
+	{{#each entries:entryIndex}}
+		{{#if confEntry.faved || !showOnlyFaved}}
+			{{> tplConfigSetting}}
+		{{/if}}
+	{{/each}}
+</div>

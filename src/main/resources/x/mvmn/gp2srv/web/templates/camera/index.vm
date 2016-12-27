@@ -10,8 +10,7 @@
 			console.log(config);
 			getJson("$!{request.contextPath}/favedConfigs.json?", function(favedConfigs) {
 				console.log(favedConfigs);
-				var section_set = $("#section_set");
-				section_set.html('');
+				$("#section_camera").html('');
 
 				var entries = []; 
 				for(var confPath in config) {
@@ -21,11 +20,38 @@
 					entries.push({confEntry: confEntry, favInProgress: false, favError: false});
 				}
 				var ractive = new Ractive({
-					el: '#section_set',
+					el: '#section_camera',
 					template: '#tplCameraConfigSettings',
 					data: {entries: entries, showFavToggle: true, contextPath:"$!{request.contextPath}"}
 				});
 				ractive.on({
+					doCapture: function(event) {
+						var captureButton = event.node;
+						captureButton.enabled = false;
+						$.ajax({
+							url: '$!{request.contextPath}/capture',
+							method: 'POST'
+						}).fail(function(jqXHR, textStatus) {
+							captureButton.enabled = true;
+							console.log(jqXHR);
+							alert("Error occurred: "+textStatus);
+						}).done(function() {
+							captureButton.enabled = true;
+						});
+					},
+					toggleLiveView: function(event) {
+						$(event.node).parent().find("input").click();
+					},
+					setLiveView: function(event) {
+						if(event.node.checked) {
+							$("#liveViewContainer").show();
+							$("#liveViewContainer").html('<img class="fullWidth" style="width: 100%" src="$!{request.contextPath}/stream.mjpeg" />');
+						} else {
+							$("#liveViewContainer").hide();
+							$("#liveViewContainer img").attr("src", "");
+							$("#liveViewContainer").html('');
+						}
+					},
 					refreshConfig: function(event) {
 						reReadConfig();
 					},
@@ -122,7 +148,7 @@
 		
 		//var pathElements = ;
 		var navRactive = new Ractive({
-			el: '#section_browse',
+			el: '#section_files',
 			template: '#tplBrowseSection',
 			data: {contextPath:"$!{request.contextPath}", browseData:{"currentBrowsePath":"", "filesList":[], "folderList":[{name:"/", path:"", folder:true}]}, pathElements:[]}
 		});
@@ -195,19 +221,17 @@
 	<div class="pageHead">GPhoto2Server</div>
 	<div class="pageSubHead">
 		<div class="navigationContainer">
-			#foreach($navopt in ["set", "view", "browse", "script"])
+			#foreach($navopt in ["camera", "files", "scripts"])
 				#if($foreach.count>1) | #end
 				<span><a href="#$!navopt" onclick="javascript:nav('$!navopt');return false">$!navopt</a></span>
 			#end
 		</div>
 	</div>
-	<div class="sitesection pageContent scroll" id="section_set">
+	<div class="sitesection" id="section_camera">
 	</div>
-	<div class="sitesection pageContent scroll" id="section_view">
+	<div class="sitesection pageContent scroll" id="section_files">
 	</div>
-	<div class="sitesection pageContent scroll" id="section_browse">
-	</div>
-	<div class="sitesection pageContent scroll" id="section_script">
+	<div class="sitesection pageContent scroll" id="section_scripts">
 	</div>
 </div>
 #parse("camera/foot.vm")

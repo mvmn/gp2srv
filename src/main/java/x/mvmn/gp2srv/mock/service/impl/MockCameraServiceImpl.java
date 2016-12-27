@@ -105,9 +105,9 @@ public class MockCameraServiceImpl implements CameraService {
 
 	public CameraFileSystemEntryBean capture() {
 		checkClosed();
-		CameraFileSystemEntryBean newCapture = new CameraFileSystemEntryBean(String.format("photo%08d", counter.incrementAndGet()), "/photos/", false);
-		fsEntries.put(newCapture.getPath() + newCapture.getName(), newCapture);
-		return null;
+		CameraFileSystemEntryBean newCapture = new CameraFileSystemEntryBean(String.format("photo%08d", counter.incrementAndGet()), "/photos", false);
+		fsEntries.put(newCapture.getPath() + "/" + newCapture.getName(), newCapture);
+		return newCapture;
 	}
 
 	public CameraFileSystemEntryBean capture(GP2CameraCaptureType captureType) {
