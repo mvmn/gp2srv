@@ -2,6 +2,8 @@ package x.mvmn.gp2srv.web.service.impl;
 
 import java.io.Closeable;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import x.mvmn.gp2srv.web.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
@@ -73,5 +75,14 @@ public class CameraServiceImpl implements CameraService, Closeable {
 
 	public byte[] fileGetContents(final String filePath, final String fileName) {
 		return GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName);
+	}
+
+	public Map<String, CameraConfigEntryBean> getConfigAsMap() {
+		final List<CameraConfigEntryBean> config = this.getConfig();
+		final Map<String, CameraConfigEntryBean> configMap = new TreeMap<String, CameraConfigEntryBean>();
+		for (CameraConfigEntryBean configEntry : config) {
+			configMap.put(configEntry.getPath(), configEntry);
+		}
+		return configMap;
 	}
 }

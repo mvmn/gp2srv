@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -203,5 +204,14 @@ public class MockCameraServiceImpl implements CameraService {
 	public CameraService releaseCamera() {
 		checkClosed();
 		return this;
+	}
+
+	public Map<String, CameraConfigEntryBean> getConfigAsMap() {
+		final List<CameraConfigEntryBean> config = this.getConfig();
+		final Map<String, CameraConfigEntryBean> configMap = new TreeMap<String, CameraConfigEntryBean>();
+		for (CameraConfigEntryBean configEntry : config) {
+			configMap.put(configEntry.getPath(), configEntry);
+		}
+		return configMap;
 	}
 }

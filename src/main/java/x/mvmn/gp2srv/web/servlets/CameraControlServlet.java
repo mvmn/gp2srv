@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,7 +28,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 	private static final long serialVersionUID = 7389681375772493366L;
 
-	protected final CameraService camera;
+	protected final CameraService cameraService;
 	protected final Properties favouredCamConfSettings;
 	protected final File imagesFolder;
 
@@ -37,7 +36,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final File imagesFolder,
 			final Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
-		this.camera = cameraService;
+		this.cameraService = cameraService;
 		this.favouredCamConfSettings = favouredCamConfSettings;
 		this.imagesFolder = imagesFolder;
 	}
@@ -81,7 +80,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					break;
 				}
 				if (updatedConfigEntry != null) {
-					camera.setConfig(updatedConfigEntry);
+					cameraService.setConfig(updatedConfigEntry);
 					getConfigAsMap(false);
 				}
 				serveJson(updatedConfigEntry, response);
@@ -89,12 +88,12 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
 
-				camera.fileDelete(filePath, fileName);
+				cameraService.fileDelete(filePath, fileName);
 
 				serveJson(Boolean.TRUE, response);
 			} else if ("/capture".equals(path)) {
-				camera.capture();
-				camera.waitForSpecificEvent(1000, GP2CameraEventType.CAPTURE_COMPLETE);
+				cameraService.capture();
+				cameraService.waitForSpecificEvent(1000, GP2CameraEventType.CAPTURE_COMPLETE);
 				serveJson(Boolean.TRUE, response);
 			} else {
 				returnNotFound(request, response);
@@ -146,10 +145,10 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				}
 
 				result.put("currentBrowsePath", path);
-				final List<CameraFileSystemEntryBean> fileList = camera.filesList(path, true, false, false);
+				final List<CameraFileSystemEntryBean> fileList = cameraService.filesList(path, true, false, false);
 				Collections.sort(fileList);
 				result.put("filesList", fileList);
-				final List<CameraFileSystemEntryBean> folderList = camera.filesList(path, false, true, false);
+				final List<CameraFileSystemEntryBean> folderList = cameraService.filesList(path, false, true, false);
 				Collections.sort(folderList);
 				result.put("folderList", folderList);
 				serveJson(result, response);
@@ -157,7 +156,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
 
-				byte[] fileContents = camera.fileGetContents(filePath, fileName);
+				byte[] fileContents = cameraService.fileGetContents(filePath, fileName);
 
 				response.setContentType("image/jpeg");
 				response.getOutputStream().write(fileContents);
@@ -183,12 +182,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			try {
 				GPhoto2Server.liveViewEnabled.set(false);
 				GPhoto2Server.waitWhileLiveViewInProgress(50);
-				final List<CameraConfigEntryBean> config = camera.getConfig();
-				final Map<String, CameraConfigEntryBean> configMap = new TreeMap<String, CameraConfigEntryBean>();
-				for (CameraConfigEntryBean configEntry : config) {
-					configMap.put(configEntry.getPath(), configEntry);
-				}
-				configAsMap = configMap;
+				configAsMap = cameraService.getConfigAsMap();
 				velocityContextService.getGlobalContext().put("lastReadCameraConfig", configAsMap);
 			} finally {
 				GPhoto2Server.liveViewEnabled.set(true);
@@ -197,9 +191,4 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 		return configAsMap;
 	}
-
-	/*
-	 * protected void redirectLocalSafely(final HttpServletRequest request, final HttpServletResponse response, final String destination) { try {
-	 * response.sendRedirect(request.getContextPath() + destination); } catch (final Exception e) { logger.error(e); } }
-	 */
 }

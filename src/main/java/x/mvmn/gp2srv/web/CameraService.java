@@ -1,6 +1,7 @@
 package x.mvmn.gp2srv.web;
 
 import java.util.List;
+import java.util.Map;
 
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
@@ -25,6 +26,8 @@ public interface CameraService {
 	public GP2CameraEventType waitForEvent(int timeout);
 
 	public List<CameraConfigEntryBean> getConfig();
+
+	public Map<String, CameraConfigEntryBean> getConfigAsMap();
 
 	public CameraService setConfig(CameraConfigEntryBean configEntry);
 

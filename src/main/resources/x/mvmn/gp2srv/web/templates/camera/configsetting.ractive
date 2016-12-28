@@ -5,7 +5,7 @@
 		{{#if showFavToggle}}
 			<span class="favToggleContainer">
 				{{#if !favInProgress}}
-					<input type="checkbox" {{#if confEntry.faved}} checked="checked" {{/if}} on-change="@this.fire('handleFav', event, entryIndex)" />
+					<input type="checkbox" {{#if faved}} checked="checked" {{/if}} on-change="@this.fire('handleFav', event, entryIndex)" />
 				{{/if}}
 				{{#if favInProgress}}
 					<img class="favToggleLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />

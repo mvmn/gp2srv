@@ -18,12 +18,11 @@
 				console.log(favedConfigs);
 				$("#section_camera").html('');
 
-				var entries = []; 
+				var entries = [];
 				for(var confPath in config) {
 					var confEntry = config[confPath];
-					confEntry.faved = favedConfigs[confEntry.path];
-
-					entries.push({confEntry: confEntry, favInProgress: false, favError: false});
+					
+					entries.push({confEntry: confEntry, faved: favedConfigs[confEntry.path], favInProgress: false, favError: false});
 				}
 				var ractive = new Ractive({
 					el: '#section_camera',
@@ -137,7 +136,7 @@
 							ractive.update("entries");
 						}).done(function(data) {
 							entry.favInProgress = false;
-							entry.confEntry.faved = (data===true);
+							entry.faved = (data===true);
 							ractive.update("entries");
 						});
 					}
@@ -168,6 +167,7 @@
 				$("#browseLoadingIndicator").show();
 				getJson("$!{request.contextPath}/browse.json?path=" + encodeURIComponent(browsePath), function(browseData) {
 					$("#browseLoadingIndicator").hide();
+					$("#browseErrorIndicator").hide();
 					navRactive.set("pathElements", browseData.currentBrowsePath.replace(/\/$/g,'').split("/"));
 					navRactive.set("browseData", browseData);
 				}, function() {
@@ -184,7 +184,7 @@
 					loadingIndicator.show();
 					$.ajax({
 						cache: false,
-						url: '$!{request.contextPath}/deletefile?name='+encodeURIComponent(name)+'&folder='+encodeURIComponent(path),
+						url: '$!{request.contextPath}/deletefile?name=' + encodeURIComponent(name) + '&folder=' + encodeURIComponent(path),
 						method: 'POST'
 					}).done(function() {
 						deleteLink.show();

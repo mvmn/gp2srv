@@ -19,6 +19,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import x.mvmn.gp2srv.mock.service.impl.MockCameraServiceImpl;
+import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl;
 import x.mvmn.gp2srv.web.CameraService;
 import x.mvmn.gp2srv.web.service.impl.CameraServiceImpl;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
@@ -29,6 +30,9 @@ import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.ImagesServlet;
 import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
+import x.mvmn.gp2srv.web.servlets.ScriptExecWebSocketNotifier;
+import x.mvmn.gp2srv.web.servlets.ScriptExecutionReportingWebSocketServlet;
+import x.mvmn.gp2srv.web.servlets.ScriptingServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.jlibgphoto2.GP2Camera;
 import x.mvmn.lang.util.Provider;
@@ -53,6 +57,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final File imagesFolder;
 	private final File favouredCamConfSettingsFile;
 	private final FileBackedProperties favouredCamConfSettings;
+	protected final ScriptExecutionServiceImpl scriptExecService = new ScriptExecutionServiceImpl();
+	protected final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
 
 	public static final AtomicBoolean liveViewEnabled = new AtomicBoolean(true);
 	public static final AtomicBoolean liveViewInProgress = new AtomicBoolean(false);
@@ -133,23 +139,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 						EnumSet.of(DispatcherType.REQUEST));
 			}
 
-			// context.addServlet(new ServletHolder(new WebSocketServlet() {
-			// private static final long serialVersionUID = 2418523268586680763L;
-			//
-			// @Override
-			// public void configure(final WebSocketServletFactory factory) {
-			// factory.setCreator(new WebSocketCreator() {
-			// @Override
-			// public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-			// req.getRequestURI();
-			// // TODO Auto-generated method stub
-			// return null;
-			// }
-			// });
-			// }
-			// }), "/ws/*");
-
 			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(camera);
+			scriptExecWebSocketNotifier = new ScriptExecWebSocketNotifier(logger);
+
+			context.addServlet(new ServletHolder(new ScriptExecutionReportingWebSocketServlet(scriptExecService, logger)), "/scriptws");
+			context.addServlet(new ServletHolder(new ScriptingServlet(scriptExecService, scriptExecWebSocketNotifier, velocityContextService, this, logger)),
+					"/scripting/*");
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");

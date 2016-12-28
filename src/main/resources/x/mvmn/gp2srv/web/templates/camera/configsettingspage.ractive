@@ -22,7 +22,7 @@
 		</div>
 	</div>
 	{{#each entries:entryIndex}}
-		{{#if confEntry.faved || !showOnlyFaved}}
+		{{#if faved || !showOnlyFaved}}
 			{{> tplConfigSetting}}
 		{{/if}}
 	{{/each}}
