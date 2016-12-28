@@ -31,6 +31,14 @@ public class ScriptStep {
 		}
 
 		if (execute) {
+			CameraConfigEntryBean configEntry = null;
+			if (ScriptStepType.CAMPROP_SET.equals(type)) {
+				configEntry = cameraService.getConfigAsMap().get(key);
+				if (configEntry != null) {
+					context.set("__camprop", configEntry);
+				}
+			}
+
 			Object evaluatedValue = (expressionExpressionCache == null ? (expressionExpressionCache = engine.createExpression(expression))
 					: expressionExpressionCache).evaluate(context);
 			String evaluatedValueAsString = evaluatedValue.toString();
@@ -53,7 +61,6 @@ public class ScriptStep {
 					context.set(key, evaluatedValue);
 				break;
 				case CAMPROP_SET:
-					CameraConfigEntryBean configEntry = cameraService.getConfigAsMap().get(key);
 					if (configEntry != null) {
 						switch (configEntry.getValueType()) {
 							case FLOAT:

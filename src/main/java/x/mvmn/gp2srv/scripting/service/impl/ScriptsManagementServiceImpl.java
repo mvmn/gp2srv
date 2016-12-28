@@ -23,7 +23,7 @@ public class ScriptsManagementServiceImpl {
 	};
 
 	protected final File scriptsFolder;
-	protected final Gson gson = new GsonBuilder().create();
+	protected final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public ScriptsManagementServiceImpl(final File scriptsFolder, final Logger logger) {
 		this.scriptsFolder = scriptsFolder;
@@ -42,6 +42,15 @@ public class ScriptsManagementServiceImpl {
 	public List<ScriptStep> load(final String name) throws IOException {
 		File file = new File(scriptsFolder, normalizeScriptName(name));
 		return file.exists() ? Arrays.asList(gson.fromJson(FileUtils.readFileToString(file, StandardCharsets.UTF_8), ScriptStep[].class)) : null;
+	}
+
+	public boolean delete(final String name) throws IOException {
+		File file = new File(scriptsFolder, normalizeScriptName(name));
+		if (file.exists()) {
+			return file.delete();
+		} else {
+			return false;
+		}
 	}
 
 	public String normalizeScriptName(final String name) {

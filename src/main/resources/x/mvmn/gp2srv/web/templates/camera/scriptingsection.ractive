@@ -1,0 +1,55 @@
+<div class="siteContentElementContainer">
+	<div>
+		<input type="button" on-click="loadScriptsList" value="List scripts" />
+		<input type="button" on-click="createNewScript" value="New script" />
+	</div>
+	<div style="padding-top: 6px;">
+	{{#each scriptFiles}}
+		<div>
+			<img style="display: none" class="deleteLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+			<img style="display: none" class="deleteErrorIndicator" src="{{contextPath}}/static/warning.png" />
+			[
+				<a href="#" on-click="@this.fire('deleteScript', event, .)">x</a>
+			]	
+			<a href="#" on-click="@this.fire('loadScript', event, .)">{{.}}</a>
+		</div>
+	{{/each}}
+	</div>
+</div>
+{{#if scriptSteps}}
+<div id="scriptEditor">
+	<div class="siteContentElementContainer subsectionHeading">	
+		{{scriptName}}{{#if isDirty}} *{{/if}}
+
+		<img style="display: none" class="loadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+		<img style="display: none" class="errorIndicator" src="{{contextPath}}/static/warning.png" />		
+	</div>
+	<div class="siteContentElementContainer">
+		<input type="button" value="Save" on-click="saveScript" />
+		<input type="button" value="Run" on-click="runScript" />
+		<input type="button" value="Stop" on-click="stopScript" style="display: none" />
+	</div>
+	<div class="siteContentElementContainer">
+		<div>
+			{{#each scriptSteps:stepIndex}}
+				<div style="padding-bottom: 8px">
+					<div><input type="text" value="{{condition}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'condition', stepIndex, event.node.value)" /></div>
+					<div>
+						<select on-change="@this.fire('scriptStepPropertyChanged', event, 'type', stepIndex, event.node.value)">
+							{{#each scriptStepTypes}}
+								<option value="{{key}}" {{#if type == key}}selected="selected"{{/if}}>{{name}}</option>
+							{{/each}}
+						</select>
+					</div>
+					<div>
+						<input type="text" value="{{key}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)" />
+					</div>
+					<div>
+						<input type="text" value="{{expression}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'expression', stepIndex, event.node.value)" />
+					</div>
+				</div>
+			{{/each}}
+		</div>
+	</div>
+</div>
+{{/if}}

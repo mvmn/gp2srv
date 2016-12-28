@@ -90,11 +90,14 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 		final String path = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
 		try {
-			if ("/scripts/write".equals(path)) {
+			if ("/scripts/put".equals(path)) {
 				String scriptName = scriptManagementService.normalizeScriptName(request.getParameter("name"));
 
 				ScriptStep[] script = GSON.fromJson(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8), ScriptStep[].class);
 				serveJson(scriptManagementService.save(scriptName, Arrays.asList(script)), response);
+			} else if ("/scripts/delete".equals(path)) {
+				String scriptName = scriptManagementService.normalizeScriptName(request.getParameter("name"));
+				serveJson(scriptManagementService.delete(scriptName), response);
 			} else if ("/scripts/exec/dumpvars".equals(path)) {
 				this.scriptDumpVars.set(Boolean.valueOf(request.getParameter("enable")));
 			} else if ("/scripts/exec/stop".equals(path)) {
