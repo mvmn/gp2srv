@@ -2,6 +2,7 @@ package x.mvmn.gp2srv.scripting.model;
 
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
 
 import x.mvmn.gp2srv.web.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
@@ -18,29 +19,34 @@ public class ScriptStep {
 	protected String expression;
 	protected String condition;
 
-	public void execute(CameraService cameraService, JexlEngine engine, JexlContext context) {
-		context.set("currentTimeMillis", System.currentTimeMillis());
+	protected volatile JexlExpression conditionExpressionCache;
+	protected volatile JexlExpression expressionExpressionCache;
 
+	public void execute(CameraService cameraService, JexlEngine engine, JexlContext context) {
 		boolean execute = true;
 		if (condition != null && !condition.trim().isEmpty()) {
-			execute = Boolean.valueOf(engine.createExpression(condition).evaluate(context).toString());
+			execute = Boolean
+					.valueOf((conditionExpressionCache == null ? (conditionExpressionCache = engine.createExpression(condition)) : conditionExpressionCache)
+							.evaluate(context).toString());
 		}
 
 		if (execute) {
-			String evaluatedValue = engine.createExpression(expression).evaluate(context).toString();
+			Object evaluatedValue = (expressionExpressionCache == null ? (expressionExpressionCache = engine.createExpression(expression))
+					: expressionExpressionCache).evaluate(context);
+			String evaluatedValueAsString = evaluatedValue.toString();
 
 			switch (type) {
 				case CAPTURE:
 					cameraService.capture();
 				break;
 				case DELAY:
-					ensuredWait(Long.parseLong(evaluatedValue));
+					ensuredWait(Long.parseLong(evaluatedValueAsString));
 				break;
 				case CAMEVENT_WAIT:
 					if (key != null) {
-						cameraService.waitForSpecificEvent(Integer.parseInt(evaluatedValue), GP2CameraEventType.getByCode(Integer.parseInt(key)));
+						cameraService.waitForSpecificEvent(Integer.parseInt(evaluatedValueAsString), GP2CameraEventType.getByCode(Integer.parseInt(key)));
 					} else {
-						cameraService.waitForEvent(Integer.parseInt(evaluatedValue));
+						cameraService.waitForEvent(Integer.parseInt(evaluatedValueAsString));
 					}
 				break;
 				case VAR_SET:
@@ -51,13 +57,13 @@ public class ScriptStep {
 					if (configEntry != null) {
 						switch (configEntry.getValueType()) {
 							case FLOAT:
-								configEntry = configEntry.cloneWithNewValue(Float.parseFloat(evaluatedValue));
+								configEntry = configEntry.cloneWithNewValue(Float.parseFloat(evaluatedValueAsString));
 							break;
 							case INT:
-								configEntry = configEntry.cloneWithNewValue(Integer.parseInt(evaluatedValue));
+								configEntry = configEntry.cloneWithNewValue(Integer.parseInt(evaluatedValueAsString));
 							break;
 							case STRING:
-								configEntry = configEntry.cloneWithNewValue(evaluatedValue);
+								configEntry = configEntry.cloneWithNewValue(evaluatedValueAsString);
 							break;
 						}
 						cameraService.setConfig(configEntry);

@@ -2,6 +2,7 @@ package x.mvmn.gp2srv.web.servlets;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jetty.websocket.api.Session;
 
@@ -16,9 +17,11 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 
 	private static final Gson GSON = new GsonBuilder().create();
 	private final Logger logger;
+	private final AtomicBoolean dumpVars;
 
-	public ScriptExecWebSocketNotifier(final Logger logger) {
+	public ScriptExecWebSocketNotifier(final Logger logger, AtomicBoolean dumpVars) {
 		this.logger = logger;
+		this.dumpVars = dumpVars;
 	}
 
 	public void preStep(ScriptExecution execution) {
@@ -69,8 +72,15 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 
 	protected String toJson(ScriptExecution execution, String eventType) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("stepNumber", execution.getCurrentStep());
-		result.put("eventType", eventType);
+		if (dumpVars.get()) {
+			result.putAll(execution.dumpVariables(true));
+		}
+		result.put("__eventType", eventType);
+		result.put("__scriptName", execution.getScriptName());
+		result.put("__stepNumber", execution.getCurrentStep());
+		if (execution.getLatestError() != null) {
+			result.put("__latesterror", execution.getLatestError());
+		}
 		return GSON.toJson(result);
 	}
 }

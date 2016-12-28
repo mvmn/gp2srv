@@ -116,8 +116,8 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 	@Override
 	public void doGet(final HttpServletRequest request, final HttpServletResponse response) {
-		processRequestByPath(request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : ""), makeVelocityContext(request, response),
-				request, response, logger);
+		final String path = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
+		processRequestByPath(path, makeVelocityContext(request, response), request, response, logger);
 	}
 
 	protected void processRequestByPath(final String requestPath, final Context velocityContext, final HttpServletRequest request,

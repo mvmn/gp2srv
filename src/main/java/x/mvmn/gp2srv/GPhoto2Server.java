@@ -20,6 +20,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import x.mvmn.gp2srv.mock.service.impl.MockCameraServiceImpl;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl;
+import x.mvmn.gp2srv.scripting.service.impl.ScriptsManagementServiceImpl;
 import x.mvmn.gp2srv.web.CameraService;
 import x.mvmn.gp2srv.web.service.impl.CameraServiceImpl;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
@@ -55,10 +56,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final File userHome;
 	private final File appHomeFolder;
 	private final File imagesFolder;
+	private final File scriptsFolder;
 	private final File favouredCamConfSettingsFile;
 	private final FileBackedProperties favouredCamConfSettings;
-	protected final ScriptExecutionServiceImpl scriptExecService = new ScriptExecutionServiceImpl();
-	protected final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
+	private final ScriptsManagementServiceImpl scriptManagementService;
+	private final ScriptExecutionServiceImpl scriptExecService;
+	private final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
 
 	public static final AtomicBoolean liveViewEnabled = new AtomicBoolean(true);
 	public static final AtomicBoolean liveViewInProgress = new AtomicBoolean(false);
@@ -115,6 +118,8 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			appHomeFolder.mkdir();
 			imagesFolder = new File(appHomeFolder, "img");
 			imagesFolder.mkdirs();
+			scriptsFolder = new File(appHomeFolder, "scripts");
+			scriptsFolder.mkdirs();
 			favouredCamConfSettingsFile = new File(appHomeFolder, "favouredConfs.properties");
 			if (!favouredCamConfSettingsFile.exists()) {
 				favouredCamConfSettingsFile.createNewFile();
@@ -140,11 +145,14 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			}
 
 			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(camera);
-			scriptExecWebSocketNotifier = new ScriptExecWebSocketNotifier(logger);
+			AtomicBoolean scriptDumpVars = new AtomicBoolean(true);
+			scriptManagementService = new ScriptsManagementServiceImpl(scriptsFolder, logger);
+			scriptExecService = new ScriptExecutionServiceImpl(logger);
+			scriptExecWebSocketNotifier = new ScriptExecWebSocketNotifier(logger, scriptDumpVars);
 
 			context.addServlet(new ServletHolder(new ScriptExecutionReportingWebSocketServlet(scriptExecService, logger)), "/scriptws");
-			context.addServlet(new ServletHolder(new ScriptingServlet(scriptExecService, scriptExecWebSocketNotifier, velocityContextService, this, logger)),
-					"/scripting/*");
+			context.addServlet(new ServletHolder(new ScriptingServlet(cameraService, scriptManagementService, scriptExecService, scriptExecWebSocketNotifier,
+					scriptDumpVars, velocityContextService, this, logger)), "/scripts/*");
 
 			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
