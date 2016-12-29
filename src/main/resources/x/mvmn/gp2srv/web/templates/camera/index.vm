@@ -176,7 +176,7 @@
 				});
 			},
 			deleteFile: function(event, path, name) {
-				if(confirm("Delete file "+path+"/"+name+"?")) {
+				if(confirm("Delete file "+path.replace(/\/$/g,'')+"/"+name+"?")) {
 					var ractive = this;
 					var deleteLink = $(event.node);
 					var loadingIndicator = $(event.node).parent().find(".deleteLoadingIndicator");
@@ -296,7 +296,7 @@
 			    webSocket.onclose = function() {
 			        setTimeout(function(){
 			        	if(webSocket.readyState != 1) {
-			        		if(!webSocket.doNotReconnect) {
+			        		if(!ractive.get("traceWebSocketDontReconnect")) {
 			        			webSocket.close();
 				        		startTraceWebSocket(handler, ractive);
 				        	}
@@ -309,13 +309,14 @@
 			scriptingRactive.on({
 				stopTracing: function(event) {
 					var ws = scriptingRactive.get("traceWebSocket");
-					ws.doNotReconnect = true;
+					scriptingRactive.set("traceWebSocketDontReconnect", true);
 					ws.close();
 					scriptingRactive.set("activeScriptStepIndex", null);
 					$("#btnStartTracing").show();
 					$("#btnStoptTracing").hide();				
 				},
 				startTracing: function(event) {
+					scriptingRactive.set("traceWebSocketDontReconnect", false);
 					checkSaveRequired(scriptingRactive, function() {
 						getJson("$!{request.contextPath}/scripts/exec/current/steps", function(scriptSteps) {
 							scriptingRactive.set("scriptSteps", scriptSteps);
