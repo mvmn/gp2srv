@@ -3,7 +3,7 @@ package x.mvmn.gp2srv.web.servlets;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,11 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.scripting.model.ScriptStep;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecution;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptsManagementServiceImpl;
-import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.lang.util.Provider;
@@ -55,30 +55,25 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				serveJson(scriptManagementService.load(request.getParameter("name")), response);
 			} else if ("/scripts/exec/current".equals(path)) {
 				ScriptExecution currentExecution = scriptExecService.getCurrentExecution();
-				Map<String, Object> result = new HashMap<String, Object>();
+				Map<String, Object> result = Collections.emptyMap();
 				if (currentExecution != null) {
-					if (scriptDumpVars.get()) {
-						result.putAll(currentExecution.dumpVariables(true));
-					}
-					result.put("___scriptName", currentExecution.getScriptName());
-					result.put("___currentStep", currentExecution.getCurrentStep());
-					result.put("___totalStepsPassed", currentExecution.getTotalStepsPassed());
-					result.put("___latestError", currentExecution.getLatestError());
-					result.put("___errors", currentExecution.getErrors());
+					result = ScriptExecWebSocketNotifier.toExecutionInfoDTO(currentExecution, "___", null, scriptDumpVars.get(), true);
+				}
+				serveJson(result, response);
+			} else if ("/scripts/exec/current/steps".equals(path)) {
+				List<ScriptStep> result;
+				ScriptExecution currentExecution = scriptExecService.getCurrentExecution();
+				if (currentExecution != null) {
+					result = Arrays.asList(currentExecution.getScriptSteps());
+				} else {
+					result = Collections.emptyList();
 				}
 				serveJson(result, response);
 			} else if ("/scripts/exec/finished".equals(path)) {
 				ScriptExecution finishedExecution = scriptExecService.getLatestFinishedExecution();
-				Map<String, Object> result = new HashMap<String, Object>();
+				Map<String, Object> result = Collections.emptyMap();
 				if (finishedExecution != null) {
-					if (scriptDumpVars.get()) {
-						result.putAll(finishedExecution.dumpVariables(true));
-					}
-					result.put("___scriptName", finishedExecution.getScriptName());
-					result.put("___currentStep", finishedExecution.getCurrentStep());
-					result.put("___totalStepsPassed", finishedExecution.getTotalStepsPassed());
-					result.put("___latestError", finishedExecution.getLatestError());
-					result.put("___errors", finishedExecution.getErrors());
+					result = ScriptExecWebSocketNotifier.toExecutionInfoDTO(finishedExecution, "___", null, scriptDumpVars.get(), true);
 				}
 				serveJson(result, response);
 			}

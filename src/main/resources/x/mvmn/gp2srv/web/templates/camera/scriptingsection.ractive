@@ -30,6 +30,10 @@
 		<input type="button" value="Stop" on-click="stopScript" id="btnScriptStop" />
 		<span id="runStopStatusText" class="small"></span>
 	</div>
+	<div class="siteContentElementContainer">
+		<input type="button" value="Trace currently running script" id="btnStartTracing" on-click="startTracing" />
+		<input type="button" value="Stop tracing" id="btnStoptTracing" style="display: none" on-click="stopTracing" />
+	</div>
 	<div class="siteContentElementContainer" style="padding-top: 0px">
 		<div class="smaller">
 			<span on-click="toggleScriptVarsHint">Variables provided to scripts (click to show/hide)</span>
@@ -43,13 +47,13 @@
 		</div>
 		<div style="padding-bottom: 8px">
 			{{#each scriptSteps:stepIndex}}
-				<div style="padding-bottom: 8px">
+				<div style="padding-bottom: 8px" {{#if stepIndex == activeScriptStepIndex }}class="activeStep"{{/if}}>
 					<div>
 						<input type="button" value="↑" on-click="@this.fire('swapScriptSteps', event, stepIndex-1, stepIndex)" />
 						<input type="button" value="x" on-click="@this.fire('deleteScriptStep', event, stepIndex)" />
 						if (<input type="text" value="{{condition}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'condition', stepIndex, event.node.value)" />) then
 					</div>
-					<div {{#if stepIndex == activeScriptStepIndex }}class="activeStep"{{/if}}>
+					<div>
 						<input type="button" value="↓" on-click="@this.fire('swapScriptSteps', event, stepIndex, stepIndex+1)" />
 						<select on-change="@this.fire('scriptStepPropertyChanged', event, 'type', stepIndex, event.node.value)">
 							{{#each scriptStepTypes}}
@@ -101,12 +105,20 @@
 {{/if}}
 <div id="scriptEditor">
 	<div class="siteContentElementContainer subsectionHeading">	
-		Script status 
-		<input type="button" value="Currently running" on-click="@this.fire('loadScriptStatus', event, 'current')" /> 
-		<input type="button" value="Latest finished" on-click="@this.fire('loadScriptStatus', event, 'finished')" />
-		
-		<img style="display: none" id="scriptStatusLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
-		<img style="display: none" id="scriptStatusErrorIndicator" src="{{contextPath}}/static/warning.png" />		
+		<div>
+			Script status 
+			<input type="button" value="Currently running" on-click="@this.fire('loadScriptStatus', event, 'current')" /> 
+			<input type="button" value="Latest finished" on-click="@this.fire('loadScriptStatus', event, 'finished')" />
+			
+			<img style="display: none" id="scriptStatusLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+			<img style="display: none" id="scriptStatusErrorIndicator" src="{{contextPath}}/static/warning.png" />
+		</div>
+		<div class="smaller">
+			<input type="checkbox" on-change="setCurrentScriptStatusAutoUpdate" />
+			Auto-get each
+			<input id="setCurrentScriptStatusAutoUpdateIntervalInput" type="text" value="5" size="6" />
+			sec (for running)
+		</div>
 	</div>
 	<div class="siteContentElementContainer">
 		<div style="padding-bottom: 6px">
@@ -120,9 +132,9 @@
 			<div style="padding-bottom: 6px">
 				<span class="headline">{{scriptExecutionStatusInfo.___scriptName}}</span>
 				<span>@ step #{{scriptExecutionStatusInfo.___currentStep}}</span>
-				<div>({{scriptExecutionStatusInfo.___totalStepsPassed}} steps passed in total)</div>
+				<div class="small">({{scriptExecutionStatusInfo.___totalStepsPassed}} steps passed in total)</div>
 			</div>
-			<div style="padding-bottom: 6px">
+			<div style="padding-bottom: 6px" class="smaller">
 				{{#each scriptExecutionStatusInfo}}
 					{{#if @key != '___errors' && @key != '___scriptName' && @key != '___currentStep' && @key != '___latestError' && @key != '___totalStepsPassed'}}
 						<div><span>{{@key}}</span> = <span>{{.}}</span></div> 
@@ -130,10 +142,13 @@
 				{{/each}}
 			</div>
 			{{#if scriptExecutionStatusInfo.___latestError}}
-				<div><span>Latest error:</span><span>{{scriptExecutionStatusInfo.___latestError}}</span></div>
+				<div class="small">
+					<span>Latest error:</span>
+					<span>{{scriptExecutionStatusInfo.___latestError}}</span>
+				</div>
 			{{/if}}
 			{{#if scriptExecutionStatusInfo.___errors}}
-				<div style="padding-bottom: 6px">
+				<div style="padding-bottom: 6px" class="smaller">
 					<div>Errors:</div>
 					{{#each scriptExecutionStatusInfo.___errors}}
 						<div>{{.}}</div>

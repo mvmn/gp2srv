@@ -275,7 +275,86 @@
 				}
 			}
 			
+			var loadScriptsStatus = function(type) {
+				$("#scriptStatusLoadingIndicator").show();
+				$("#scriptStatusErrorIndicator").hide();
+				getJson("$!{request.contextPath}/scripts/exec/"+type, function(data) {
+					$("#scriptStatusLoadingIndicator").hide();
+					$("#scriptStatusErrorIndicator").hide();
+					scriptingRactive.set("scriptExecutionStatusInfo", data);
+				}, function(jqXHR, textStatus) {
+					$("#scriptStatusLoadingIndicator").hide();
+					$("#scriptStatusErrorIndicator").show();
+					console.log("Error loading script status: "+textStatus);
+				});
+			};
+			
+			function startTraceWebSocket(handler, ractive){
+			    var webSocket = new WebSocket("ws://"+window.location.hostname+":"+window.location.port+"$!{request.contextPath}/scriptws");
+				ractive.set("traceWebSocket", webSocket);
+			    webSocket.onmessage = handler;
+			    webSocket.onclose = function() {
+			        setTimeout(function(){
+			        	if(webSocket.readyState != 1) {
+			        		if(!webSocket.doNotReconnect) {
+			        			webSocket.close();
+				        		startTraceWebSocket(handler, ractive);
+				        	}
+			        	}
+			        }, 1000);
+			    };
+			}
+
+			
 			scriptingRactive.on({
+				stopTracing: function(event) {
+					var ws = scriptingRactive.get("traceWebSocket");
+					ws.doNotReconnect = true;
+					ws.close();
+					scriptingRactive.set("activeScriptStepIndex", null);
+					$("#btnStartTracing").show();
+					$("#btnStoptTracing").hide();				
+				},
+				startTracing: function(event) {
+					checkSaveRequired(scriptingRactive, function() {
+						getJson("$!{request.contextPath}/scripts/exec/current/steps", function(scriptSteps) {
+							scriptingRactive.set("scriptSteps", scriptSteps);
+							scriptingRactive.set("isDirty", false);
+							$("#btnStartTracing").hide();
+							$("#btnStoptTracing").show();
+						
+							startTraceWebSocket(function(event) {
+								var eventData = JSON.parse(event.data);
+								scriptingRactive.set("scriptName", eventData.___scriptName);
+								scriptingRactive.set("scriptExecutionStatusInfo", eventData);
+								if(eventData.___eventType == 'preStep') {
+									scriptingRactive.set("activeScriptStepIndex", eventData.___currentStep);
+								} else if(eventData.___eventType == 'postStep') {
+									scriptingRactive.set("activeScriptStepIndex", null);
+								}
+							}, scriptingRactive);
+						
+						}, function(jqXHR, textStatus) {
+							alert("Error loading currently running script steps: "+textStatus);
+						});
+					});
+				},
+				setCurrentScriptStatusAutoUpdate: function(event) {
+					var interval = parseInt($("#setCurrentScriptStatusAutoUpdateIntervalInput").val());
+					if(!interval>0) { // covers NaN
+						interval = 1;
+					}
+					interval = interval * 1000;
+					if(event.node.checked) {
+						var loadScriptsStatusIntervalObj = setInterval(function() {
+							loadScriptsStatus('current');
+						}, interval);
+						scriptingRactive.set('loadScriptsStatusIntervalObj', loadScriptsStatusIntervalObj);
+					} else {
+						var loadScriptsStatusIntervalObj = scriptingRactive.get('loadScriptsStatusIntervalObj');
+						clearInterval(loadScriptsStatusIntervalObj);
+					}
+				},
 				setScriptVarDump: function(event, val) {
 					$("#varDumpLoadingIndicator").show();
 					$("#varDumpErrorIndicator").hide();				
@@ -292,19 +371,7 @@
 						console.log("Error setting script variables dumping: "+textStatus);
 					});
 				},
-				loadScriptStatus: function(event, type) {
-					$("#scriptStatusLoadingIndicator").show();
-					$("#scriptStatusErrorIndicator").hide();
-					getJson("$!{request.contextPath}/scripts/exec/"+type, function(data) {
-						$("#scriptStatusLoadingIndicator").hide();
-						$("#scriptStatusErrorIndicator").hide();
-						scriptingRactive.set("scriptExecutionStatusInfo", data);
-					}, function(jqXHR, textStatus) {
-						$("#scriptStatusLoadingIndicator").hide();
-						$("#scriptStatusErrorIndicator").show();
-						console.log("Error loading script status: "+textStatus);
-					});
-				},
+				loadScriptStatus: function(event, type) { loadScriptsStatus(type) },
 				toggleScriptVarsHint: function() {
 					$("#scriptVarsHint").toggle();
 				},
@@ -405,6 +472,7 @@
 							scriptingRactive.set("scriptSteps", scriptSteps);
 							scriptingRactive.set("scriptName", scriptName);
 							scriptingRactive.set("isDirty", false);
+							scriptingRactive.set("activeScriptStepIndex", null);
 							$("#scriptVarsHint").hide();
 						}, function(textStatus){
 							console.log("Error loading script: " + textStatus);

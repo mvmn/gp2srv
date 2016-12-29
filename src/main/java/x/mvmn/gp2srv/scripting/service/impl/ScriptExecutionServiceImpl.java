@@ -99,6 +99,10 @@ public class ScriptExecutionServiceImpl {
 			this.cameraService = cameraService;
 		}
 
+		public ScriptStep[] getScriptSteps() {
+			return steps;
+		}
+
 		public Set<String> getVariables() {
 			return context.variableNames();
 		}

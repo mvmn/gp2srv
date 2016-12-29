@@ -16,7 +16,7 @@ public class ImageUtil {
 		}
 
 		// 765 - 255 * 3
-		return (result / argbs.length) / 765;
+		return (result / argbs.length) / 7.65d;
 	}
 
 	public static int argbToAlpha(int argb) {

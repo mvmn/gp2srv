@@ -134,3 +134,6 @@ body {
     background-color: black;
 	color: white;
 }
+.activeStep {
+	background-color: green;
+}

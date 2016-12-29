@@ -60,7 +60,7 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 		for (Session session : ScriptExecutionReportingWebSocketServlet.WEB_SOCKET_SESSIONS) {
 			try {
 				if (session.isOpen()) {
-					session.getRemote().sendString(toJson(execution, eventType));
+					session.getRemote().sendString(GSON.toJson(toExecutionInfoDTO(execution, "___", eventType, dumpVars.get(), false)));
 				} else {
 					ScriptExecutionReportingWebSocketServlet.WEB_SOCKET_SESSIONS.remove(session);
 				}
@@ -70,17 +70,22 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 		}
 	}
 
-	protected String toJson(ScriptExecution execution, String eventType) {
+	public static Map<String, Object> toExecutionInfoDTO(final ScriptExecution execution, final String keyPrefix, final String eventType,
+			final boolean dumpVariables, final boolean dumpAllErrors) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		if (dumpVars.get()) {
+		if (dumpVariables) {
 			result.putAll(execution.dumpVariables(true));
 		}
-		result.put("__eventType", eventType);
-		result.put("__scriptName", execution.getScriptName());
-		result.put("__stepNumber", execution.getCurrentStep());
-		if (execution.getLatestError() != null) {
-			result.put("__latesterror", execution.getLatestError());
+
+		result.put(keyPrefix + "eventType", eventType);
+		result.put(keyPrefix + "scriptName", execution.getScriptName());
+		result.put(keyPrefix + "currentStep", execution.getCurrentStep());
+		result.put(keyPrefix + "totalStepsPassed", execution.getTotalStepsPassed());
+		result.put(keyPrefix + "latestError", execution.getLatestError());
+		if (dumpAllErrors) {
+			result.put(keyPrefix + "errors", execution.getErrors());
 		}
-		return GSON.toJson(result);
+
+		return result;
 	}
 }

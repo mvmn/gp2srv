@@ -19,8 +19,8 @@ public class ScriptStep {
 	protected String expression;
 	protected String condition;
 
-	protected volatile JexlExpression conditionExpressionCache;
-	protected volatile JexlExpression expressionExpressionCache;
+	protected transient volatile JexlExpression conditionExpressionCache;
+	protected transient volatile JexlExpression expressionExpressionCache;
 
 	public void execute(CameraService cameraService, JexlEngine engine, JexlContext context) {
 		boolean execute = true;
