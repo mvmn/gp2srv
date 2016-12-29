@@ -25,30 +25,65 @@
 		<img style="display: none" class="errorIndicator" src="{{contextPath}}/static/warning.png" />		
 	</div>
 	<div class="siteContentElementContainer">
-		<input type="button" value="Save" on-click="saveScript" />
-		<input type="button" value="Run" on-click="runScript" />
-		<input type="button" value="Stop" on-click="stopScript" style="display: none" />
+		<input type="button" value="Save" on-click="saveScript" id="btnScriptSave" />
+		<input type="button" value="Run"  on-click="runScript" id="btnScriptRun" />
+		<input type="button" value="Stop" on-click="stopScript" id="btnScriptStop" />
 	</div>
 	<div class="siteContentElementContainer">
-		<div>
+		<div style="padding-bottom: 8px">
 			{{#each scriptSteps:stepIndex}}
 				<div style="padding-bottom: 8px">
-					<div><input type="text" value="{{condition}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'condition', stepIndex, event.node.value)" /></div>
 					<div>
+						<input type="button" value="↑" on-click="@this.fire('swapScriptSteps', event, stepIndex-1, stepIndex)" />
+						<input type="button" value="x" on-click="@this.fire('deleteScriptStep', event, stepIndex)" />
+						if (<input type="text" value="{{condition}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'condition', stepIndex, event.node.value)" />) then
+					</div>
+					<div {{#if stepIndex == activeScriptStepIndex }}class="activeStep"{{/if}}>
+						<input type="button" value="↓" on-click="@this.fire('swapScriptSteps', event, stepIndex, stepIndex+1)" />
 						<select on-change="@this.fire('scriptStepPropertyChanged', event, 'type', stepIndex, event.node.value)">
 							{{#each scriptStepTypes}}
 								<option value="{{key}}" {{#if type == key}}selected="selected"{{/if}}>{{name}}</option>
 							{{/each}}
 						</select>
+						{{#if type != 'CAPTURE' || type != 'DELAY' }}
+							{{#if type == 'VAR_SET' }}
+								<input type="text" value="{{key}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)" />
+							{{/if}}
+							{{#if type == 'CAMEVENT_WAIT' }}
+								<select on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)">
+									{{#each cameraEventTypes}}
+										<option value="{{key}}" {{#if key == type}}selected="selected"{{/if}}>{{name}}</option>
+									{{/each}}
+								</select>						
+							{{/if}}
+							{{#if type == 'CAMPROP_SET' }}
+								<select on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)">
+									{{#each config}}
+										<option value="{{path}}" {{#if key == path}}selected="selected"{{/if}}>{{label}}</option>
+									{{/each}}
+								</select>
+							{{/if}}
+						{{/if}}
 					</div>
-					<div>
-						<input type="text" value="{{key}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)" />
-					</div>
-					<div>
-						<input type="text" value="{{expression}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'expression', stepIndex, event.node.value)" />
+					<div>			
+						{{#if type == 'CAMPROP_SET' || type == 'VAR_SET' }}
+							to
+						{{/if}}
+						{{#if type == 'DELAY' || type == 'CAMEVENT_WAIT' }}
+							for
+						{{/if}}
+						{{#if type != 'CAPTURE'}}
+							<input type="text" size="40" value="{{expression}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'expression', stepIndex, event.node.value)" />
+						{{/if}}
+						{{#if type == 'DELAY' || type == 'CAMEVENT_WAIT' }}
+							ms
+						{{/if}}
 					</div>
 				</div>
 			{{/each}}
+		</div>
+		<div>
+			<input type="button" value="Add step" on-click="addScriptStep" />
 		</div>
 	</div>
 </div>

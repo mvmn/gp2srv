@@ -1,4 +1,4 @@
-package x.mvmn.gp2srv.web;
+package x.mvmn.gp2srv.camera;
 
 import java.util.List;
 import java.util.Map;

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import x.mvmn.gp2srv.GPhoto2Server;
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;

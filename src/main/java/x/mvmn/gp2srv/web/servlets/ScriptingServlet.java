@@ -18,7 +18,7 @@ import x.mvmn.gp2srv.scripting.model.ScriptStep;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecution;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptsManagementServiceImpl;
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.lang.util.Provider;
@@ -114,7 +114,7 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				List<ScriptStep> scriptContent = scriptManagementService.load(scriptName);
 				String result;
 				if (scriptContent != null) {
-					execution = scriptExecService.execute(cameraService, scriptName, scriptContent, scriptExecWebSocketNotifier);
+					execution = scriptExecService.execute(cameraService, logger, scriptName, scriptContent, scriptExecWebSocketNotifier);
 					if (execution != null) {
 						result = "Script has been run";
 					} else {

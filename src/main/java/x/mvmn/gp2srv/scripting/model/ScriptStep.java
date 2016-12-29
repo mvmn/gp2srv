@@ -4,7 +4,7 @@ import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
 
@@ -33,7 +33,7 @@ public class ScriptStep {
 		if (execute) {
 			CameraConfigEntryBean configEntry = null;
 			if (ScriptStepType.CAMPROP_SET.equals(type)) {
-				configEntry = cameraService.getConfigAsMap().get(key);
+				configEntry = cameraService.getConfigAsMap().get(key.trim());
 				if (configEntry != null) {
 					context.set("__camprop", configEntry);
 				}
@@ -51,8 +51,9 @@ public class ScriptStep {
 					ensuredWait(Long.parseLong(evaluatedValueAsString));
 				break;
 				case CAMEVENT_WAIT:
-					if (key != null) {
-						cameraService.waitForSpecificEvent(Integer.parseInt(evaluatedValueAsString), GP2CameraEventType.getByCode(Integer.parseInt(key)));
+					if (key != null && !key.trim().isEmpty()) {
+						cameraService.waitForSpecificEvent(Integer.parseInt(evaluatedValueAsString),
+								GP2CameraEventType.getByCode(Integer.parseInt(key.trim())));
 					} else {
 						cameraService.waitForEvent(Integer.parseInt(evaluatedValueAsString));
 					}

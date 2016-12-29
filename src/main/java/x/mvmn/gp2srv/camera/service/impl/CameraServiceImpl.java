@@ -1,11 +1,11 @@
-package x.mvmn.gp2srv.web.service.impl;
+package x.mvmn.gp2srv.camera.service.impl;
 
 import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera;

@@ -200,141 +200,219 @@
 			}
 		});
 
-		var scriptingRactive = new Ractive({
-			el: '#section_scripts',
-			template: '#tplScriptingSection',
-			data: {contextPath:"$!{request.contextPath}", scriptFiles:[], scriptStepTypes:[
-				{key:'CAPTURE', name:'Capture photo'},
-				{key:'DELAY', name:'Wait'},
-				{key:'CAMEVENT_WAIT', name:'Await cam event'},
-				{key:'CAMPROP_SET', name:'Set cam property'}, 
-				{key:'VAR_SET', name:'Set variable'}
-			]}
-		});
-
-		var saveCurrentScript = function(ractive, successCallback) {
-			var scriptName = ractive.get("scriptName");
-			var scriptSteps = ractive.get("scriptSteps");
-
-			var loadingIndicator = $("#scriptEditor .loadingIndicator");
-			var errorIndicator = $("#scriptEditor .errorIndicator");
-
-			loadingIndicator.show();
-			errorIndicator.hide();
-			$.ajax({
-				url: "$!{request.contextPath}/scripts/put?name=" + encodeURIComponent(scriptName), 
-				method: 'POST', 
-				contentType: 'application/json',
-				data: JSON.stringify(scriptSteps),
-				dataType: 'json'
-			}).done(function(data) {
-				loadingIndicator.hide();
-				errorIndicator.hide();
-				ractive.set("isDirty", false);
-				if(successCallback) {
-					successCallback();
+		getJson("$!{request.contextPath}/cameraConfig.json?reRead=true", function(config) {
+			var scriptingRactive = new Ractive({
+				el: '#section_scripts',
+				template: '#tplScriptingSection',
+				data: {contextPath:"$!{request.contextPath}", 
+					scriptFiles:[], 
+					scriptStepTypes:[
+						{key:'CAPTURE', name:'Capture photo'},
+						{key:'DELAY', name:'Wait'},
+						{key:'CAMEVENT_WAIT', name:'Await cam event'},
+						{key:'CAMPROP_SET', name:'Set cam property'}, 
+						{key:'VAR_SET', name:'Set variable'}
+					],
+					cameraEventTypes:[
+						{type:'', name:'Any'},
+						{type:'4', name:'Capture done'},
+						{type:'2', name:'File added'},
+						{type:'3', name:'Folder added'},
+						{type:'1', name:'Timeout'},
+						{type:'0', name:'Unknown'}
+					],
+					config: config
 				}
-			}).fail(function(jqXHR, textStatus) {
-				console.log("Error saving script: " + textStatus);
-				loadingIndicator.hide();
-				errorIndicator.show();
 			});
-		};
 
-		var checkSaveRequired = function(ractive, successCallback) {
-			var dirty = ractive.get("isDirty");
-			
-			if(dirty) {
+			var saveCurrentScript = function(ractive, successCallback, errorCallback) {
 				var scriptName = ractive.get("scriptName");
-				if(confirm("Save current changes to "+scriptName+"?")) {
-					saveCurrentScript(ractive, successCallback);
+				var scriptSteps = ractive.get("scriptSteps");
+	
+				var loadingIndicator = $("#scriptEditor .loadingIndicator");
+				var errorIndicator = $("#scriptEditor .errorIndicator");
+	
+				loadingIndicator.show();
+				errorIndicator.hide();
+				$("#btnScriptSave").prop("disabled", true);
+				$.ajax({
+					url: "$!{request.contextPath}/scripts/put?name=" + encodeURIComponent(scriptName), 
+					method: 'POST', 
+					contentType: 'application/json',
+					data: JSON.stringify(scriptSteps),
+					dataType: 'json'
+				}).done(function(data) {
+					loadingIndicator.hide();
+					errorIndicator.hide();
+					ractive.set("isDirty", false);
+					$("#btnScriptSave").prop("disabled", false);
+					if(successCallback) {
+						successCallback();
+					}
+				}).fail(function(jqXHR, textStatus) {
+					console.log("Error saving script: " + textStatus);
+					loadingIndicator.hide();
+					errorIndicator.show();
+					$("#btnScriptSave").prop("disabled", false);
+					if(errorCallback) {
+						errorCallback();
+					}					
+				});
+			};
+	
+			var checkSaveRequired = function(ractive, successCallback) {
+				var dirty = ractive.get("isDirty");
+				
+				if(dirty) {
+					var scriptName = ractive.get("scriptName");
+					if(confirm("Save current changes to "+scriptName+"?")) {
+						saveCurrentScript(ractive, successCallback);
+					} else {
+						successCallback();
+					}
 				} else {
 					successCallback();
 				}
-			} else {
-				successCallback();
 			}
-		}
-		
-		scriptingRactive.on({
-			createNewScript: function() {
-				checkSaveRequired(scriptingRactive, function() {
-					var newScriptName = prompt("Input script name", "new.gp2srv_script");
-					if(newScriptName) {
-						scriptingRactive.set("scriptSteps", [{type:'DELAY', expression:'1000'}]);
-						scriptingRactive.set("scriptName", newScriptName);
+			
+			scriptingRactive.on({
+				stopScript: function() {
+					$("#btnScriptStop").prop("disabled", true);
+					$.ajax({
+						url:"$!{request.contextPath}/scripts/exec/stop",
+						method:"POST"
+					}).done(function(data) {
+						$("#btnScriptStop").prop("disabled", false);
+					}).fail(function(jqXHR, textStatus) {
+						alert("Error occurred: "+textStatus);
+						$("#btnScriptStop").prop("disabled", false);
+					});
+				},
+				runScript: function() {
+					$("#btnScriptRun").prop("disabled", true);
+					$.ajax({
+						url:"$!{request.contextPath}/scripts/exec/start?name=" + encodeURIComponent(scriptingRactive.get("scriptName")),
+						method:"POST"
+					}).done(function(data) {
+						$("#btnScriptRun").prop("disabled", false);
+					}).fail(function(jqXHR, textStatus) {
+						alert("Error occurred: "+textStatus);
+						$("#btnScriptRun").prop("disabled", false);
+					});
+				},
+				deleteScriptStep: function(event, index) {
+					if(confirm("Delete script step?")) {
+						var scriptSteps = scriptingRactive.get("scriptSteps");
+						scriptSteps.splice(index, 1);
+						scriptingRactive.set("scriptSteps", scriptSteps);
 						scriptingRactive.set("isDirty", true);
 					}
-				});
-			},
-			saveScript: function() {
-				saveCurrentScript(scriptingRactive);
-			},
-			scriptStepPropertyChanged: function(event, field, stepIndex, newValue) {
-				scriptingRactive.set("isDirty", true);
-				var steps = scriptingRactive.get("scriptSteps");
-				var step = steps[stepIndex];
-				step[field] = newValue;
-				scriptingRactive.set("scriptSteps", steps);
-			},
-			loadScriptsList: function() {
-				getJson("$!{request.contextPath}/scripts/list", function(scriptsList) {
-					scriptingRactive.set("scriptFiles", scriptsList);
-				}, function(textStatus) {
-					alert('Error loading scripts list: '+textStatus);
-				});				
-			},
-			loadScript: function(event, scriptName) {
-				checkSaveRequired(scriptingRactive, function() {
-					var loadingIndicator = $("#scriptEditor .loadingIndicator");
-					var errorIndicator = $("#scriptEditor .errorIndicator");
+				},
+				swapScriptSteps: function(event, idxA, idxB) {
+					var scriptSteps = scriptingRactive.get("scriptSteps");
+					if(idxA>-1 && idxB>-1 && idxA<scriptSteps.length && idxB<scriptSteps.length) {
+						var stepA = scriptSteps[idxA];
+						scriptSteps[idxA] = scriptSteps[idxB];
+						scriptSteps[idxB] = stepA;
+						scriptingRactive.set("scriptSteps", scriptSteps);
+						scriptingRactive.set("isDirty", true);
+					}
+				},
+				addScriptStep: function() {
+					var scriptSteps = scriptingRactive.get("scriptSteps");
+					scriptSteps.push({type:'DELAY', expression:'1000', key:'', condition:''});
+					scriptingRactive.set("scriptSteps", scriptSteps);
+					scriptingRactive.set("isDirty", true);
+				},
+				createNewScript: function() {
+					checkSaveRequired(scriptingRactive, function() {
+						var newScriptName = prompt("Input script name", "new.gp2srv_script");
+						if(newScriptName) {
+							scriptingRactive.set("scriptSteps", [{type:'DELAY', expression:'1000', key:'', condition:''}]);
+							scriptingRactive.set("scriptName", newScriptName);
+							scriptingRactive.set("isDirty", true);
+						}
+					});
+				},
+				saveScript: function() {
+					saveCurrentScript(scriptingRactive);
+				},
+				scriptStepPropertyChanged: function(event, field, stepIndex, newValue) {
+					scriptingRactive.set("isDirty", true);
+					var steps = scriptingRactive.get("scriptSteps");
+					var step = steps[stepIndex];
+					step[field] = newValue;
+					if(field == 'type') {
+						if(newValue == 'CAMEVENT_WAIT') {
+							step['key'] = '';
+						} else if(newValue == 'CAMPROP_SET') {
+							step['key'] = Object.keys(scriptingRactive.get('config'))[0];
+						}
+					}
+					scriptingRactive.set("scriptSteps", steps);
+				},
+				loadScriptsList: function() {
+					getJson("$!{request.contextPath}/scripts/list", function(scriptsList) {
+						scriptingRactive.set("scriptFiles", scriptsList);
+					}, function(textStatus) {
+						alert('Error loading scripts list: '+textStatus);
+					});				
+				},
+				loadScript: function(event, scriptName) {
+					checkSaveRequired(scriptingRactive, function() {
+						var loadingIndicator = $("#scriptEditor .loadingIndicator");
+						var errorIndicator = $("#scriptEditor .errorIndicator");
+						loadingIndicator.show();
+						errorIndicator.hide();
+						getJson("$!{request.contextPath}/scripts/get?name=" + encodeURIComponent(scriptName), function(scriptSteps) {
+							loadingIndicator.hide();
+							errorIndicator.hide();
+							
+							scriptingRactive.set("scriptSteps", scriptSteps);
+							scriptingRactive.set("scriptName", scriptName);
+							scriptingRactive.set("isDirty", false);
+						}, function(textStatus){
+							console.log("Error loading script: " + textStatus);
+							loadingIndicator.hide();
+							errorIndicator.show();
+						});
+					});
+				},
+				deleteScript: function(event, scriptName) {
+					var container = $(event.node);
+					var loadingIndicator = container.parent().find(".deleteLoadingIndicator");
+					var errorIndicator = container.parent().find(".deleteErrorIndicator");
 					loadingIndicator.show();
 					errorIndicator.hide();
-					getJson("$!{request.contextPath}/scripts/get?name=" + encodeURIComponent(scriptName), function(scriptSteps) {
+					$.ajax({
+						url: "$!{request.contextPath}/scripts/delete", 
+						method: "POST", 
+						data: {name:scriptName}
+					}).done(function(data) {
 						loadingIndicator.hide();
-						errorIndicator.hide();
-						
-						scriptingRactive.set("scriptSteps", scriptSteps);
-						scriptingRactive.set("scriptName", scriptName);
-						scriptingRactive.set("isDirty", false);
-					}, function(textStatus){
-						console.log("Error loading script: " + textStatus);
+						if(data) {
+							errorIndicator.hide();
+							var scriptFiles = scriptingRactive.get("scriptFiles");
+							for(var idx in scriptFiles) {
+								if(scriptFiles[idx] == scriptName) {
+									scriptFiles.splice(idx, 1);
+									scriptingRactive.set("scriptFiles", scriptFiles);
+									break;
+								}
+							}
+						} else {
+							errorIndicator.show();	
+						}
+					}).fail(function(jqXHR, textStatus) {
 						loadingIndicator.hide();
 						errorIndicator.show();
 					});
-				});
-			},
-			deleteScript: function(event, scriptName) {
-				var container = $(event.node);
-				var loadingIndicator = container.parent().find(".deleteLoadingIndicator");
-				var errorIndicator = container.parent().find(".deleteErrorIndicator");
-				loadingIndicator.show();
-				errorIndicator.hide();
-				$.ajax({
-					url: "$!{request.contextPath}/scripts/delete", 
-					method: "POST", 
-					data: {name:scriptName}
-				}).done(function(data) {
-					loadingIndicator.hide();
-					if(data) {
-						errorIndicator.hide();
-						var scriptFiles = scriptingRactive.get("scriptFiles");
-						for(var idx in scriptFiles) {
-							if(scriptFiles[idx] == scriptName) {
-								scriptFiles.splice(idx, 1);
-								scriptingRactive.set("scriptFiles", scriptFiles);
-								break;
-							}
-						}
-					} else {
-						errorIndicator.show();	
-					}
-				}).fail(function(jqXHR, textStatus) {
-					loadingIndicator.hide();
-					errorIndicator.show();
-				});
-			}
-		});
+				}
+			});
+		
+		}, function(textStatus) {
+			alert("Error loading camera config: "+textStatus);
+		});				
 	}
 	
 	function getJson(url, successCallback, errorCallback) {

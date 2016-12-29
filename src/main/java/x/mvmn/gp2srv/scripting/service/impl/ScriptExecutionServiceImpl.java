@@ -13,7 +13,8 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
 
 import x.mvmn.gp2srv.scripting.model.ScriptStep;
-import x.mvmn.gp2srv.web.CameraService;
+import x.mvmn.gp2srv.camera.CameraService;
+import x.mvmn.gp2srv.camera.service.impl.LightMeterImpl;
 import x.mvmn.log.api.Logger;
 
 public class ScriptExecutionServiceImpl {
@@ -35,9 +36,9 @@ public class ScriptExecutionServiceImpl {
 	public ScriptExecutionServiceImpl(Logger logger) {
 	}
 
-	public ScriptExecution execute(final CameraService cameraService, final String scriptName, final List<ScriptStep> script,
+	public ScriptExecution execute(final CameraService cameraService, final Logger logger, final String scriptName, final List<ScriptStep> script,
 			final ScriptExecutionObserver scriptExecutionObserver) {
-		final ScriptExecution scriptExecution = new ScriptExecution(cameraService, scriptName, script, engine, scriptExecutionObserver);
+		final ScriptExecution scriptExecution = new ScriptExecution(cameraService, logger, scriptName, script, engine, scriptExecutionObserver);
 		if (currentExecution.compareAndSet(null, scriptExecution)) {
 			new Thread(scriptExecution).start();
 			return scriptExecution;
@@ -86,11 +87,12 @@ public class ScriptExecutionServiceImpl {
 		protected final String scriptName;
 		protected final CameraService cameraService;
 
-		public ScriptExecution(final CameraService cameraService, final String scriptName, final List<ScriptStep> steps, final JexlEngine engine,
-				final ScriptExecutionObserver scriptExecutionObserver) {
+		public ScriptExecution(final CameraService cameraService, final Logger logger, final String scriptName, final List<ScriptStep> steps,
+				final JexlEngine engine, final ScriptExecutionObserver scriptExecutionObserver) {
 			this.steps = steps.toArray(new ScriptStep[steps.size()]);
 			this.engine = engine;
 			this.context = new JexlMapContext();
+			context.set("__lightmeter", new LightMeterImpl(cameraService, logger));
 			this.scriptExecutionObserver = scriptExecutionObserver;
 			this.scriptName = scriptName;
 			this.cameraService = cameraService;
@@ -118,25 +120,34 @@ public class ScriptExecutionServiceImpl {
 			return result;
 		}
 
-		public synchronized void nextStep() {
+		public synchronized void doStep(int stepNum) {
 			ScriptStep currentStepObj = null;
-			int stepNum = 0;
 			try {
-				if (currentStep >= steps.length) {
-					currentStep = 0;
-				}
-				stepNum = currentStep++;
 				currentStepObj = steps[stepNum];
-				context.set("__currentTimeMillis", System.currentTimeMillis());
-				context.set("__step", stepNum);
-				context.set("__totalStepsPassed", totalStepsPassed);
 				currentStepObj.execute(cameraService, engine, context);
 				totalStepsPassed++;
 			} catch (Exception e) {
 				latestError = "Error on step #" + stepNum + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim();
 				errors.add(latestError);
-				requestStop();
+
+				// TODO: optional
+				// requestStop();
 			}
+		}
+
+		protected void populateStepData(int stepNumber) {
+			context.set("__currentTimeMillis", System.currentTimeMillis());
+			context.set("__step", stepNumber);
+			context.set("__totalStepsPassed", totalStepsPassed);
+		}
+
+		protected int getAndAdvanceNextStepNumber() {
+			int stepNum = 0;
+			if (currentStep >= steps.length) {
+				currentStep = 0;
+			}
+			stepNum = currentStep++;
+			return stepNum;
 		}
 
 		public void requestStop() {
@@ -150,9 +161,11 @@ public class ScriptExecutionServiceImpl {
 		public void run() {
 			scriptExecutionObserver.onStart(this);
 			while (!stopRequest) {
+				int stepNumber = getAndAdvanceNextStepNumber();
+				populateStepData(stepNumber);
 				scriptExecutionObserver.preStep(this);
-				nextStep();
-				scriptExecutionObserver.preStep(this);
+				doStep(stepNumber);
+				scriptExecutionObserver.postStep(this);
 			}
 			ScriptExecutionServiceImpl.this.currentExecution.set(null);
 			ScriptExecutionServiceImpl.this.latestFinishedExecution.set(this);
