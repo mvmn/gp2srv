@@ -1,1 +1,4 @@
 #macro(outputBr $obj)$!obj.toString().replaceAll("[\r\n]","<br/>")#end
+#macro(testGlobalMacro)
+	Hi there from testGlobalMacro. 
+#end
