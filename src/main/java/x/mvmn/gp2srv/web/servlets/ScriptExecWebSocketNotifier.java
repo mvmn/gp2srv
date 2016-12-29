@@ -81,6 +81,7 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 		result.put(keyPrefix + "scriptName", execution.getScriptName());
 		result.put(keyPrefix + "currentStep", execution.getCurrentStep());
 		result.put(keyPrefix + "totalStepsPassed", execution.getTotalStepsPassed());
+		result.put(keyPrefix + "loopCount", execution.getLoopCount());
 		result.put(keyPrefix + "latestError", execution.getLatestError());
 		if (dumpAllErrors) {
 			result.put(keyPrefix + "errors", execution.getErrors());

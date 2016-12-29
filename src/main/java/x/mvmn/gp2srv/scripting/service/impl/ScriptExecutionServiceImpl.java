@@ -85,6 +85,7 @@ public class ScriptExecutionServiceImpl {
 		protected final ScriptExecutionObserver scriptExecutionObserver;
 		protected volatile int nextStep = 0;
 		protected volatile int currentStep = 0;
+		protected volatile long loopCount = 0;
 		protected volatile long totalStepsPassed = 0;
 		protected final String scriptName;
 		protected final CameraService cameraService;
@@ -152,14 +153,16 @@ public class ScriptExecutionServiceImpl {
 
 		protected void populateStepData(int stepNumber) {
 			context.set("__currentTimeMillis", System.currentTimeMillis());
-			context.set("__step", stepNumber);
-			context.set("__totalStepsPassed", totalStepsPassed);
+			context.set("___currentStep", stepNumber);
+			context.set("___totalStepsPassed", totalStepsPassed);
+			context.set("___loopCount", loopCount);
 		}
 
 		protected int getAndAdvanceNextStepNumber() {
 			int stepNum = 0;
 			if (nextStep >= steps.length) {
 				nextStep = 0;
+				loopCount++;
 			}
 			stepNum = nextStep++;
 			return stepNum;
@@ -171,6 +174,10 @@ public class ScriptExecutionServiceImpl {
 
 		public int getCurrentStep() {
 			return currentStep;
+		}
+
+		public long getLoopCount() {
+			return loopCount;
 		}
 
 		public long getTotalStepsPassed() {

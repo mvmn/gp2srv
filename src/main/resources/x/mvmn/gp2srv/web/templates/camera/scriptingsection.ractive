@@ -31,16 +31,17 @@
 		<span id="runStopStatusText" class="small"></span>
 	</div>
 	<div class="siteContentElementContainer">
-		<input type="button" value="Trace currently running script" id="btnStartTracing" on-click="startTracing" />
+		<input type="button" value="Trace running script" id="btnStartTracing" on-click="startTracing" />
 		<input type="button" value="Stop tracing" id="btnStoptTracing" style="display: none" on-click="stopTracing" />
 	</div>
 	<div class="siteContentElementContainer" style="padding-top: 0px">
 		<div class="smaller">
 			<span on-click="toggleScriptVarsHint">Variables provided to scripts (click to show/hide)</span>
 			<div id="scriptVarsHint">
+				<div>&#8226; ___currentStep - number of current step in script</div>
+				<div>&#8226; ___totalStepsPassed - counter of total steps passed</div>
+				<div>&#8226; ___loopCount - counter of script loops executed</div>
 				<div>&#8226; __lightmeter.get() - get preview and calculate average pixel brightness %</div>
-				<div>&#8226; __step - number of current step in script</div>
-				<div>&#8226; __totalStepsPassed - counter of total steps passed</div>
 				<div>&#8226; __currentTimeMillis - current time in milliseconds</div>
 				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
 			</div>
@@ -132,11 +133,12 @@
 			<div style="padding-bottom: 6px">
 				<span class="headline">{{scriptExecutionStatusInfo.___scriptName}}</span>
 				<span>@ step #{{scriptExecutionStatusInfo.___currentStep}}</span>
+				<div class="small">Loop count: {{scriptExecutionStatusInfo.___loopCount}}</div>
 				<div class="small">({{scriptExecutionStatusInfo.___totalStepsPassed}} steps passed in total)</div>
 			</div>
 			<div style="padding-bottom: 6px" class="smaller">
 				{{#each scriptExecutionStatusInfo}}
-					{{#if @key != '___errors' && @key != '___scriptName' && @key != '___currentStep' && @key != '___latestError' && @key != '___totalStepsPassed'}}
+					{{#if @key != '___errors' && @key != '___scriptName' && @key != '___latestError' && @key != '___eventType'}}
 						<div><span>{{@key}}</span> = <span>{{.}}</span></div> 
 					{{/if}}
 				{{/each}}
