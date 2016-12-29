@@ -26,24 +26,24 @@ public class CameraServiceImpl implements CameraService, Closeable {
 		camera.close();
 	}
 
-	public byte[] capturePreview() {
+	public synchronized byte[] capturePreview() {
 		return camera.capturePreview();
 	}
 
-	public CameraServiceImpl releaseCamera() {
+	public synchronized CameraServiceImpl releaseCamera() {
 		camera.release();
 		return this;
 	}
 
-	public CameraFileSystemEntryBean capture() {
+	public synchronized CameraFileSystemEntryBean capture() {
 		return camera.capture();
 	}
 
-	public CameraFileSystemEntryBean capture(final GP2CameraCaptureType captureType) {
+	public synchronized CameraFileSystemEntryBean capture(final GP2CameraCaptureType captureType) {
 		return camera.capture(captureType);
 	}
 
-	public String getSummary() {
+	public synchronized String getSummary() {
 		return camera.getSummary();
 	}
 
@@ -55,25 +55,25 @@ public class CameraServiceImpl implements CameraService, Closeable {
 		return camera.waitForEvent(timeout);
 	}
 
-	public List<CameraConfigEntryBean> getConfig() {
+	public synchronized List<CameraConfigEntryBean> getConfig() {
 		return GP2ConfigHelper.getConfig(camera);
 	}
 
-	public CameraServiceImpl setConfig(CameraConfigEntryBean configEntry) {
+	public synchronized CameraServiceImpl setConfig(CameraConfigEntryBean configEntry) {
 		GP2ConfigHelper.setConfig(camera, configEntry);
 		return this;
 	}
 
-	public List<CameraFileSystemEntryBean> filesList(final String path, boolean includeFiles, boolean includeFolders, boolean recursive) {
+	public synchronized List<CameraFileSystemEntryBean> filesList(final String path, boolean includeFiles, boolean includeFolders, boolean recursive) {
 		return GP2CameraFilesHelper.list(camera, path, includeFiles, includeFolders, recursive);
 	}
 
-	public CameraServiceImpl fileDelete(final String filePath, final String fileName) {
+	public synchronized CameraServiceImpl fileDelete(final String filePath, final String fileName) {
 		GP2CameraFilesHelper.deleteCameraFile(camera, filePath, fileName);
 		return this;
 	}
 
-	public byte[] fileGetContents(final String filePath, final String fileName) {
+	public synchronized byte[] fileGetContents(final String filePath, final String fileName) {
 		return GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName);
 	}
 
