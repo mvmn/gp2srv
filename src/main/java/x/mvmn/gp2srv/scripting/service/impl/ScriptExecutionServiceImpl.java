@@ -134,7 +134,7 @@ public class ScriptExecutionServiceImpl {
 				currentStepObj.execute(cameraService, engine, context);
 				totalStepsPassed++;
 			} catch (JexlException e) {
-				error("Evaluation rrror on step #" + stepNum + " " + currentStepObj + ": "
+				error("Evaluation error on step #" + stepNum + " " + currentStepObj + ": "
 						+ ((e.getCause() != null ? e.getCause().getClass().getName() : "") + " " + e.getMessage()).trim());
 			} catch (NumberFormatException e) {
 				error("Number format error on step #" + stepNum + " " + currentStepObj + ": " + e.getMessage());
