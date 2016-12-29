@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.MapContext;
 
 import x.mvmn.gp2srv.scripting.model.ScriptStep;
@@ -131,13 +132,22 @@ public class ScriptExecutionServiceImpl {
 				currentStepObj = steps[stepNum];
 				currentStepObj.execute(cameraService, engine, context);
 				totalStepsPassed++;
+			} catch (JexlException e) {
+				error("Evaluation rrror on step #" + stepNum + " " + currentStepObj + ": "
+						+ ((e.getCause() != null ? e.getCause().getClass().getName() : "") + " " + e.getMessage()).trim());
+			} catch (NumberFormatException e) {
+				error("Number format error on step #" + stepNum + " " + currentStepObj + ": " + e.getMessage());
 			} catch (Exception e) {
-				latestError = "Error on step #" + stepNum + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim();
-				errors.add(latestError);
+				error("Error on step #" + stepNum + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim());
 
 				// TODO: optional
 				// requestStop();
 			}
+		}
+
+		protected void error(String message) {
+			latestError = message;
+			errors.add(message);
 		}
 
 		protected void populateStepData(int stepNumber) {
