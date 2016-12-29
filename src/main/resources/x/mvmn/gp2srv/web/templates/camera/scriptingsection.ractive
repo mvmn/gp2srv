@@ -47,7 +47,7 @@
 		</div>
 		<div style="padding-bottom: 8px">
 			{{#each scriptSteps:stepIndex}}
-				<div style="padding-bottom: 8px" {{#if stepIndex == activeScriptStepIndex }}class="activeStep"{{/if}}>
+				<div style="padding: 8px" {{#if stepIndex == activeScriptStepIndex }}class="activeStep"{{/if}}>
 					<div>
 						<input type="button" value="↑" on-click="@this.fire('swapScriptSteps', event, stepIndex-1, stepIndex)" />
 						<input type="button" value="x" on-click="@this.fire('deleteScriptStep', event, stepIndex)" />
