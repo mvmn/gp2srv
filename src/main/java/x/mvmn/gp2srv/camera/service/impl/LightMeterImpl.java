@@ -27,4 +27,8 @@ public class LightMeterImpl {
 			return 0;
 		}
 	}
+
+	public String toString() {
+		return "LightMeter";
+	}
 }

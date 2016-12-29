@@ -82,6 +82,7 @@ public class ScriptExecutionServiceImpl {
 		protected final JexlMapContext context;
 		protected volatile boolean stopRequest = false;
 		protected final ScriptExecutionObserver scriptExecutionObserver;
+		protected volatile int nextStep = 0;
 		protected volatile int currentStep = 0;
 		protected volatile long totalStepsPassed = 0;
 		protected final String scriptName;
@@ -143,10 +144,10 @@ public class ScriptExecutionServiceImpl {
 
 		protected int getAndAdvanceNextStepNumber() {
 			int stepNum = 0;
-			if (currentStep >= steps.length) {
-				currentStep = 0;
+			if (nextStep >= steps.length) {
+				nextStep = 0;
 			}
-			stepNum = currentStep++;
+			stepNum = nextStep++;
 			return stepNum;
 		}
 
@@ -158,10 +159,15 @@ public class ScriptExecutionServiceImpl {
 			return currentStep;
 		}
 
+		public long getTotalStepsPassed() {
+			return totalStepsPassed;
+		}
+
 		public void run() {
 			scriptExecutionObserver.onStart(this);
 			while (!stopRequest) {
 				int stepNumber = getAndAdvanceNextStepNumber();
+				currentStep = stepNumber;
 				populateStepData(stepNumber);
 				scriptExecutionObserver.preStep(this);
 				doStep(stepNumber);

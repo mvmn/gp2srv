@@ -60,10 +60,11 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 					if (scriptDumpVars.get()) {
 						result.putAll(currentExecution.dumpVariables(true));
 					}
-					result.put("__scriptName", currentExecution.getScriptName());
-					result.put("__currentStep", currentExecution.getCurrentStep());
-					result.put("__latestError", currentExecution.getLatestError());
-					result.put("__errors", currentExecution.getErrors());
+					result.put("___scriptName", currentExecution.getScriptName());
+					result.put("___currentStep", currentExecution.getCurrentStep());
+					result.put("___totalStepsPassed", currentExecution.getTotalStepsPassed());
+					result.put("___latestError", currentExecution.getLatestError());
+					result.put("___errors", currentExecution.getErrors());
 				}
 				serveJson(result, response);
 			} else if ("/scripts/exec/finished".equals(path)) {
@@ -73,10 +74,11 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 					if (scriptDumpVars.get()) {
 						result.putAll(finishedExecution.dumpVariables(true));
 					}
-					result.put("__scriptName", finishedExecution.getScriptName());
-					result.put("__currentStep", finishedExecution.getCurrentStep());
-					result.put("__latestError", finishedExecution.getLatestError());
-					result.put("__errors", finishedExecution.getErrors());
+					result.put("___scriptName", finishedExecution.getScriptName());
+					result.put("___currentStep", finishedExecution.getCurrentStep());
+					result.put("___totalStepsPassed", finishedExecution.getTotalStepsPassed());
+					result.put("___latestError", finishedExecution.getLatestError());
+					result.put("___errors", finishedExecution.getErrors());
 				}
 				serveJson(result, response);
 			}
@@ -106,6 +108,8 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				if (currentExecution != null) {
 					currentExecution.requestStop();
 					result = true;
+				} else {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				}
 				serveJson(result, response);
 			} else if ("/scripts/exec/start".equals(path)) {
@@ -118,9 +122,11 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 					if (execution != null) {
 						result = "Script has been run";
 					} else {
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 						result = "Another execution already in progress";
 					}
 				} else {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 					result = "Script not found for name " + scriptName;
 				}
 				serveJson(result, response);

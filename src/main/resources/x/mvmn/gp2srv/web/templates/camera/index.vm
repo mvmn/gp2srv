@@ -276,6 +276,38 @@
 			}
 			
 			scriptingRactive.on({
+				setScriptVarDump: function(event, val) {
+					$("#varDumpLoadingIndicator").show();
+					$("#varDumpErrorIndicator").hide();				
+					$.ajax({
+						method: 'POST',
+						url: '$!{request.contextPath}/scripts/exec/dumpvars',
+						data: {enable: val}
+					}).done(function(data) {
+						$("#varDumpLoadingIndicator").hide();
+						$("#varDumpErrorIndicator").hide();										
+					}).fail(function(jqXHR, textStatus) {
+						$("#varDumpLoadingIndicator").hide();
+						$("#varDumpErrorIndicator").show();				
+						console.log("Error setting script variables dumping: "+textStatus);
+					});
+				},
+				loadScriptStatus: function(event, type) {
+					$("#scriptStatusLoadingIndicator").show();
+					$("#scriptStatusErrorIndicator").hide();
+					getJson("$!{request.contextPath}/scripts/exec/"+type, function(data) {
+						$("#scriptStatusLoadingIndicator").hide();
+						$("#scriptStatusErrorIndicator").hide();
+						scriptingRactive.set("scriptExecutionStatusInfo", data);
+					}, function(jqXHR, textStatus) {
+						$("#scriptStatusLoadingIndicator").hide();
+						$("#scriptStatusErrorIndicator").show();
+						console.log("Error loading script status: "+textStatus);
+					});
+				},
+				toggleScriptVarsHint: function() {
+					$("#scriptVarsHint").toggle();
+				},
 				stopScript: function() {
 					$("#btnScriptStop").prop("disabled", true);
 					$.ajax({
@@ -283,8 +315,9 @@
 						method:"POST"
 					}).done(function(data) {
 						$("#btnScriptStop").prop("disabled", false);
+						$("#runStopStatusText").text("");
 					}).fail(function(jqXHR, textStatus) {
-						alert("Error occurred: "+textStatus);
+						$("#runStopStatusText").text("No scripts are running");
 						$("#btnScriptStop").prop("disabled", false);
 					});
 				},
@@ -295,8 +328,9 @@
 						method:"POST"
 					}).done(function(data) {
 						$("#btnScriptRun").prop("disabled", false);
+						$("#runStopStatusText").text("");
 					}).fail(function(jqXHR, textStatus) {
-						alert("Error occurred: "+textStatus);
+						$("#runStopStatusText").text(jqXHR.responseJSON);
 						$("#btnScriptRun").prop("disabled", false);
 					});
 				},
@@ -363,7 +397,7 @@
 						var loadingIndicator = $("#scriptEditor .loadingIndicator");
 						var errorIndicator = $("#scriptEditor .errorIndicator");
 						loadingIndicator.show();
-						errorIndicator.hide();
+						errorIndicator.hide();						
 						getJson("$!{request.contextPath}/scripts/get?name=" + encodeURIComponent(scriptName), function(scriptSteps) {
 							loadingIndicator.hide();
 							errorIndicator.hide();
@@ -371,6 +405,7 @@
 							scriptingRactive.set("scriptSteps", scriptSteps);
 							scriptingRactive.set("scriptName", scriptName);
 							scriptingRactive.set("isDirty", false);
+							$("#scriptVarsHint").hide();
 						}, function(textStatus){
 							console.log("Error loading script: " + textStatus);
 							loadingIndicator.hide();

@@ -28,8 +28,19 @@
 		<input type="button" value="Save" on-click="saveScript" id="btnScriptSave" />
 		<input type="button" value="Run"  on-click="runScript" id="btnScriptRun" />
 		<input type="button" value="Stop" on-click="stopScript" id="btnScriptStop" />
+		<span id="runStopStatusText" class="small"></span>
 	</div>
-	<div class="siteContentElementContainer">
+	<div class="siteContentElementContainer" style="padding-top: 0px">
+		<div class="smaller">
+			<span on-click="toggleScriptVarsHint">Variables provided to scripts (click to show/hide)</span>
+			<div id="scriptVarsHint">
+				<div>&#8226; __lightmeter.get() - get preview and calculate average pixel brightness %</div>
+				<div>&#8226; __step - number of current step in script</div>
+				<div>&#8226; __totalStepsPassed - counter of total steps passed</div>
+				<div>&#8226; __currentTimeMillis - current time in milliseconds</div>
+				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
+			</div>
+		</div>
 		<div style="padding-bottom: 8px">
 			{{#each scriptSteps:stepIndex}}
 				<div style="padding-bottom: 8px">
@@ -88,3 +99,47 @@
 	</div>
 </div>
 {{/if}}
+<div id="scriptEditor">
+	<div class="siteContentElementContainer subsectionHeading">	
+		Script status 
+		<input type="button" value="Currently running" on-click="@this.fire('loadScriptStatus', event, 'current')" /> 
+		<input type="button" value="Latest finished" on-click="@this.fire('loadScriptStatus', event, 'finished')" />
+		
+		<img style="display: none" id="scriptStatusLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+		<img style="display: none" id="scriptStatusErrorIndicator" src="{{contextPath}}/static/warning.png" />		
+	</div>
+	<div class="siteContentElementContainer">
+		<div style="padding-bottom: 6px">
+			<input type="button" value="Variables dump on" on-click="@this.fire('setScriptVarDump', event, true)" /> 
+			<input type="button" value="Variables dump off" on-click="@this.fire('setScriptVarDump', event, false)" />
+
+			<img style="display: none" id="varDumpLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+			<img style="display: none" id="varDumpErrorIndicator" src="{{contextPath}}/static/warning.png" />
+		</div>	
+		{{#if scriptExecutionStatusInfo}}
+			<div style="padding-bottom: 6px">
+				<span class="headline">{{scriptExecutionStatusInfo.___scriptName}}</span>
+				<span>@ step #{{scriptExecutionStatusInfo.___currentStep}}</span>
+				<div>({{scriptExecutionStatusInfo.___totalStepsPassed}} steps passed in total)</div>
+			</div>
+			<div style="padding-bottom: 6px">
+				{{#each scriptExecutionStatusInfo}}
+					{{#if @key != '___errors' && @key != '___scriptName' && @key != '___currentStep' && @key != '___latestError' && @key != '___totalStepsPassed'}}
+						<div><span>{{@key}}</span> = <span>{{.}}</span></div> 
+					{{/if}}
+				{{/each}}
+			</div>
+			{{#if scriptExecutionStatusInfo.___latestError}}
+				<div><span>Latest error:</span><span>{{scriptExecutionStatusInfo.___latestError}}</span></div>
+			{{/if}}
+			{{#if scriptExecutionStatusInfo.___errors}}
+				<div style="padding-bottom: 6px">
+					<div>Errors:</div>
+					{{#each scriptExecutionStatusInfo.___errors}}
+						<div>{{.}}</div>
+					{{/each}}
+				</div>
+			{{/if}}
+		{{/if}}
+	</div>
+</div>
