@@ -215,4 +215,8 @@ public class MockCameraServiceImpl implements CameraService {
 		}
 		return configMap;
 	}
+
+	public byte[] fileGetThumb(String filePath, String fileName) {
+		return fileGetContents(filePath, fileName);
+	}
 }

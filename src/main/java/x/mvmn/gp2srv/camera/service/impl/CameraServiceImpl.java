@@ -77,6 +77,10 @@ public class CameraServiceImpl implements CameraService, Closeable {
 		return GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName);
 	}
 
+	public synchronized byte[] fileGetThumb(final String filePath, final String fileName) {
+		return GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName, true);
+	}
+
 	public Map<String, CameraConfigEntryBean> getConfigAsMap() {
 		final List<CameraConfigEntryBean> config = this.getConfig();
 		final Map<String, CameraConfigEntryBean> configMap = new TreeMap<String, CameraConfigEntryBean>();

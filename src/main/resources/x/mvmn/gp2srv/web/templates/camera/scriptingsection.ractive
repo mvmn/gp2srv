@@ -42,7 +42,8 @@
 				<div>&#8226; ___totalStepsPassed - counter of total steps passed</div>
 				<div>&#8226; ___loopCount - counter of script loops executed</div>
 				<div>&#8226; __lightmeter.getForPreview() - get preview and calculate average pixel brightness (in %)</div>
-				<div>&#8226; __lightmeter.getForCameraFile(cameraFilePath) - get camera file contents and calculate average pixel brightness (in %)</div>
+				<div>&#8226; __lightmeter.getForCameraFile(cameraFilePath) - get camera file full contents and calculate average pixel brightness (in %)</div>
+				<div>&#8226; __lightmeter.getForThumb(cameraFilePath) - get camera file thumbnail and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __currentTimeMillis - current time in milliseconds</div>
 				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
 				<div>&#8226; __capturedFile - for capture steps, contains file path+name of captured shot in camera FS</div>
