@@ -6,6 +6,8 @@ GP2FOLDER=gp2srv-$GP2VERSION
 mkdir -p ./target/$GP2FOLDER/lib/
 mv ./target/lib/*.jar ./target/$GP2FOLDER/lib/
 mv ./target/*.jar ./target/$GP2FOLDER/
+mv ./target/run.bat ./target/$GP2FOLDER/
+mv ./target/run.sh ./target/$GP2FOLDER/
 
 cd target
 zip -r ./$GP2FOLDER.zip ./$GP2FOLDER

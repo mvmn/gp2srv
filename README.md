@@ -12,6 +12,10 @@ Optional. Default is INFO.
 - auth - username:password
 Optional. Enables basic HTTP authentication with provided credentials.
 
+Java System properties
+- -Djna.library.path=/path/to/folder/with/libgphoto2.dylib/or/such - in case you get errors like "Unable to load library 'gphoto2': Native library (darwin/libgphoto2.dylib) not found in resource path" you can specify a path to folder that contains gphoto2 library folder. 
+The library path depends on your platform and method of installation (e.g. on OS X you can install gphoto2 library via Homebrew, and use custom folder for all Homebrew installations - then you would have to provide a path like ~/homebrew/lib, given that ~/homebrew is your custom folder for Homebrew installations).
+
 Dependencies:
 - LibGPhoto2 - http://www.gphoto.org
 - Java 1.5 and above

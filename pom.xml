@@ -144,6 +144,28 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<tasks>
+								<echo file="${project.build.directory}/run.sh" append="false">
+									java&#032;-jar&#032;GPhoto2Server-${project.version}.jar
+								</echo>
+								<echo file="${project.build.directory}/run.bat" append="false">
+									java&#032;-jar&#032;GPhoto2Server-${project.version}.jar
+								</echo>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.6</version>
 				<configuration>
