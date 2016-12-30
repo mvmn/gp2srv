@@ -45,6 +45,7 @@
 				<div>&#8226; __lightmeter.getForCameraFile(cameraFilePath) - get camera file contents and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __currentTimeMillis - current time in milliseconds</div>
 				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
+				<div>&#8226; __capturedFile - for capture steps, contains file path+name of captured shot in camera FS</div>
 			</div>
 		</div>
 		<div style="padding-bottom: 8px">
