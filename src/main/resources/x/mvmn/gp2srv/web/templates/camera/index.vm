@@ -169,15 +169,81 @@
 					$("#browseErrorIndicator").hide();
 					navRactive.set("pathElements", browseData.currentBrowsePath.replace(/\/$/g,'').split("/"));
 					navRactive.set("browseData", browseData);
+					navRactive.set("selectedFiles", []);
+					$("#browseContent .fileSelectionCheckbox").prop("checked", false);
 				}, function(textStatus) {
 					console.log('Error loading files list: '+textStatus);
 					$("#browseLoadingIndicator").hide();
 					$("#browseErrorIndicator").show();
 				});
 			},
+			setFileSelection: function(event, fileIndex) {
+				var selectedFiles = navRactive.get("selectedFiles");
+				if(!selectedFiles)  {
+					selectedFiles = [];
+				}
+				if(event.node.checked) {
+					selectedFiles.push(fileIndex);
+				} else {
+					var index = selectedFiles.indexOf(fileIndex);
+					if(index>=0) {
+						selectedFiles.splice(index, 1);
+					}
+				}
+				navRactive.set("selectedFiles", selectedFiles);
+			},
+			deselectAllFiles: function(event) {
+				navRactive.set("selectedFiles", []);
+			},
+			selectAllFiles: function(event) {
+				var selectedFiles = [];
+				for(var i=0; i<navRactive.get("browseData").filesList.length; i++) {
+					selectedFiles.push(i);
+				}
+				navRactive.set("selectedFiles", selectedFiles);
+			},
+			deleteSelectedFiles: function(event) { 
+				var browseData = navRactive.get("browseData");
+				var selectedFiles = navRactive.get("selectedFiles");
+				if(!selectedFiles) {
+					selectedFiles = [];
+				}
+				var filesToDelete = [];
+				for(var i in selectedFiles) {
+					var selectedFileIndex = selectedFiles[i];
+					filesToDelete.push(browseData.filesList[selectedFileIndex]);
+				}
+				$("#browseContent .fileSelectionCheckbox").prop("checked", false);
+				
+				for(var i in filesToDelete) {
+					var fileToDelete = filesToDelete[i];
+					var delFunc = function(fileToDelete) {
+						$.ajax({
+							cache: false,
+							url: '$!{request.contextPath}/deletefile?name=' + encodeURIComponent(fileToDelete.name) + '&folder=' + encodeURIComponent(fileToDelete.path),
+							method: 'POST'
+						}).done(function() {
+							var browseDataMod = navRactive.get("browseData");
+							var idx = -1;
+							for(var k in browseDataMod.filesList) {
+								if(browseDataMod.filesList[k].name == fileToDelete.name && browseDataMod.filesList[k].path == fileToDelete.path) {
+									idx = k;
+									break;
+								}  
+							}
+							if(idx>=0) {
+								browseDataMod.filesList.splice(idx, 1);
+							}
+							navRactive.set("browseData", browseDataMod);
+						}).fail(function(jqXHR, textStatus) {
+							alert("Error deleting file: "+textStatus);
+						});
+					};
+					delFunc(fileToDelete);
+				}
+			},
 			deleteFile: function(event, path, name) {
 				if(confirm("Delete file "+path.replace(/\/$/g,'')+"/"+name+"?")) {
-					var ractive = this;
 					var deleteLink = $(event.node);
 					var loadingIndicator = $(event.node).parent().find(".deleteLoadingIndicator");
 					deleteLink.hide();
@@ -189,7 +255,7 @@
 					}).done(function() {
 						deleteLink.show();
 						loadingIndicator.hide();
-						ractive.fire('browseFolder', event, path.replace(/\/$/g,''));
+						navRactive.fire('browseFolder', event, path.replace(/\/$/g,''));
 					}).fail(function(jqXHR, textStatus) {
 						deleteLink.show();
 						loadingIndicator.hide();
@@ -204,7 +270,7 @@
 			var scriptingRactive = new Ractive({
 				el: '#section_scripts',
 				template: '#tplScriptingSection',
-				data: {contextPath:"$!{request.contextPath}", 
+				data: {contextPath:"$!{request.contextPath}",
 					scriptFiles:[], 
 					scriptStepTypes:[
 						{key:'CAPTURE', name:'Capture photo'},

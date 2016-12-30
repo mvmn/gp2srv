@@ -7,20 +7,26 @@
 	<img id="browseErrorIndicator" src="{{contextPath}}/static/warning.png" />
 	<img id="browseLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
 	<div id="browseContent">
-		<div>
+		<div style="padding-bottom: 6px">
+			<input type="button" value="Select all" on-click="selectAllFiles" />
+			<input type="button" value="Deselect all" on-click="deselectAllFiles" />
+			<input type="button" value="Delete selected files" on-click="deleteSelectedFiles" />
+		</div>
+		<div style="padding-bottom: 6px">
 			{{#each browseData.folderList}}
 				<div class="fullWidth">
 					<a href="#" on-click="@this.fire('browseFolder', event, path.replace(/\/$/g,'')+'/'+name.replace(/^\//g,'').replace(/\/$/g,''))">{{name.replace(/^\//g,'').replace(/\/$/g,'')}}/</a>	
 				</div>
 			{{/each}}
 		</div>
-		<div style="padding-top: 6px">
-			{{#each browseData.filesList}}
+		<div style="padding-bottom: 8px">
+			{{#each browseData.filesList:fileIndex}}
 				<div class="fullWidth">
 					[
 						<a href="#" on-click="@this.fire('deleteFile', event, path, name)">x</a>
 						<img style="display: none" class="deleteLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
 					]
+					<input type="checkbox" {{#if selectedFiles.indexOf(fileIndex)>=0}}checked="checked"{{/if}} class="fileSelectionCheckbox" on-change="@this.fire('setFileSelection', event, fileIndex)" />
 					<a target="_blank" href="{{contextPath}}/camfilepreview?folder={{encodeURIComponent(path)}}&name={{encodeURIComponent(name)}}">{{name}}</a>
 				</div>
 			{{/each}}
