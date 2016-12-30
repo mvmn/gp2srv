@@ -7,6 +7,7 @@ mkdir -p ./target/$GP2FOLDER/lib/
 mv ./target/lib/*.jar ./target/$GP2FOLDER/lib/
 mv ./target/*.jar ./target/$GP2FOLDER/
 mv ./target/run.bat ./target/$GP2FOLDER/
+chmod +x ./target/run.sh
 mv ./target/run.sh ./target/$GP2FOLDER/
 
 cd target
