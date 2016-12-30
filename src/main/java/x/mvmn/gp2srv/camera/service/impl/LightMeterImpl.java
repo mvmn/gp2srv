@@ -19,9 +19,18 @@ public class LightMeterImpl {
 		this.logger = logger;
 	}
 
-	public double get() {
+	public double getForCameraFile(String cameraFilePath) {
+		int lios = cameraFilePath.lastIndexOf("/");
+		return doCalc(cameraService.fileGetContents(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)));
+	}
+
+	public double getForPreview() {
+		return doCalc(cameraService.capturePreview());
+	}
+
+	protected double doCalc(byte[] image) {
 		try {
-			return ImageUtil.calculateAverageBrightness(ImageIO.read(new ByteArrayInputStream(cameraService.capturePreview())));
+			return ImageUtil.calculateAverageBrightness(ImageIO.read(new ByteArrayInputStream(image)));
 		} catch (IOException e) {
 			logger.error("Error obtianing preview average brightness", e);
 			return 0;

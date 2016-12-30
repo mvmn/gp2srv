@@ -6,6 +6,7 @@ import org.apache.commons.jexl3.JexlExpression;
 
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
 
 public class ScriptStep {
@@ -45,7 +46,8 @@ public class ScriptStep {
 
 			switch (type) {
 				case CAPTURE:
-					cameraService.capture();
+					CameraFileSystemEntryBean cfseb = cameraService.capture();
+					context.set("__capturedFile", cfseb.getPath() + (cfseb.getPath().endsWith("/") ? "" : "/") + cfseb.getName());
 				break;
 				case DELAY:
 					ensuredWait(Long.parseLong(evaluatedValueAsString));
