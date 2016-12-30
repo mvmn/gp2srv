@@ -155,8 +155,9 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 			} else if ("/camfilepreview".equals(requestPath)) {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
+				final boolean thumb = Boolean.valueOf(request.getParameter("thumb"));
 
-				byte[] fileContents = cameraService.fileGetContents(filePath, fileName);
+				byte[] fileContents = thumb ? cameraService.fileGetThumb(filePath, fileName) : cameraService.fileGetContents(filePath, fileName);
 
 				response.setContentType("image/jpeg");
 				response.getOutputStream().write(fileContents);

@@ -36,4 +36,6 @@ public interface CameraService {
 	public CameraService fileDelete(final String filePath, final String fileName);
 
 	public byte[] fileGetContents(final String filePath, final String fileName);
+
+	public byte[] fileGetThumb(final String filePath, final String fileName);
 }

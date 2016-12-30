@@ -28,6 +28,7 @@
 					]
 					<input type="checkbox" {{#if selectedFiles.indexOf(fileIndex)>=0}}checked="checked"{{/if}} class="fileSelectionCheckbox" on-change="@this.fire('setFileSelection', event, fileIndex)" />
 					<a target="_blank" href="{{contextPath}}/camfilepreview?folder={{encodeURIComponent(path)}}&name={{encodeURIComponent(name)}}">{{name}}</a>
+					(<a target="_blank" href="{{contextPath}}/camfilepreview?thumb=true&folder={{encodeURIComponent(path)}}&name={{encodeURIComponent(name)}}">thumbnail</a>)
 				</div>
 			{{/each}}
 		</div>

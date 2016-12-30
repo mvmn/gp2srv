@@ -24,6 +24,11 @@ public class LightMeterImpl {
 		return doCalc(cameraService.fileGetContents(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)));
 	}
 
+	public double getForThumb(String cameraFilePath) {
+		int lios = cameraFilePath.lastIndexOf("/");
+		return doCalc(cameraService.fileGetThumb(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)));
+	}
+
 	public double getForPreview() {
 		return doCalc(cameraService.capturePreview());
 	}
