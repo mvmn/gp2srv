@@ -1,7 +1,7 @@
 package x.mvmn.util;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
+import java.awt.image.DataBufferByte;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.TimeUnit;
@@ -11,15 +11,26 @@ public class ImageUtil {
 	public static double calculateAverageBrightness(BufferedImage image) {
 		double result = 0;
 
-		int argbs[] = image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth());
+		int imageType = image.getType();
+		if (imageType != BufferedImage.TYPE_INT_ARGB && imageType != BufferedImage.TYPE_INT_RGB && imageType != BufferedImage.TYPE_3BYTE_BGR
+				&& imageType != BufferedImage.TYPE_4BYTE_ABGR && imageType != BufferedImage.TYPE_4BYTE_ABGR_PRE && imageType != BufferedImage.TYPE_INT_ARGB_PRE
+				&& imageType != BufferedImage.TYPE_INT_BGR) {
+			throw new RuntimeException("Unsupported image type: " + image.getType());
+		}
+		boolean hasAlpha = image.getAlphaRaster() != null;
+		int pixelSize = hasAlpha ? 4 : 3;
+		byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 
-		final ForkJoinPool pool = new ForkJoinPool();
 		int cpuCores = Runtime.getRuntime().availableProcessors();
+		final ForkJoinPool pool = new ForkJoinPool(cpuCores);
 
 		BrightnessCalcTask[] tasks = new BrightnessCalcTask[cpuCores];
-		int subArraySize = (int) Math.ceil(((double) argbs.length) / cpuCores);
+		int subArraySize = (int) Math.ceil(((double) pixels.length) / cpuCores);
+		if (subArraySize % pixelSize != 0) {
+			subArraySize += pixelSize - subArraySize % pixelSize;
+		}
 		for (int i = 0; i < cpuCores; i++) {
-			tasks[i] = new BrightnessCalcTask(Arrays.copyOfRange(argbs, subArraySize * i, Math.min(subArraySize * (i + 1), argbs.length)));
+			tasks[i] = new BrightnessCalcTask(pixels, subArraySize * i, Math.min(subArraySize * (i + 1), pixels.length), pixelSize);
 			pool.submit(tasks[i]);
 		}
 		pool.shutdown();
@@ -40,11 +51,17 @@ public class ImageUtil {
 	protected static class BrightnessCalcTask extends ForkJoinTask<Double> {
 		private static final long serialVersionUID = -6616059829029123394L;
 
-		protected final int argbs[];
+		protected final byte pixels[];
+		protected final int pixelSize;
+		protected final int from;
+		protected final int to;
 		protected volatile double result;
 
-		public BrightnessCalcTask(int argbs[]) {
-			this.argbs = argbs;
+		public BrightnessCalcTask(byte pixels[], int from, int to, int pixelSize) {
+			this.pixels = pixels;
+			this.pixelSize = pixelSize;
+			this.from = from;
+			this.to = to;
 		}
 
 		@Override
@@ -59,13 +76,11 @@ public class ImageUtil {
 		@Override
 		protected boolean exec() {
 			double result = 0.0d;
-			for (int i = 0; i < argbs.length; i++) {
-				int argb = argbs[i];
-				result += argbToRed(argb);
-				result += argbToGreen(argb);
-				result += argbToBlue(argb);
+			int length = to - from;
+			for (int i = from; i < to; i += pixelSize) {
+				result += ((int) pixels[pixelSize - 3] & 0xff) + ((int) pixels[pixelSize - 2] & 0xff) + ((int) pixels[pixelSize - 1] & 0xff);
 			}
-			this.result = (result / argbs.length) / 7.65d;
+			this.result = (result / (length / pixelSize)) / 7.65d;
 			return true;
 		}
 	}
