@@ -202,6 +202,19 @@
 				}
 				navRactive.set("selectedFiles", selectedFiles);
 			},
+			loadThumbnails: function(event) {
+				var browseData = navRactive.get("browseData");
+				var selectedFiles = navRactive.get("selectedFiles");
+				if(!selectedFiles) {
+					selectedFiles = [];
+				}
+				for(var i in selectedFiles) {
+					var selectedFileIndex = selectedFiles[i];
+					var selectedFile = browseData.filesList[selectedFileIndex];
+					selectedFile.previewLink = navRactive.get("contextPath") + "/camfilepreview?thumb=true&folder=" + encodeURIComponent(selectedFile.path) + "&name=" + encodeURIComponent(selectedFile.name);					
+				}
+				navRactive.set("browseData", browseData);
+			},
 			deleteSelectedFiles: function(event) { 
 				var browseData = navRactive.get("browseData");
 				var selectedFiles = navRactive.get("selectedFiles");
