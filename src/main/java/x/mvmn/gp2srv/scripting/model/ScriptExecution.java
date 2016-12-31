@@ -74,11 +74,8 @@ public class ScriptExecution implements Runnable {
 		return result;
 	}
 
-	public synchronized void doStep(ScriptStep currentStepObj, int stepNum) {
-
-	}
-
 	protected void handleError(String message) {
+		message = "Loop " + getLoopCount() + ": " + message;
 		latestError = message;
 		errors.add(message);
 		if (stopOnError) {
