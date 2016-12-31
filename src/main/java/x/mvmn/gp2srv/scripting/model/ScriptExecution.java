@@ -74,8 +74,10 @@ public class ScriptExecution implements Runnable {
 		return result;
 	}
 
-	protected void handleError(String message) {
-		message = "Loop " + getLoopCount() + ": " + message;
+	protected void handleError(JexlMapContext context, String message) {
+		long loopNum = getLoopCount();
+		message = "Loop " + loopNum + ": " + message;
+		context.set("__latestErrorLoop", loopNum);
 		latestError = message;
 		errors.add(message);
 		if (stopOnError) {
@@ -148,12 +150,12 @@ public class ScriptExecution implements Runnable {
 					}
 				}
 			} catch (JexlException e) {
-				handleError("Evaluation error on step #" + stepNumber + " " + currentStepObj + ": "
+				handleError(context, "Evaluation error on step #" + stepNumber + " " + currentStepObj + ": "
 						+ ((e.getCause() != null ? e.getCause().getClass().getName() : "") + " " + e.getMessage()).trim());
 			} catch (NumberFormatException e) {
-				handleError("Number format error on step #" + stepNumber + " " + currentStepObj + ": " + e.getMessage());
+				handleError(context, "Number format error on step #" + stepNumber + " " + currentStepObj + ": " + e.getMessage());
 			} catch (Exception e) {
-				handleError("Error on step #" + stepNumber + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim());
+				handleError(context, "Error on step #" + stepNumber + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim());
 			}
 			if (afterStepDelay > 0) {
 				try {

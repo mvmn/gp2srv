@@ -64,6 +64,7 @@
 				<div>&#8226; __loopStartTime - value of current time ms before executing 1-st step of script updated each loop, i.e. time of loop start.</div>
 				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
 				<div>&#8226; __capturedFile - for capture steps, contains file path+name of captured shot in camera FS</div>
+				<div>&#8226; __latestErrorLoop - loop number for latest occurred error</div>
 			</div>
 		</div>
 		<div style="padding-bottom: 8px">
