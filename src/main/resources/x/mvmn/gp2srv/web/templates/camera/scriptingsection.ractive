@@ -31,8 +31,22 @@
 		<span id="runStopStatusText" class="small"></span>
 	</div>
 	<div class="siteContentElementContainer">
-		<input type="button" value="Trace running script" id="btnStartTracing" on-click="startTracing" />
-		<input type="button" value="Stop tracing" id="btnStoptTracing" style="display: none" on-click="stopTracing" />
+		<div>
+			<input type="button" value="Trace running script" id="btnStartTracing" on-click="startTracing" />
+			<input type="button" value="Stop tracing" id="btnStoptTracing" style="display: none" on-click="stopTracing" />
+		</div>
+		<div class="small">
+			Set stop on error:
+			<input type="button" value="no" on-click="@this.fire('setScriptStopOnError', event, false)" /> 
+			<input type="button" value="yes" on-click="@this.fire('setScriptStopOnError', event, true)" />
+
+			<img style="display: none" id="stopOnErrorLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+			<img style="display: none" id="stopOnErrorErrorIndicator" src="{{contextPath}}/static/warning.png" />
+			
+			<input type="button" value="Set afterstep delay" on-click="setAfterStepDelay" />
+			<img style="display: none" id="asdLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+			<img style="display: none" id="asdErrorIndicator" src="{{contextPath}}/static/warning.png" />
+		</div>
 	</div>
 	<div class="siteContentElementContainer" style="padding-top: 0px">
 		<div class="smaller">
@@ -41,10 +55,13 @@
 				<div>&#8226; ___currentStep - number of current step in script</div>
 				<div>&#8226; ___totalStepsPassed - counter of total steps passed</div>
 				<div>&#8226; ___loopCount - counter of script loops executed</div>
+				<div>&#8226; ___evaldCondition - evaluated value of step condition</div>
+				<div>&#8226; ___evaldExpression - evaluated value of step expression</div>
 				<div>&#8226; __lightmeter.getForPreview() - get preview and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __lightmeter.getForCameraFile(cameraFilePath) - get camera file full contents and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __lightmeter.getForThumb(cameraFilePath) - get camera file thumbnail and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __currentTimeMillis - current time in milliseconds</div>
+				<div>&#8226; __loopStartTime - value of current time ms before executing 1-st step of script updated each loop, i.e. time of loop start.</div>
 				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
 				<div>&#8226; __capturedFile - for capture steps, contains file path+name of captured shot in camera FS</div>
 			</div>
@@ -124,10 +141,11 @@
 			sec (for running)
 		</div>
 	</div>
-	<div class="siteContentElementContainer">
-		<div style="padding-bottom: 6px">
-			<input type="button" value="Variables dump on" on-click="@this.fire('setScriptVarDump', event, true)" /> 
-			<input type="button" value="Variables dump off" on-click="@this.fire('setScriptVarDump', event, false)" />
+	<div class="siteContentElementContainer">		
+		<div style="padding-bottom: 6px" class="small">
+			Variables dump:
+			<input type="button" value="on" on-click="@this.fire('setScriptVarDump', event, true)" /> 
+			<input type="button" value="off" on-click="@this.fire('setScriptVarDump', event, false)" />
 
 			<img style="display: none" id="varDumpLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
 			<img style="display: none" id="varDumpErrorIndicator" src="{{contextPath}}/static/warning.png" />
@@ -136,12 +154,13 @@
 			<div style="padding-bottom: 6px">
 				<span class="headline">{{scriptExecutionStatusInfo.___scriptName}}</span>
 				<span>@ step #{{scriptExecutionStatusInfo.___currentStep}}</span>
-				<div class="small">Loop count: {{scriptExecutionStatusInfo.___loopCount}}</div>
-				<div class="small">({{scriptExecutionStatusInfo.___totalStepsPassed}} steps passed in total)</div>
+				<div class="small">{{scriptExecutionStatusInfo.___loopCount}} loops, {{scriptExecutionStatusInfo.___totalStepsPassed}} steps</div>
+				{{#if scriptExecutionStatusInfo.___stopOnError}}<div class="small">Stop on error set</div>{{/if}}
+				{{#if scriptExecutionStatusInfo.___afterStepDelay>0}}<div class="small">After-step delay: {{scriptExecutionStatusInfo.___afterStepDelay}}</div>{{/if}}
 			</div>
 			<div style="padding-bottom: 6px" class="smaller">
 				{{#each scriptExecutionStatusInfo}}
-					{{#if @key != '___errors' && @key != '___scriptName' && @key != '___latestError' && @key != '___eventType'}}
+					{{#if @key != '___afterStepDelay' && @key != '___errors' && @key != '___scriptName' && @key != '___latestError' && @key != '___eventType' && @key != '___stopOnError'}}
 						<div><span>{{@key}}</span> = <span>{{.}}</span></div> 
 					{{/if}}
 				{{/each}}

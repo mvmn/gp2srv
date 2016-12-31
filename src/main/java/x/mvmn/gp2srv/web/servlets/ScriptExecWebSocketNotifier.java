@@ -1,7 +1,7 @@
 package x.mvmn.gp2srv.web.servlets;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -72,7 +72,7 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 
 	public static Map<String, Object> toExecutionInfoDTO(final ScriptExecution execution, final String keyPrefix, final String eventType,
 			final boolean dumpVariables, final boolean dumpAllErrors) {
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new TreeMap<String, Object>();
 		if (dumpVariables) {
 			result.putAll(execution.dumpVariables(true));
 		}
@@ -83,6 +83,8 @@ public final class ScriptExecWebSocketNotifier implements ScriptExecutionObserve
 		result.put(keyPrefix + "totalStepsPassed", execution.getTotalStepsPassed());
 		result.put(keyPrefix + "loopCount", execution.getLoopCount());
 		result.put(keyPrefix + "latestError", execution.getLatestError());
+		result.put(keyPrefix + "stopOnError", execution.isStopOnError());
+		result.put(keyPrefix + "afterStepDelay", execution.getAfterStepDelay());
 		if (dumpAllErrors) {
 			result.put(keyPrefix + "errors", execution.getErrors());
 		}

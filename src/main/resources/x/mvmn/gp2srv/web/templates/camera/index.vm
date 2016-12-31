@@ -386,6 +386,25 @@
 
 			
 			scriptingRactive.on({
+				setAfterStepDelay: function(event) {
+					var afterStepDelay = prompt("Input after-step delay value in miliseconds", "1000");
+					if(afterStepDelay) {
+						$("#asdLoadingIndicator").show();
+						$("#asdErrorIndicator").hide();
+						$.ajax({
+							method: 'POST',
+							url: '$!{request.contextPath}/scripts/exec/afterstepdelay',
+							data: {value: afterStepDelay}
+						}).done(function(data) {
+							$("#asdLoadingIndicator").hide();
+							$("#asdErrorIndicator").hide();										
+						}).fail(function(jqXHR, textStatus) {
+							$("#asdLoadingIndicator").hide();
+							$("#asdErrorIndicator").show();				
+							console.log("Error setting script variables dumping: "+textStatus);
+						});
+					}
+				},
 				stopTracing: function(event) {
 					var ws = scriptingRactive.get("traceWebSocket");
 					scriptingRactive.set("traceWebSocketDontReconnect", true);
@@ -434,6 +453,22 @@
 						var loadScriptsStatusIntervalObj = scriptingRactive.get('loadScriptsStatusIntervalObj');
 						clearInterval(loadScriptsStatusIntervalObj);
 					}
+				},
+				setScriptStopOnError: function(event, val) {
+					$("#stopOnErrorLoadingIndicator").show();
+					$("#stopOnErrorErrorIndicator").hide();				
+					$.ajax({
+						method: 'POST',
+						url: '$!{request.contextPath}/scripts/exec/stoponerror',
+						data: {enable: val}
+					}).done(function(data) {
+						$("#stopOnErrorLoadingIndicator").hide();
+						$("#stopOnErrorErrorIndicator").hide();										
+					}).fail(function(jqXHR, textStatus) {
+						$("#stopOnErrorLoadingIndicator").hide();
+						$("#stopOnErrorErrorIndicator").show();				
+						console.log("Error setting script variables dumping: "+textStatus);
+					});
 				},
 				setScriptVarDump: function(event, val) {
 					$("#varDumpLoadingIndicator").show();

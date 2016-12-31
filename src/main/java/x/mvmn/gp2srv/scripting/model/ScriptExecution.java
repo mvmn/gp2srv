@@ -14,6 +14,7 @@ import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.camera.service.impl.LightMeterImpl;
 import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecutionObserver;
+import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.log.api.Logger;
 
 public class ScriptExecution implements Runnable {
@@ -32,6 +33,8 @@ public class ScriptExecution implements Runnable {
 	protected volatile long totalStepsPassed = 0;
 	protected final String scriptName;
 	protected final CameraService cameraService;
+	protected volatile boolean stopOnError = false;
+	protected volatile int afterStepDelay = 0;
 
 	public ScriptExecution(final CameraService cameraService, final Logger logger, final String scriptName, final List<ScriptStep> steps,
 			final JexlEngine engine, final ScriptExecutionObserver scriptExecutionObserver, final Function<ScriptExecution, Void> finishListener) {
@@ -71,35 +74,27 @@ public class ScriptExecution implements Runnable {
 		return result;
 	}
 
-	public synchronized void doStep(int stepNum) {
-		ScriptStep currentStepObj = null;
-		try {
-			currentStepObj = steps[stepNum];
-			currentStepObj.execute(cameraService, engine, context);
-			totalStepsPassed++;
-		} catch (JexlException e) {
-			error("Evaluation error on step #" + stepNum + " " + currentStepObj + ": "
-					+ ((e.getCause() != null ? e.getCause().getClass().getName() : "") + " " + e.getMessage()).trim());
-		} catch (NumberFormatException e) {
-			error("Number format error on step #" + stepNum + " " + currentStepObj + ": " + e.getMessage());
-		} catch (Exception e) {
-			error("Error on step #" + stepNum + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim());
+	public synchronized void doStep(ScriptStep currentStepObj, int stepNum) {
 
-			// TODO: optional
-			// requestStop();
+	}
+
+	protected void handleError(String message) {
+		latestError = message;
+		errors.add(message);
+		if (stopOnError) {
+			requestStop();
 		}
 	}
 
-	protected void error(String message) {
-		latestError = message;
-		errors.add(message);
-	}
-
 	protected void populateStepData(int stepNumber) {
-		context.set("__currentTimeMillis", System.currentTimeMillis());
+		long ctm = System.currentTimeMillis();
+		context.set("__currentTimeMillis", ctm);
 		context.set("___currentStep", stepNumber);
 		context.set("___totalStepsPassed", totalStepsPassed);
 		context.set("___loopCount", loopCount);
+		if (stepNumber == 0) {
+			context.set("__loopStartTime", ctm);
+		}
 	}
 
 	protected int getAndAdvanceNextStepNumber() {
@@ -134,8 +129,38 @@ public class ScriptExecution implements Runnable {
 			int stepNumber = getAndAdvanceNextStepNumber();
 			currentStep = stepNumber;
 			populateStepData(stepNumber);
-			scriptExecutionObserver.preStep(this);
-			doStep(stepNumber);
+			ScriptStep currentStepObj = null;
+			try {
+				currentStepObj = steps[stepNumber];
+				boolean execute = currentStepObj.evalCondition(engine, context);
+				context.set("___evaldCondition", execute);
+				CameraConfigEntryBean confEntry = null;
+				Object evaluatedValue = null;
+				if (execute) {
+					confEntry = currentStepObj.getConfigEntryForEval(cameraService);
+					evaluatedValue = currentStepObj.evalExpression(engine, context, confEntry);
+				}
+				context.set("___evaldExpression", evaluatedValue);
+				scriptExecutionObserver.preStep(this);
+
+				if (execute) {
+					currentStepObj.execute(cameraService, evaluatedValue, context, confEntry);
+					totalStepsPassed++;
+				}
+			} catch (JexlException e) {
+				handleError("Evaluation error on step #" + stepNumber + " " + currentStepObj + ": "
+						+ ((e.getCause() != null ? e.getCause().getClass().getName() : "") + " " + e.getMessage()).trim());
+			} catch (NumberFormatException e) {
+				handleError("Number format error on step #" + stepNumber + " " + currentStepObj + ": " + e.getMessage());
+			} catch (Exception e) {
+				handleError("Error on step #" + stepNumber + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim());
+			}
+			if (afterStepDelay > 0) {
+				try {
+					Thread.sleep(afterStepDelay);
+				} catch (InterruptedException e) {
+				}
+			}
 			scriptExecutionObserver.postStep(this);
 		}
 		finishListener.apply(this);
@@ -152,5 +177,21 @@ public class ScriptExecution implements Runnable {
 
 	public String getLatestError() {
 		return latestError;
+	}
+
+	public boolean isStopOnError() {
+		return stopOnError;
+	}
+
+	public void setStopOnError(boolean stopOnError) {
+		this.stopOnError = stopOnError;
+	}
+
+	public int getAfterStepDelay() {
+		return afterStepDelay;
+	}
+
+	public void setAfterStepDelay(int traceDelay) {
+		this.afterStepDelay = traceDelay;
 	}
 }

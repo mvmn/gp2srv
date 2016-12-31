@@ -97,6 +97,20 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				serveJson(scriptManagementService.delete(scriptName), response);
 			} else if ("/scripts/exec/dumpvars".equals(path)) {
 				this.scriptDumpVars.set(Boolean.valueOf(request.getParameter("enable")));
+			} else if ("/scripts/exec/afterstepdelay".equals(path)) {
+				ScriptExecution execution = this.scriptExecService.getCurrentExecution();
+				if (execution != null) {
+					execution.setAfterStepDelay(Integer.parseInt(request.getParameter("value")));
+				} else {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				}
+			} else if ("/scripts/exec/stoponerror".equals(path)) {
+				ScriptExecution execution = this.scriptExecService.getCurrentExecution();
+				if (execution != null) {
+					execution.setStopOnError(Boolean.valueOf(request.getParameter("enable")));
+				} else {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				}
 			} else if ("/scripts/exec/stop".equals(path)) {
 				boolean result = false;
 				ScriptExecution currentExecution = scriptExecService.getCurrentExecution();

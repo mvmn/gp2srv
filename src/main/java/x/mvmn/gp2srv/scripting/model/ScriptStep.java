@@ -23,7 +23,7 @@ public class ScriptStep {
 	protected transient volatile JexlExpression conditionExpressionCache;
 	protected transient volatile JexlExpression expressionExpressionCache;
 
-	public void execute(CameraService cameraService, JexlEngine engine, JexlContext context) {
+	public boolean evalCondition(JexlEngine engine, JexlContext context) {
 		boolean execute = true;
 		if (condition != null && !condition.trim().isEmpty()) {
 			execute = Boolean
@@ -31,55 +31,66 @@ public class ScriptStep {
 							.evaluate(context).toString());
 		}
 
-		if (execute) {
-			CameraConfigEntryBean configEntry = null;
-			if (ScriptStepType.CAMPROP_SET.equals(type)) {
-				configEntry = cameraService.getConfigAsMap().get(key.trim());
-				if (configEntry != null) {
-					context.set("__camprop", configEntry);
+		return execute;
+	}
+
+	public CameraConfigEntryBean getConfigEntryForEval(CameraService cameraService) {
+		CameraConfigEntryBean configEntry = null;
+		if (ScriptStepType.CAMPROP_SET.equals(type)) {
+			configEntry = cameraService.getConfigAsMap().get(key.trim());
+		}
+		return configEntry;
+	}
+
+	public Object evalExpression(JexlEngine engine, JexlContext context, CameraConfigEntryBean configEntryForEval) {
+		Object evaluatedValue = null;
+		if (!ScriptStepType.CAPTURE.equals(type)) {
+			if (configEntryForEval != null) {
+				context.set("__camprop", configEntryForEval);
+			}
+			evaluatedValue = (expressionExpressionCache == null ? (expressionExpressionCache = engine.createExpression(expression)) : expressionExpressionCache)
+					.evaluate(context);
+		}
+		return evaluatedValue;
+	}
+
+	public void execute(CameraService cameraService, Object evaluatedValue, JexlContext context, CameraConfigEntryBean configEntry) {
+		String evaluatedValueAsString = evaluatedValue != null ? evaluatedValue.toString() : "";
+
+		switch (type) {
+			case CAPTURE:
+				CameraFileSystemEntryBean cfseb = cameraService.capture();
+				context.set("__capturedFile", cfseb.getPath() + (cfseb.getPath().endsWith("/") ? "" : "/") + cfseb.getName());
+			break;
+			case DELAY:
+				ensuredWait(Long.parseLong(evaluatedValueAsString));
+			break;
+			case CAMEVENT_WAIT:
+				if (key != null && !key.trim().isEmpty()) {
+					cameraService.waitForSpecificEvent(Integer.parseInt(evaluatedValueAsString), GP2CameraEventType.getByCode(Integer.parseInt(key.trim())));
+				} else {
+					cameraService.waitForEvent(Integer.parseInt(evaluatedValueAsString));
 				}
-			}
-
-			Object evaluatedValue = (expressionExpressionCache == null ? (expressionExpressionCache = engine.createExpression(expression))
-					: expressionExpressionCache).evaluate(context);
-			String evaluatedValueAsString = evaluatedValue.toString();
-
-			switch (type) {
-				case CAPTURE:
-					CameraFileSystemEntryBean cfseb = cameraService.capture();
-					context.set("__capturedFile", cfseb.getPath() + (cfseb.getPath().endsWith("/") ? "" : "/") + cfseb.getName());
-				break;
-				case DELAY:
-					ensuredWait(Long.parseLong(evaluatedValueAsString));
-				break;
-				case CAMEVENT_WAIT:
-					if (key != null && !key.trim().isEmpty()) {
-						cameraService.waitForSpecificEvent(Integer.parseInt(evaluatedValueAsString),
-								GP2CameraEventType.getByCode(Integer.parseInt(key.trim())));
-					} else {
-						cameraService.waitForEvent(Integer.parseInt(evaluatedValueAsString));
+			break;
+			case VAR_SET:
+				context.set(key, evaluatedValue);
+			break;
+			case CAMPROP_SET:
+				if (configEntry != null) {
+					switch (configEntry.getValueType()) {
+						case FLOAT:
+							configEntry = configEntry.cloneWithNewValue(Float.parseFloat(evaluatedValueAsString));
+						break;
+						case INT:
+							configEntry = configEntry.cloneWithNewValue(Integer.parseInt(evaluatedValueAsString));
+						break;
+						case STRING:
+							configEntry = configEntry.cloneWithNewValue(evaluatedValueAsString);
+						break;
 					}
-				break;
-				case VAR_SET:
-					context.set(key, evaluatedValue);
-				break;
-				case CAMPROP_SET:
-					if (configEntry != null) {
-						switch (configEntry.getValueType()) {
-							case FLOAT:
-								configEntry = configEntry.cloneWithNewValue(Float.parseFloat(evaluatedValueAsString));
-							break;
-							case INT:
-								configEntry = configEntry.cloneWithNewValue(Integer.parseInt(evaluatedValueAsString));
-							break;
-							case STRING:
-								configEntry = configEntry.cloneWithNewValue(evaluatedValueAsString);
-							break;
-						}
-						cameraService.setConfig(configEntry);
-					}
-				break;
-			}
+					cameraService.setConfig(configEntry);
+				}
+			break;
 		}
 	}
 
