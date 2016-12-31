@@ -15,9 +15,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import x.mvmn.gp2srv.camera.CameraService;
+import x.mvmn.gp2srv.scripting.model.ScriptExecution;
 import x.mvmn.gp2srv.scripting.model.ScriptStep;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl;
-import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecution;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptsManagementServiceImpl;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
