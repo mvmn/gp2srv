@@ -134,6 +134,17 @@ body {
     background-color: black;
 	color: white;
 }
-.activeStep {
-	background-color: green;
+.activeStep, .activeStep .stepOrder {
+	background-color: #99DD99 !important;
+}
+.stepOrder {
+	display: inline-block;
+	width: 40px;
+	background-color: #BBBBBB;
+	text-align: center;
+}
+.scriptStep {
+	border: 0;
+	margin: 2px;
+	background-color: #EEEEEE;
 }

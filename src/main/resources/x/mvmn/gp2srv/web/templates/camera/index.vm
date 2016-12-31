@@ -286,11 +286,12 @@
 				data: {contextPath:"$!{request.contextPath}",
 					scriptFiles:[], 
 					scriptStepTypes:[
-						{key:'CAPTURE', name:'Capture photo'},
+						{key:'CAPTURE', name:'Capture'},
 						{key:'DELAY', name:'Wait'},
-						{key:'CAMEVENT_WAIT', name:'Await cam event'},
-						{key:'CAMPROP_SET', name:'Set cam property'}, 
-						{key:'VAR_SET', name:'Set variable'}
+						{key:'CAMEVENT_WAIT', name:'Wait cam'},
+						{key:'CAMPROP_SET', name:'Set prop'}, 
+						{key:'VAR_SET', name:'Set var'},
+						{key:'STOP', name:'Stop'}
 					],
 					cameraEventTypes:[
 						{type:'', name:'Any'},

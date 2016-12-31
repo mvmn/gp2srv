@@ -68,24 +68,26 @@
 		</div>
 		<div style="padding-bottom: 8px">
 			{{#each scriptSteps:stepIndex}}
-				<div style="padding: 8px" {{#if stepIndex == activeScriptStepIndex }}class="activeStep"{{/if}}>
+				<div style="padding: 8px" class="{{#if stepIndex == activeScriptStepIndex }}activeStep{{/if}} small scriptStep">
 					<div>
-						<input type="button" value="↑" on-click="@this.fire('swapScriptSteps', event, stepIndex-1, stepIndex)" />
+						<span class="stepOrder"><input type="button" value="↑" on-click="@this.fire('swapScriptSteps', event, stepIndex-1, stepIndex)" /></span>
 						<input type="button" value="x" on-click="@this.fire('deleteScriptStep', event, stepIndex)" />
-						if (<input type="text" value="{{condition}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'condition', stepIndex, event.node.value)" />) then
-					</div>
-					<div>
-						<input type="button" value="↓" on-click="@this.fire('swapScriptSteps', event, stepIndex, stepIndex+1)" />
+						if (<input type="text" value="{{condition}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'condition', stepIndex, event.node.value)" />)
 						<select on-change="@this.fire('scriptStepPropertyChanged', event, 'type', stepIndex, event.node.value)">
 							{{#each scriptStepTypes}}
 								<option value="{{key}}" {{#if type == key}}selected="selected"{{/if}}>{{name}}</option>
 							{{/each}}
 						</select>
-						{{#if type != 'CAPTURE' || type != 'DELAY' }}
+					</div>
+					<div>
+						<span class="stepOrder smaller">#{{stepIndex}}</span>
+						&nbsp;
+						{{#if type != 'CAPTURE' && type != 'DELAY' && type != 'STOP' }}
 							{{#if type == 'VAR_SET' }}
 								<input type="text" value="{{key}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)" />
 							{{/if}}
 							{{#if type == 'CAMEVENT_WAIT' }}
+								camera event: 
 								<select on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)">
 									{{#each cameraEventTypes}}
 										<option value="{{key}}" {{#if key == type}}selected="selected"{{/if}}>{{name}}</option>
@@ -102,14 +104,16 @@
 						{{/if}}
 					</div>
 					<div>			
+						<span class="stepOrder"><input type="button" value="↓" on-click="@this.fire('swapScriptSteps', event, stepIndex, stepIndex+1)" /></span>
+						&nbsp;
 						{{#if type == 'CAMPROP_SET' || type == 'VAR_SET' }}
 							to
 						{{/if}}
 						{{#if type == 'DELAY' || type == 'CAMEVENT_WAIT' }}
 							for
 						{{/if}}
-						{{#if type != 'CAPTURE'}}
-							<input type="text" size="40" value="{{expression}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'expression', stepIndex, event.node.value)" />
+						{{#if type != 'CAPTURE' && type!= 'STOP'}}
+							<input type="text" size="36" value="{{expression}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'expression', stepIndex, event.node.value)" />
 						{{/if}}
 						{{#if type == 'DELAY' || type == 'CAMEVENT_WAIT' }}
 							ms

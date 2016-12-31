@@ -12,7 +12,17 @@ import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
 public class ScriptStep {
 
 	public static enum ScriptStepType {
-		CAPTURE, DELAY, CAMEVENT_WAIT, CAMPROP_SET, VAR_SET
+		CAPTURE(false), DELAY(true), CAMEVENT_WAIT(true), CAMPROP_SET(true), VAR_SET(true), STOP(false);
+
+		protected final boolean usesExpression;
+
+		ScriptStepType(boolean usesExpression) {
+			this.usesExpression = usesExpression;
+		}
+
+		public boolean getUsesExpression() {
+			return usesExpression;
+		}
 	}
 
 	protected ScriptStepType type;
@@ -44,7 +54,7 @@ public class ScriptStep {
 
 	public Object evalExpression(JexlEngine engine, JexlContext context, CameraConfigEntryBean configEntryForEval) {
 		Object evaluatedValue = null;
-		if (!ScriptStepType.CAPTURE.equals(type)) {
+		if (type.getUsesExpression()) {
 			if (configEntryForEval != null) {
 				context.set("__camprop", configEntryForEval);
 			}
@@ -54,10 +64,14 @@ public class ScriptStep {
 		return evaluatedValue;
 	}
 
-	public void execute(CameraService cameraService, Object evaluatedValue, JexlContext context, CameraConfigEntryBean configEntry) {
+	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlContext context, CameraConfigEntryBean configEntry) {
+		boolean result = false;
 		String evaluatedValueAsString = evaluatedValue != null ? evaluatedValue.toString() : "";
 
 		switch (type) {
+			case STOP:
+				result = true;
+			break;
 			case CAPTURE:
 				CameraFileSystemEntryBean cfseb = cameraService.capture();
 				context.set("__capturedFile", cfseb.getPath() + (cfseb.getPath().endsWith("/") ? "" : "/") + cfseb.getName());
@@ -92,6 +106,7 @@ public class ScriptStep {
 				}
 			break;
 		}
+		return result;
 	}
 
 	protected void ensuredWait(long totalWaitTime) {

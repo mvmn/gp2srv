@@ -141,8 +141,11 @@ public class ScriptExecution implements Runnable {
 				scriptExecutionObserver.preStep(this);
 
 				if (execute) {
-					currentStepObj.execute(cameraService, evaluatedValue, context, confEntry);
+					boolean stopRequest = currentStepObj.execute(cameraService, evaluatedValue, context, confEntry);
 					totalStepsPassed++;
+					if (stopRequest) {
+						requestStop();
+					}
 				}
 			} catch (JexlException e) {
 				handleError("Evaluation error on step #" + stepNumber + " " + currentStepObj + ": "
