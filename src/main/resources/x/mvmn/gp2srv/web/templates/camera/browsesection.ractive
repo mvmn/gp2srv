@@ -1,6 +1,6 @@
 <div class="siteContentElementContainer browseNavigation">
 	<div id="browseNavigation" class="fullWidth">
-		&gt;&nbsp;{{#each pathElements:pathElIndex}}<a href="#" on-click="@this.fire('browseFolder', event, pathElements.slice(0, pathElIndex+1).join('/'))">{{ . == ""? "/" : . }}</a>&nbsp;&gt;&nbsp;{{/each}}
+		{{#each pathElements:pathElIndex}}&nbsp;&gt;&nbsp;<a href="#" on-click="@this.fire('browseFolder', event, pathElements.slice(0, pathElIndex+1).join('/'))">{{ . == ""? "/" : . }}</a>{{/each}}
 	</div>
 </div>
 <div class="siteContentElementContainer">
