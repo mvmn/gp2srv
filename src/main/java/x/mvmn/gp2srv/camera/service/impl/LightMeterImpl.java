@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.camera.service.impl;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -26,7 +27,7 @@ public class LightMeterImpl {
 
 	public double getForThumb(String cameraFilePath) {
 		int lios = cameraFilePath.lastIndexOf("/");
-		return doCalc(cameraService.fileGetThumb(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)));
+		return doCalc(cameraService.fileGetThumb(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)), true);
 	}
 
 	public double getForPreview() {
@@ -34,8 +35,13 @@ public class LightMeterImpl {
 	}
 
 	protected double doCalc(byte[] image) {
+		return doCalc(image, false);
+	}
+
+	protected double doCalc(byte[] image, boolean reliable) {
 		try {
-			return ImageUtil.calculateAverageBrightness(ImageIO.read(new ByteArrayInputStream(image)));
+			BufferedImage javaBufferedImage = ImageIO.read(new ByteArrayInputStream(image));
+			return reliable ? ImageUtil.calculateAverageBrightnessSlowReliable(javaBufferedImage) : ImageUtil.calculateAverageBrightness(javaBufferedImage);
 		} catch (IOException e) {
 			logger.error("Error obtianing preview average brightness", e);
 			return 0;
