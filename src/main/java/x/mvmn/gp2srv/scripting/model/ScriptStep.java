@@ -12,7 +12,7 @@ import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
 public class ScriptStep {
 
 	public static enum ScriptStepType {
-		CAPTURE(false), DELAY(true), CAMEVENT_WAIT(true), CAMPROP_SET(true), VAR_SET(true), STOP(false);
+		CAPTURE(false), DELAY(true), CAMEVENT_WAIT(true), CAMPROP_SET(true), EXEC_SCRIPT(false), VAR_SET(true), STOP(false);
 
 		protected final boolean usesExpression;
 
@@ -64,11 +64,14 @@ public class ScriptStep {
 		return evaluatedValue;
 	}
 
-	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlContext context, CameraConfigEntryBean configEntry) {
+	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlEngine engine, JexlContext context, CameraConfigEntryBean configEntry) {
 		boolean result = false;
 		String evaluatedValueAsString = evaluatedValue != null ? evaluatedValue.toString() : "";
 
 		switch (type) {
+			case EXEC_SCRIPT:
+				engine.createScript(expression).execute(context);
+			break;
 			case STOP:
 				result = true;
 			break;

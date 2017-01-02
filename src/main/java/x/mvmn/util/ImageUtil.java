@@ -78,7 +78,7 @@ public class ImageUtil {
 			double result = 0.0d;
 			int length = to - from;
 			for (int i = from; i < to; i += pixelSize) {
-				result += ((int) pixels[pixelSize - 3] & 0xff) + ((int) pixels[pixelSize - 2] & 0xff) + ((int) pixels[pixelSize - 1] & 0xff);
+				result += ((int) pixels[i + pixelSize - 3] & 0xff) + ((int) pixels[i + pixelSize - 2] & 0xff) + ((int) pixels[i + pixelSize - 1] & 0xff);
 			}
 			this.result = (result / (length / pixelSize)) / 7.65d;
 			return true;
@@ -101,21 +101,16 @@ public class ImageUtil {
 		return argb & 0xFF;
 	}
 
-	public static double calculateAverageBrightnessSlowReliable(BufferedImage image) {
-		long result = 0;
-
-		// TODO: parallelize
-
-		int argbs[] = image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth());
-		for (int i = 0; i < argbs.length; i++) {
-			int argb = argbs[i];
-			result += argbToRed(argb);
-			result += argbToGreen(argb);
-			result += argbToBlue(argb);
-		}
-
-		return (result / argbs.length) / 7.65d;
-	}
+	/*
+	 * public static double calculateAverageBrightnessSlowReliable(BufferedImage image) { long result = 0;
+	 * 
+	 * // TODO: parallelize
+	 * 
+	 * int argbs[] = image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()); for (int i =
+	 * 0; i < argbs.length; i++) { int argb = argbs[i]; result += argbToRed(argb); result += argbToGreen(argb); result += argbToBlue(argb); }
+	 * 
+	 * return (result / argbs.length) / 7.65d; }
+	 */
 
 	/*
 	 * protected static volatile double currentValue = 0d; public static void main(String args[]) throws Exception { final JFrame frame = new JFrame(); final

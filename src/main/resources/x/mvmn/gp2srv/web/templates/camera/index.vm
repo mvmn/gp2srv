@@ -291,6 +291,7 @@
 						{key:'CAMEVENT_WAIT', name:'Wait cam'},
 						{key:'CAMPROP_SET', name:'Set prop'}, 
 						{key:'VAR_SET', name:'Set var'},
+						{key:'EXEC_SCRIPT', name:'JEXLscript'},
 						{key:'STOP', name:'Stop'}
 					],
 					cameraEventTypes:[

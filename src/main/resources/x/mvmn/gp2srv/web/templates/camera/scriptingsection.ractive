@@ -60,6 +60,8 @@
 				<div>&#8226; __lightmeter.getForPreview() - get preview and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __lightmeter.getForCameraFile(cameraFilePath) - get camera file full contents and calculate average pixel brightness (in %)</div>
 				<div>&#8226; __lightmeter.getForThumb(cameraFilePath) - get camera file thumbnail and calculate average pixel brightness (in %)</div>
+				<div>&#8226; __helper.createArray(size) creates object array of specified size</div>
+				<div>&#8226; __helper.createList() creates dynamic object list of specified size</div>
 				<div>&#8226; __currentTimeMillis - current time in milliseconds</div>
 				<div>&#8226; __loopStartTime - value of current time ms before executing 1-st step of script updated each loop, i.e. time of loop start.</div>
 				<div>&#8226; __camprop - for set camera property steps, object that contains camera property details</div>
@@ -84,7 +86,7 @@
 						<span class="stepOrder smaller">#{{stepIndex}}</span>
 						&nbsp;
 						{{#if type != 'CAPTURE' && type != 'DELAY' && type != 'STOP' }}
-							{{#if type == 'VAR_SET' }}
+							{{#if type == 'VAR_SET'}}
 								<input type="text" value="{{key}}" on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)" />
 							{{/if}}
 							{{#if type == 'CAMEVENT_WAIT' }}
@@ -93,7 +95,7 @@
 									{{#each cameraEventTypes}}
 										<option value="{{key}}" {{#if key == type}}selected="selected"{{/if}}>{{name}}</option>
 									{{/each}}
-								</select>						
+								</select>
 							{{/if}}
 							{{#if type == 'CAMPROP_SET' }}
 								<select on-change="@this.fire('scriptStepPropertyChanged', event, 'key', stepIndex, event.node.value)">

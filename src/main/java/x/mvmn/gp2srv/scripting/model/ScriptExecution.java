@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.scripting.model;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.apache.commons.jexl3.JexlException;
 
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.camera.service.impl.LightMeterImpl;
+import x.mvmn.gp2srv.camera.service.impl.ScriptHelper;
 import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecutionObserver;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
@@ -42,6 +44,7 @@ public class ScriptExecution implements Runnable {
 		this.engine = engine;
 		this.context = new JexlMapContext();
 		context.set("__lightmeter", new LightMeterImpl(cameraService, logger));
+		context.set("__helper", new ScriptHelper());
 		this.scriptExecutionObserver = scriptExecutionObserver;
 		this.finishListener = finishListener;
 		this.scriptName = scriptName;
@@ -66,7 +69,23 @@ public class ScriptExecution implements Runnable {
 		for (String varName : getVariables()) {
 			Object value = getVariableValue(varName);
 			if (asStrings) {
-				value = value != null ? value.toString() : null;
+				if (value != null) {
+					if (value.getClass().isArray()) {
+						StringBuilder valueArrayStr = new StringBuilder("[");
+						for (int i = 0; i < Array.getLength(value); i++) {
+							if (i > 0) {
+								valueArrayStr.append(", ");
+							}
+							Object val = Array.get(value, i);
+							valueArrayStr.append(val != null ? val.toString() : "null");
+						}
+						value = valueArrayStr.append("]").toString();
+					} else {
+						value = value.toString();
+					}
+				} else {
+					value = null;
+				}
 			}
 			result.put(varName, value);
 		}
@@ -143,7 +162,7 @@ public class ScriptExecution implements Runnable {
 				scriptExecutionObserver.preStep(this);
 
 				if (execute) {
-					boolean stopRequest = currentStepObj.execute(cameraService, evaluatedValue, context, confEntry);
+					boolean stopRequest = currentStepObj.execute(cameraService, evaluatedValue, engine, context, confEntry);
 					totalStepsPassed++;
 					if (stopRequest) {
 						requestStop();
