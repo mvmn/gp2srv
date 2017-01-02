@@ -1,7 +1,9 @@
 package x.mvmn.gp2srv.mock.service.impl;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -87,7 +89,10 @@ public class MockCameraServiceImpl implements CameraService {
 
 		if (System.getProperty("gp2mock.screengrab") != null) {
 			try {
-				Rectangle screenRect = new Rectangle(800, 600);
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				int captureWidth = Math.min(800, screenSize.width);
+				int captureHeight = Math.min(600, screenSize.height);
+				Rectangle screenRect = new Rectangle(screenSize.width - captureWidth, screenSize.height - captureHeight, captureWidth, captureHeight);
 				BufferedImage capture = new Robot().createScreenCapture(screenRect);
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ImageIO.write(capture, "jpg", baos);
