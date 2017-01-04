@@ -41,7 +41,7 @@
 			{{#if lowercase(confEntry.type) == "radio" || lowercase(confEntry.type) == "menu" }}
 				<select class="fullWidth" on-change="@this.fire('handleChange', event, entryIndex, event.node.value)">
 					{{#confEntry.choices:idx}}
-						<option value="{{.}}" {{#if confEntry.strValue == . }} selected="selected" {{/if}}>{{.}}</option>
+						<option value="{{.}}" {{#if confEntry.strValue == . }} selected="selected" {{/if}}>{{idx}}: {{.}}</option>
 					{{/choices}}
 				</select>
 			{{elseif lowercase(confEntry.type) == "toggle" }}
