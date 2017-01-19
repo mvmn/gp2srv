@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
@@ -22,6 +21,10 @@ import x.mvmn.log.api.Logger;
 
 public class ScriptExecution implements Runnable {
 
+	public static interface ScriptExecutionFinishListener {
+		public void onFinish(ScriptExecution scriptExecution);
+	}
+
 	protected final ScriptStep[] steps;
 	protected final List<String> errors = new ArrayList<String>();
 	protected volatile String latestError;
@@ -29,7 +32,7 @@ public class ScriptExecution implements Runnable {
 	protected final JexlMapContext context;
 	protected volatile boolean stopRequest = false;
 	protected final ScriptExecutionObserver scriptExecutionObserver;
-	protected final Function<ScriptExecution, Void> finishListener;
+	protected final ScriptExecutionFinishListener finishListener;
 	protected volatile int nextStep = 0;
 	protected volatile int currentStep = 0;
 	protected volatile long loopCount = 0;
@@ -40,7 +43,7 @@ public class ScriptExecution implements Runnable {
 	protected volatile int afterStepDelay = 0;
 
 	public ScriptExecution(final CameraService cameraService, final Logger logger, final String scriptName, final List<ScriptStep> steps,
-			final JexlEngine engine, final ScriptExecutionObserver scriptExecutionObserver, final Function<ScriptExecution, Void> finishListener) {
+			final JexlEngine engine, final ScriptExecutionObserver scriptExecutionObserver, final ScriptExecutionFinishListener finishListener) {
 		this.steps = steps.toArray(new ScriptStep[steps.size()]);
 		this.engine = engine;
 		this.context = new JexlMapContext();
@@ -182,7 +185,7 @@ public class ScriptExecution implements Runnable {
 			}
 			scriptExecutionObserver.postStep(this);
 		}
-		finishListener.apply(this);
+		finishListener.onFinish(this);
 		scriptExecutionObserver.onStop(this);
 	}
 

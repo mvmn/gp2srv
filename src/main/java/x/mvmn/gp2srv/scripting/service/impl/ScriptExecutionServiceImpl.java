@@ -2,17 +2,17 @@ package x.mvmn.gp2srv.scripting.service.impl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.scripting.model.ScriptExecution;
+import x.mvmn.gp2srv.scripting.model.ScriptExecution.ScriptExecutionFinishListener;
 import x.mvmn.gp2srv.scripting.model.ScriptStep;
 import x.mvmn.log.api.Logger;
 
-public class ScriptExecutionServiceImpl implements Function<ScriptExecution, Void> {
+public class ScriptExecutionServiceImpl implements ScriptExecutionFinishListener {
 
 	protected AtomicReference<ScriptExecution> currentExecution = new AtomicReference<ScriptExecution>();
 	protected AtomicReference<ScriptExecution> latestFinishedExecution = new AtomicReference<ScriptExecution>();
@@ -50,9 +50,8 @@ public class ScriptExecutionServiceImpl implements Function<ScriptExecution, Voi
 		return latestFinishedExecution.get();
 	}
 
-	public Void apply(ScriptExecution execution) {
+	public void onFinish(ScriptExecution execution) {
 		currentExecution.set(null);
 		latestFinishedExecution.set(execution);
-		return null;
 	}
 }
