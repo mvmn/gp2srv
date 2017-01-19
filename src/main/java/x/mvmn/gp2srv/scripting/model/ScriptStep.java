@@ -8,6 +8,7 @@ import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
+import x.mvmn.lang.util.WaitUtil;
 
 public class ScriptStep {
 
@@ -32,6 +33,16 @@ public class ScriptStep {
 
 	protected transient volatile JexlExpression conditionExpressionCache;
 	protected transient volatile JexlExpression expressionExpressionCache;
+
+	public ScriptStep() {
+	}
+
+	public ScriptStep(ScriptStepType type, String key, String expression, String condition) {
+		this.setType(type);
+		this.setKey(key);
+		this.setExpression(expression);
+		this.setCondition(condition);
+	}
 
 	public boolean evalCondition(JexlEngine engine, JexlContext context) {
 		boolean execute = true;
@@ -80,7 +91,7 @@ public class ScriptStep {
 				context.set("__capturedFile", cfseb.getPath() + (cfseb.getPath().endsWith("/") ? "" : "/") + cfseb.getName());
 			break;
 			case DELAY:
-				ensuredWait(Long.parseLong(evaluatedValueAsString));
+				WaitUtil.ensuredWait(Long.parseLong(evaluatedValueAsString));
 			break;
 			case CAMEVENT_WAIT:
 				if (key != null && !key.trim().isEmpty()) {
@@ -112,23 +123,6 @@ public class ScriptStep {
 		return result;
 	}
 
-	protected void ensuredWait(long totalWaitTime) {
-		long waitTime = totalWaitTime;
-		long startTime = System.currentTimeMillis();
-		long projectedEndTime = startTime + totalWaitTime;
-		do {
-			try {
-				if (waitTime > 0) {
-					Thread.sleep(waitTime);
-				}
-			} catch (InterruptedException e) {
-				// Wait time = Total wait time - passed time (e.g. total wait for 10 sec, interrupted after 3 sec, still 7 sec to wait)
-				// Passed time = now - start time
-				waitTime = totalWaitTime - (System.currentTimeMillis() - startTime);
-			}
-		} while (System.currentTimeMillis() < projectedEndTime);
-	}
-
 	public ScriptStepType getType() {
 		return type;
 	}
@@ -151,6 +145,14 @@ public class ScriptStep {
 
 	public void setExpression(String expression) {
 		this.expression = expression;
+	}
+
+	public String getCondition() {
+		return condition;
+	}
+
+	public void setCondition(String condition) {
+		this.condition = condition;
 	}
 
 	@Override

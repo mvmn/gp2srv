@@ -17,6 +17,7 @@ import x.mvmn.gp2srv.camera.service.impl.ScriptHelper;
 import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecutionObserver;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
+import x.mvmn.lang.util.WaitUtil;
 import x.mvmn.log.api.Logger;
 
 public class ScriptExecution implements Runnable {
@@ -177,10 +178,7 @@ public class ScriptExecution implements Runnable {
 				handleError(context, "Error on step #" + stepNumber + " " + currentStepObj + ": " + (e.getClass().getName() + " " + e.getMessage()).trim());
 			}
 			if (afterStepDelay > 0) {
-				try {
-					Thread.sleep(afterStepDelay);
-				} catch (InterruptedException e) {
-				}
+				WaitUtil.ensuredWait(afterStepDelay);
 			}
 			scriptExecutionObserver.postStep(this);
 		}

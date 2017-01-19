@@ -37,6 +37,7 @@ import x.mvmn.gp2srv.web.servlets.ScriptingServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.jlibgphoto2.GP2Camera;
 import x.mvmn.lang.util.Provider;
+import x.mvmn.lang.util.WaitUtil;
 import x.mvmn.log.PrintStreamLogger;
 import x.mvmn.log.api.Logger;
 import x.mvmn.log.api.Logger.LogLevel;
@@ -201,10 +202,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	public static void waitWhileLiveViewInProgress(int waitTime) {
 		while (GPhoto2Server.liveViewInProgress.get() && waitTime-- > 0) {
 			Thread.yield();
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-			}
+			WaitUtil.ensuredWait(100);
 		}
 	}
 
