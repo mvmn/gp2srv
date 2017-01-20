@@ -1,7 +1,10 @@
 package x.mvmn.gp2srv.scripting.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlScript;
@@ -30,6 +33,21 @@ public class ScriptStepTest {
 	@Before
 	public void cleanup() {
 		jexlContext.clear();
+	}
+
+	@Test
+	public void testEval() {
+		Assert.assertTrue(new ScriptStep(ScriptStepType.STOP, null, null, "true").evalCondition(new JexlBuilder().create(), jexlContext));
+		Assert.assertFalse(new ScriptStep(ScriptStepType.STOP, null, null, "false").evalCondition(new JexlBuilder().create(), jexlContext));
+		CameraService cameraService = Mockito.mock(CameraService.class);
+		Map<String, CameraConfigEntryBean> ccebMap = new HashMap<String, CameraConfigEntryBean>();
+		ccebMap.put("prop", new CameraConfigEntryBean(0, "prop", "prop", "", CameraConfigEntryType.TEXT, null, null, "val", null, null));
+		Mockito.when(cameraService.getConfigAsMap()).thenReturn(ccebMap);
+		ScriptStep unit = new ScriptStep(ScriptStepType.CAMPROP_SET, "prop", "2+2", "true");
+		Assert.assertEquals(ccebMap.get("prop"), unit.getConfigEntryForEval(cameraService));
+		jexlContext.clear();
+		Assert.assertEquals(4, unit.evalExpression(new JexlBuilder().create(), jexlContext, ccebMap.get("prop")));
+		Assert.assertEquals(ccebMap.get("prop"), jexlContext.get("__camprop"));
 	}
 
 	@Test
