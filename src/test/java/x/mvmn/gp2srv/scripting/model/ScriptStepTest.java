@@ -40,14 +40,15 @@ public class ScriptStepTest {
 		Assert.assertTrue(new ScriptStep(ScriptStepType.STOP, null, null, "true").evalCondition(new JexlBuilder().create(), jexlContext));
 		Assert.assertFalse(new ScriptStep(ScriptStepType.STOP, null, null, "false").evalCondition(new JexlBuilder().create(), jexlContext));
 		CameraService cameraService = Mockito.mock(CameraService.class);
+		CameraConfigEntryBean cceb = new CameraConfigEntryBean(0, "prop", "prop", "", CameraConfigEntryType.TEXT, null, null, "val", null, null);
 		Map<String, CameraConfigEntryBean> ccebMap = new HashMap<String, CameraConfigEntryBean>();
-		ccebMap.put("prop", new CameraConfigEntryBean(0, "prop", "prop", "", CameraConfigEntryType.TEXT, null, null, "val", null, null));
+		ccebMap.put("prop", cceb);
 		Mockito.when(cameraService.getConfigAsMap()).thenReturn(ccebMap);
 		ScriptStep unit = new ScriptStep(ScriptStepType.CAMPROP_SET, "prop", "2+2", "true");
-		Assert.assertEquals(ccebMap.get("prop"), unit.getConfigEntryForEval(cameraService));
+		Assert.assertEquals(cceb, unit.getConfigEntryForEval(cameraService));
 		jexlContext.clear();
-		Assert.assertEquals(4, unit.evalExpression(new JexlBuilder().create(), jexlContext, ccebMap.get("prop")));
-		Assert.assertEquals(ccebMap.get("prop"), jexlContext.get("__camprop"));
+		Assert.assertEquals(4, unit.evalExpression(new JexlBuilder().create(), jexlContext, cceb));
+		Assert.assertEquals(cceb, jexlContext.get("__camprop"));
 	}
 
 	@Test
