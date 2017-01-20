@@ -25,32 +25,42 @@ public class ScriptExecutionTest {
 		List<Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void>> params = new ArrayList<Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void>>();
 		List<ScriptStep> steps = new ArrayList<ScriptStep>();
 		CameraConfigEntryBean cceb = Mockito.mock(CameraConfigEntryBean.class);
-		steps.add(createMockStep(ScriptStepType.VAR_SET, true, 1, null, params, false));
-		steps.add(createMockStep(ScriptStepType.CAMPROP_SET, true, 2, cceb, params, false));
-		steps.add(createMockStep(ScriptStepType.CAPTURE, false, null, null, params, false));
-		steps.add(createMockStep(ScriptStepType.STOP, true, null, null, params, true));
+		steps.add(createMockStep(ScriptStepType.VAR_SET, true, 1, null, params, -1));
+		steps.add(createMockStep(ScriptStepType.CAMPROP_SET, true, 2, cceb, params, -1));
+		steps.add(createMockStep(ScriptStepType.CAPTURE, false, null, null, params, -1));
+		steps.add(createMockStep(ScriptStepType.STOP, true, null, null, params, 1));
 		ScriptExecutionObserver seo = Mockito.mock(ScriptExecutionObserver.class);
 		ScriptExecutionFinishListener fl = Mockito.mock(ScriptExecutionFinishListener.class);
 		ScriptExecution execution = new ScriptExecution(null, null, "mock", steps, null, seo, fl);
 		execution.run();
-		Assert.assertEquals(3, params.size());
+		Assert.assertEquals(6, params.size());
 		Assert.assertEquals(1, params.get(0).getA());
 		Assert.assertEquals(2, params.get(1).getA());
 		Assert.assertEquals(cceb, params.get(1).getB());
+		Assert.assertEquals(1, params.get(3).getA());
+		Assert.assertEquals(2, params.get(4).getA());
+		Assert.assertEquals(cceb, params.get(4).getB());
 		Assert.assertNull(params.get(2).getA());
+		Assert.assertNull(params.get(5).getA());
 		Assert.assertEquals(0, params.get(0).getC().get("___currentStep"));
 		Assert.assertEquals(1, params.get(1).getC().get("___currentStep"));
 		Assert.assertEquals(3, params.get(2).getC().get("___currentStep"));
-		for (Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void> p : params) {
+		Assert.assertEquals(0, params.get(3).getC().get("___currentStep"));
+		Assert.assertEquals(1, params.get(4).getC().get("___currentStep"));
+		Assert.assertEquals(3, params.get(5).getC().get("___currentStep"));
+		for (Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void> p : params.subList(0, 3)) {
 			Assert.assertEquals(0L, p.getC().get("___loopCount"));
 			Assert.assertEquals(true, p.getC().get("___evaldCondition"));
-			System.out.println(p.getC());
+		}
+		for (Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void> p : params.subList(3, 6)) {
+			Assert.assertEquals(1L, p.getC().get("___loopCount"));
+			Assert.assertEquals(true, p.getC().get("___evaldCondition"));
 		}
 	}
 
 	protected ScriptStep createMockStep(ScriptStepType type, final boolean conditionEvalResult, final Object expressionEvalResult,
 			final CameraConfigEntryBean cceb, final Collection<Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void>> paramsCollector,
-			final boolean stop) {
+			final long stopAtLoop) {
 		ScriptStep result = new ScriptStep(type, null, null, null) {
 
 			@Override
@@ -73,7 +83,7 @@ public class ScriptExecutionTest {
 					CameraConfigEntryBean configEntry) {
 				paramsCollector.add(
 						new Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void>(evaluatedValue, configEntry, context.toMap(), null, null));
-				return stop;
+				return ((Long) context.get("___loopCount")).longValue() == stopAtLoop;
 			}
 		};
 
