@@ -1,10 +1,10 @@
 package x.mvmn.gp2srv.scripting.model;
 
-import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 
 import x.mvmn.gp2srv.camera.CameraService;
+import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
@@ -44,7 +44,7 @@ public class ScriptStep {
 		this.setCondition(condition);
 	}
 
-	public boolean evalCondition(JexlEngine engine, JexlContext context) {
+	public boolean evalCondition(JexlEngine engine, JexlMapContext context) {
 		boolean execute = true;
 		if (condition != null && !condition.trim().isEmpty()) {
 			execute = Boolean
@@ -63,7 +63,7 @@ public class ScriptStep {
 		return configEntry;
 	}
 
-	public Object evalExpression(JexlEngine engine, JexlContext context, CameraConfigEntryBean configEntryForEval) {
+	public Object evalExpression(JexlEngine engine, JexlMapContext context, CameraConfigEntryBean configEntryForEval) {
 		Object evaluatedValue = null;
 		if (type.getUsesExpression()) {
 			if (configEntryForEval != null) {
@@ -75,7 +75,7 @@ public class ScriptStep {
 		return evaluatedValue;
 	}
 
-	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlEngine engine, JexlContext context, CameraConfigEntryBean configEntry) {
+	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlEngine engine, JexlMapContext context, CameraConfigEntryBean configEntry) {
 		boolean result = false;
 		String evaluatedValueAsString = evaluatedValue != null ? evaluatedValue.toString() : "";
 
