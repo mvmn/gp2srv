@@ -30,19 +30,35 @@
 					data: {entries: entries, showFavToggle: true, contextPath:"$!{request.contextPath}"}
 				});
 				ractive.on({
-					doCapture: function(event) {
+					doCaptureDldDel: function(event) {
 						var captureButton = event.node;
-						captureButton.enabled = false;
+						captureButton.disabled = true;
 						$.ajax({
-							url: '$!{request.contextPath}/capture',
+							url: '$!{request.contextPath}/capture_dld_del',
 							method: 'POST'
 						}).fail(function(jqXHR, textStatus) {
-							captureButton.enabled = true;
+							captureButton.disabled = false;
 							console.log(jqXHR);
 							alert("Error occurred: "+textStatus);
 							restartLiveView();
 						}).done(function() {
-							captureButton.enabled = true;
+							captureButton.disabled = false;
+							restartLiveView();
+						});
+					},				
+					doCapture: function(event) {
+						var captureButton = event.node;
+						captureButton.disabled = true;
+						$.ajax({
+							url: '$!{request.contextPath}/capture',
+							method: 'POST'
+						}).fail(function(jqXHR, textStatus) {
+							captureButton.disabled = false;
+							console.log(jqXHR);
+							alert("Error occurred: "+textStatus);
+							restartLiveView();
+						}).done(function() {
+							captureButton.disabled = false;
 							restartLiveView();
 						});
 					},
@@ -215,6 +231,12 @@
 				}
 				navRactive.set("browseData", browseData);
 			},
+			downloadSelectedFiles: function(event) {
+				$(".fileSelectionCheckbox:checked").each(function(idx, el) {
+					$(el).parent().find(".copyToPcBtn").click();
+					$(el).click();
+				});			
+			},
 			deleteSelectedFiles: function(event) { 
 				var browseData = navRactive.get("browseData");
 				var selectedFiles = navRactive.get("selectedFiles");
@@ -255,6 +277,25 @@
 					delFunc(fileToDelete);
 				}
 			},
+			copyFile: function(event, path, name) {
+				var copyButton = $(event.node);
+				copyButton.hide();
+				var loadingIndicator = $(event.node).parent().find(".copyLoadingIndicator");
+				loadingIndicator.show();
+				$.ajax({
+					cache: false,
+					url: '$!{request.contextPath}/downloadcamfile?name=' + encodeURIComponent(name) + '&folder=' + encodeURIComponent(path),
+					method: 'POST'
+				}).done(function() {
+					copyButton.show();
+					loadingIndicator.hide();
+				}).fail(function(jqXHR, textStatus) {
+					copyButton.show();
+					loadingIndicator.hide();
+					console.log(jqXHR);
+					alert("Error copying file: "+textStatus);
+				});				
+			},
 			deleteFile: function(event, path, name) {
 				if(confirm("Delete file "+path.replace(/\/$/g,'')+"/"+name+"?")) {
 					var deleteLink = $(event.node);
@@ -292,7 +333,9 @@
 						{key:'CAMPROP_SET', name:'Set prop'}, 
 						{key:'VAR_SET', name:'Set var'},
 						{key:'EXEC_SCRIPT', name:'JEXLscript'},
-						{key:'STOP', name:'Stop'}
+						{key:'STOP', name:'Stop'},
+						{key:'DOWNLOAD_TO_PC', name:'Dld2PC'},
+						{key:'DELETE', name:'Delete'}
 					],
 					cameraEventTypes:[
 						{type:'', name:'Any'},

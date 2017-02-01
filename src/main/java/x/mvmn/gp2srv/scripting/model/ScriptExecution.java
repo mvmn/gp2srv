@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.scripting.model;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,9 +42,11 @@ public class ScriptExecution implements Runnable {
 	protected final CameraService cameraService;
 	protected volatile boolean stopOnError = false;
 	protected volatile int afterStepDelay = 0;
+	protected final File imgDownloadPath;
 
-	public ScriptExecution(final CameraService cameraService, final Logger logger, final String scriptName, final List<ScriptStep> steps,
-			final JexlEngine engine, final ScriptExecutionObserver scriptExecutionObserver, final ScriptExecutionFinishListener finishListener) {
+	public ScriptExecution(final CameraService cameraService, final File imgDownloadPath, final Logger logger, final String scriptName,
+			final List<ScriptStep> steps, final JexlEngine engine, final ScriptExecutionObserver scriptExecutionObserver,
+			final ScriptExecutionFinishListener finishListener) {
 		this.steps = steps.toArray(new ScriptStep[steps.size()]);
 		this.engine = engine;
 		this.context = new JexlMapContext();
@@ -53,6 +56,7 @@ public class ScriptExecution implements Runnable {
 		this.finishListener = finishListener;
 		this.scriptName = scriptName;
 		this.cameraService = cameraService;
+		this.imgDownloadPath = imgDownloadPath;
 	}
 
 	public ScriptStep[] getScriptSteps() {
@@ -166,7 +170,7 @@ public class ScriptExecution implements Runnable {
 				scriptExecutionObserver.preStep(this);
 
 				if (execute) {
-					boolean stopRequest = currentStepObj.execute(cameraService, evaluatedValue, engine, context, confEntry);
+					boolean stopRequest = currentStepObj.execute(cameraService, evaluatedValue, engine, context, confEntry, imgDownloadPath);
 					totalStepsPassed++;
 					if (stopRequest) {
 						requestStop();

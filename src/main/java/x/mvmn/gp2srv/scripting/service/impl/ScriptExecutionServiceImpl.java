@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.scripting.service.impl;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,9 +32,10 @@ public class ScriptExecutionServiceImpl implements ScriptExecutionFinishListener
 	public ScriptExecutionServiceImpl(Logger logger) {
 	}
 
-	public ScriptExecution execute(final CameraService cameraService, final Logger logger, final String scriptName, final List<ScriptStep> script,
-			final ScriptExecutionObserver scriptExecutionObserver) {
-		final ScriptExecution scriptExecution = new ScriptExecution(cameraService, logger, scriptName, script, engine, scriptExecutionObserver, this);
+	public ScriptExecution execute(final CameraService cameraService, final File imgDownloadPath, final Logger logger, final String scriptName,
+			final List<ScriptStep> script, final ScriptExecutionObserver scriptExecutionObserver) {
+		final ScriptExecution scriptExecution = new ScriptExecution(cameraService, imgDownloadPath, logger, scriptName, script, engine, scriptExecutionObserver,
+				this);
 		if (currentExecution.compareAndSet(null, scriptExecution)) {
 			new Thread(scriptExecution).start();
 			return scriptExecution;

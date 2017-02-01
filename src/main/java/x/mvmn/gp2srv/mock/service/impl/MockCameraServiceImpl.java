@@ -6,6 +6,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -223,5 +224,9 @@ public class MockCameraServiceImpl implements CameraService {
 
 	public byte[] fileGetThumb(String filePath, String fileName) {
 		return fileGetContents(filePath, fileName);
+	}
+
+	public String downloadFile(String cameraFilePath, String cameraFileName, File downloadFolderPath) {
+		return "Ok";
 	}
 }

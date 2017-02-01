@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.camera;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -38,4 +39,6 @@ public interface CameraService {
 	public byte[] fileGetContents(final String filePath, final String fileName);
 
 	public byte[] fileGetThumb(final String filePath, final String fileName);
+
+	public String downloadFile(final String cameraFilePath, final String cameraFileName, final File downloadFolder);
 }

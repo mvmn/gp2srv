@@ -17,8 +17,14 @@ public class GPhoto2ServerLauncher {
 		cliOptions.addOption("gphoto2path", true, "Path to gphoto2 executable.");
 		cliOptions.addOption("logLevel", true, "Log level (TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL).");
 		cliOptions.addOption("auth", true, "Require authentication (login:password).");
+		cliOptions.addOption("imgfolder", false, "Path to store downloaded images at.");
 
+		String imageDldPath = null;
 		final CommandLine commandLine = new PosixParser().parse(cliOptions, args);
+		if (commandLine.hasOption("imgfolder")) {
+			imageDldPath = commandLine.getOptionValue("imgfolder");
+		}
+
 		if (commandLine.hasOption("port")) {
 			String portOptionVal = commandLine.getOptionValue("port");
 			try {
@@ -54,6 +60,6 @@ public class GPhoto2ServerLauncher {
 			}
 		}
 
-		new GPhoto2Server(port, logLevel, commandLine.hasOption("usemocks"), auth).start().join();
+		new GPhoto2Server(port, logLevel, commandLine.hasOption("usemocks"), auth, imageDldPath).start().join();
 	}
 }

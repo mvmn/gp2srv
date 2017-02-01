@@ -19,7 +19,6 @@ import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean.CameraConfigEntryType;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
 import x.mvmn.jlibgphoto2.exception.GP2Exception;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
@@ -30,24 +29,24 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 
 	protected final CameraService cameraService;
 	protected final Properties favouredCamConfSettings;
-	protected final File imagesFolder;
+	protected final File imageDldFolder;
 
 	public CameraControlServlet(final CameraService cameraService, final Properties favouredCamConfSettings,
-			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final File imagesFolder,
+			final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, File imageDldFolder,
 			final Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
 		this.cameraService = cameraService;
 		this.favouredCamConfSettings = favouredCamConfSettings;
-		this.imagesFolder = imagesFolder;
+		this.imageDldFolder = imageDldFolder;
 	}
 
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
-		final String path = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
+		final String requestPath = request.getServletPath() + (request.getPathInfo() != null ? request.getPathInfo() : "");
 		try {
 			GPhoto2Server.liveViewEnabled.set(false);
 			GPhoto2Server.waitWhileLiveViewInProgress(50);
-			if ("/favsetting".equals(path)) {
+			if ("/favsetting".equals(requestPath)) {
 				final String key = request.getParameter("key");
 				final String value = request.getParameter("value");
 				final Boolean valueToSet = Boolean.valueOf(value.toLowerCase());
@@ -57,7 +56,7 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					favouredCamConfSettings.remove(key);
 				}
 				serveJson(valueToSet, response);
-			} else if ("/allsettingset".equals(path)) {
+			} else if ("/allsettingset".equals(requestPath)) {
 				final String type = request.getParameter("type");
 				final String key = request.getParameter("key");
 				final String value = request.getParameter("value");
@@ -84,22 +83,34 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 					getConfigAsMap(false);
 				}
 				serveJson(updatedConfigEntry, response);
-			} else if ("/deletefile".equals(path)) {
+			} else if ("/deletefile".equals(requestPath)) {
 				final String fileName = request.getParameter("name");
 				final String filePath = request.getParameter("folder");
 
 				cameraService.fileDelete(filePath, fileName);
 
 				serveJson(Boolean.TRUE, response);
-			} else if ("/capture".equals(path)) {
+			} else if ("/capture".equals(requestPath)) {
 				cameraService.capture();
-				cameraService.waitForSpecificEvent(1000, GP2CameraEventType.CAPTURE_COMPLETE);
 				serveJson(Boolean.TRUE, response);
+			} else if ("/capture_dld_del".equals(requestPath)) {
+				CameraFileSystemEntryBean cfseb = cameraService.capture();
+				cameraService.downloadFile(cfseb.getPath(), cfseb.getName(), imageDldFolder);
+				cameraService.fileDelete(cfseb.getPath(), cfseb.getName());
+
+				serveJson(Boolean.TRUE, response);
+			} else if ("/downloadcamfile".equals(requestPath)) {
+				final String fileName = request.getParameter("name");
+				final String filePath = request.getParameter("folder");
+
+				String result = cameraService.downloadFile(filePath, fileName, imageDldFolder);
+				response.setStatus(result.equalsIgnoreCase("ok") ? HttpServletResponse.SC_OK : HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				serveJson(result, response);
 			} else {
 				returnNotFound(request, response);
 			}
 		} catch (final Exception e) {
-			logger.error("Error processing POST to " + path, e);
+			logger.error("Error processing POST to " + requestPath, e);
 			serveGenericErrorPage(request, response, -1, e.getMessage());
 		} finally {
 			GPhoto2Server.liveViewEnabled.set(true);

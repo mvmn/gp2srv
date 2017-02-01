@@ -1,5 +1,7 @@
 package x.mvmn.gp2srv.scripting.model;
 
+import java.io.File;
+
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 
@@ -13,7 +15,7 @@ import x.mvmn.lang.util.WaitUtil;
 public class ScriptStep {
 
 	public static enum ScriptStepType {
-		CAPTURE(false), DELAY(true), CAMEVENT_WAIT(true), CAMPROP_SET(true), EXEC_SCRIPT(false), VAR_SET(true), STOP(false);
+		CAPTURE(false), DELAY(true), CAMEVENT_WAIT(true), CAMPROP_SET(true), EXEC_SCRIPT(false), VAR_SET(true), STOP(false), DOWNLOAD_TO_PC(true), DELETE(true);
 
 		protected final boolean usesExpression;
 
@@ -75,11 +77,30 @@ public class ScriptStep {
 		return evaluatedValue;
 	}
 
-	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlEngine engine, JexlMapContext context, CameraConfigEntryBean configEntry) {
+	public boolean execute(CameraService cameraService, Object evaluatedValue, JexlEngine engine, JexlMapContext context, CameraConfigEntryBean configEntry,
+			File imgDownloadPath) {
 		boolean result = false;
 		String evaluatedValueAsString = evaluatedValue != null ? evaluatedValue.toString() : "";
 
 		switch (type) {
+			case DELETE: {
+				final int separatorIndex = evaluatedValueAsString.lastIndexOf("/");
+				String path = evaluatedValueAsString.substring(0, separatorIndex);
+				if (path.trim().isEmpty()) {
+					path = "/";
+				}
+				cameraService.fileDelete(path, evaluatedValueAsString.substring(separatorIndex + 1));
+			}
+			break;
+			case DOWNLOAD_TO_PC: {
+				final int separatorIndex = evaluatedValueAsString.lastIndexOf("/");
+				String path = evaluatedValueAsString.substring(0, separatorIndex);
+				if (path.trim().isEmpty()) {
+					path = "/";
+				}
+				cameraService.downloadFile(path, evaluatedValueAsString.substring(separatorIndex + 1), imgDownloadPath);
+			}
+			break;
 			case EXEC_SCRIPT:
 				engine.createScript(expression).execute(context);
 			break;

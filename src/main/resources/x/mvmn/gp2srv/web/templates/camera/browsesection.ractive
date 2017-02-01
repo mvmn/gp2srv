@@ -11,7 +11,10 @@
 			<input type="button" value="Select all" on-click="selectAllFiles" />
 			<input type="button" value="Deselect all" on-click="deselectAllFiles" />
 			<input type="button" value="Load thumbnails" on-click="loadThumbnails" />
+		</div>
+		<div style="padding-bottom: 6px">
 			<input type="button" value="Delete selected" on-click="deleteSelectedFiles" />
+			<input type="button" value="Download selected" on-click="downloadSelectedFiles" />
 		</div>
 		<div style="padding-bottom: 6px">
 			{{#each browseData.folderList}}
@@ -30,6 +33,8 @@
 					<input type="checkbox" {{#if selectedFiles.indexOf(fileIndex)>=0}}checked="checked"{{/if}} class="fileSelectionCheckbox" on-change="@this.fire('setFileSelection', event, fileIndex)" />
 					<a target="_blank" href="{{contextPath}}/camfilepreview?folder={{encodeURIComponent(path)}}&name={{encodeURIComponent(name)}}">{{name}}</a>
 					(<a target="_blank" href="{{contextPath}}/camfilepreview?thumb=true&folder={{encodeURIComponent(path)}}&name={{encodeURIComponent(name)}}">thumbnail</a>)
+					<img style="display: none" class="copyLoadingIndicator" src="{{contextPath}}/static/ajax-loader.gif" />
+					<input type="button" value="copy to PC" class="small copyToPcBtn" on-click="@this.fire('copyFile', event, path, name)" />
 				</div>
 				{{#if previewLink}}
 					<img src="{{previewLink}}" style="max-width: 100%" />

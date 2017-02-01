@@ -1,18 +1,21 @@
 package x.mvmn.gp2srv.camera.service.impl;
 
 import java.io.Closeable;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.commons.io.FileUtils;
 
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
 import x.mvmn.jlibgphoto2.GP2Camera;
-import x.mvmn.jlibgphoto2.GP2CameraFilesHelper;
-import x.mvmn.jlibgphoto2.GP2ConfigHelper;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraCaptureType;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
+import x.mvmn.jlibgphoto2.GP2CameraFilesHelper;
+import x.mvmn.jlibgphoto2.GP2ConfigHelper;
 
 public class CameraServiceImpl implements CameraService, Closeable {
 
@@ -71,6 +74,28 @@ public class CameraServiceImpl implements CameraService, Closeable {
 	public synchronized CameraServiceImpl fileDelete(final String filePath, final String fileName) {
 		GP2CameraFilesHelper.deleteCameraFile(camera, filePath, fileName);
 		return this;
+	}
+
+	public String downloadFile(final String cameraFilePath, final String cameraFileName, final File downloadFolder) {
+		String result = null;
+		byte[] content = fileGetContents(cameraFilePath, cameraFileName);
+		File targetFile = new File(downloadFolder, cameraFileName);
+		long i = 0;
+		while (targetFile.exists()) {
+			int dotIndex = cameraFileName.lastIndexOf(".");
+			if (dotIndex > 0) {
+				targetFile = new File(downloadFolder, cameraFileName.substring(0, dotIndex) + "_" + (i++) + "." + cameraFileName.substring(dotIndex + 1));
+			} else {
+				targetFile = new File(downloadFolder, cameraFileName + (i++));
+			}
+		}
+		try {
+			FileUtils.writeByteArrayToFile(targetFile, content);
+			result = "Ok";
+		} catch (Exception e) {
+			result = "Error: " + e.getClass().getName() + " " + e.getMessage();
+		}
+		return result.trim();
 	}
 
 	public synchronized byte[] fileGetContents(final String filePath, final String fileName) {

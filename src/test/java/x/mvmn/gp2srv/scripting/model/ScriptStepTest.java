@@ -58,7 +58,7 @@ public class ScriptStepTest {
 			ArgumentCaptor<GP2CameraEventType> captor = ArgumentCaptor.forClass(GP2CameraEventType.class);
 			Mockito.when(mockCameraService.waitForSpecificEvent(Mockito.eq(1000), captor.capture())).thenReturn(null);
 			ScriptStep scriptStep = new ScriptStep(ScriptStepType.CAMEVENT_WAIT, "" + GP2CameraEventType.CAPTURE_COMPLETE.getCode(), null, null);
-			Assert.assertFalse(scriptStep.execute(mockCameraService, "1000", null, null, null));
+			Assert.assertFalse(scriptStep.execute(mockCameraService, "1000", null, null, null, null));
 			Assert.assertEquals(GP2CameraEventType.CAPTURE_COMPLETE, captor.getValue());
 		}
 		{
@@ -71,7 +71,7 @@ public class ScriptStepTest {
 				}
 			});
 			ScriptStep scriptStep = new ScriptStep(ScriptStepType.CAMEVENT_WAIT, null, null, null);
-			Assert.assertFalse(scriptStep.execute(mockCameraService, "1000", null, null, null));
+			Assert.assertFalse(scriptStep.execute(mockCameraService, "1000", null, null, null, null));
 			Assert.assertTrue(calledWith1000.get());
 		}
 	}
@@ -84,7 +84,7 @@ public class ScriptStepTest {
 		ArgumentCaptor<CameraConfigEntryBean> captor = ArgumentCaptor.forClass(CameraConfigEntryBean.class);
 		Mockito.when(mockCameraService.setConfig(captor.capture())).thenReturn(mockCameraService);
 		CameraConfigEntryBean cceb = new CameraConfigEntryBean(123, "path", "label", "info", CameraConfigEntryType.TEXT, null, null, "oldVal", null, null);
-		Assert.assertFalse(scriptStep.execute(mockCameraService, "newVal", null, null, cceb));
+		Assert.assertFalse(scriptStep.execute(mockCameraService, "newVal", null, null, cceb, null));
 		Assert.assertEquals(1, captor.getAllValues().size());
 		Assert.assertEquals(cceb.cloneWithNewValue("newVal"), captor.getValue());
 	}
@@ -95,7 +95,7 @@ public class ScriptStepTest {
 
 		CameraService mockCameraService = Mockito.mock(CameraService.class);
 		Mockito.when(mockCameraService.capture()).thenReturn(new CameraFileSystemEntryBean("name", "/path", false));
-		Assert.assertFalse(scriptStep.execute(mockCameraService, null, null, jexlContext, null));
+		Assert.assertFalse(scriptStep.execute(mockCameraService, null, null, jexlContext, null, null));
 		Mockito.verify(mockCameraService).capture();
 		Assert.assertEquals("/path/name", jexlContext.get("__capturedFile"));
 	}
@@ -103,7 +103,7 @@ public class ScriptStepTest {
 	@Test
 	public void testSetVar() {
 		ScriptStep scriptStep = new ScriptStep(ScriptStepType.VAR_SET, "varx", null, null);
-		Assert.assertFalse(scriptStep.execute(null, 12345, null, jexlContext, null));
+		Assert.assertFalse(scriptStep.execute(null, 12345, null, jexlContext, null, null));
 		Object varx = jexlContext.get("varx");
 		Assert.assertNotNull(varx);
 		Assert.assertEquals(12345, varx);
@@ -112,14 +112,14 @@ public class ScriptStepTest {
 	@Test
 	public void testStop() {
 		ScriptStep scriptStep = new ScriptStep(ScriptStepType.STOP, null, null, null);
-		Assert.assertTrue(scriptStep.execute(null, null, null, null, null));
+		Assert.assertTrue(scriptStep.execute(null, null, null, null, null, null));
 	}
 
 	@Test
 	public void testDelay() {
 		ScriptStep scriptStep = new ScriptStep(ScriptStepType.DELAY, null, null, null);
 		long t1 = System.currentTimeMillis();
-		Assert.assertFalse(scriptStep.execute(null, "1000", null, null, null));
+		Assert.assertFalse(scriptStep.execute(null, "1000", null, null, null, null));
 		long t2 = System.currentTimeMillis();
 		Assert.assertTrue(t2 - t1 >= 1000);
 	}
@@ -130,7 +130,7 @@ public class ScriptStepTest {
 		JexlEngine mockEngine = Mockito.mock(JexlEngine.class);
 		JexlScript jexlScript = Mockito.mock(JexlScript.class);
 		Mockito.when(mockEngine.createScript(Mockito.any(JexlInfo.class), Mockito.anyString(), Mockito.any(String[].class))).thenReturn(jexlScript);
-		Assert.assertFalse(scriptStep.execute(null, 12345, mockEngine, jexlContext, null));
+		Assert.assertFalse(scriptStep.execute(null, 12345, mockEngine, jexlContext, null, null));
 		Mockito.verify(mockEngine).createScript(null, "x=2+2", null);
 		Mockito.verify(jexlScript).execute(jexlContext);
 	}

@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.scripting.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +32,7 @@ public class ScriptExecutionTest {
 		steps.add(createMockStep(ScriptStepType.STOP, true, null, null, params, 1));
 		ScriptExecutionObserver seo = Mockito.mock(ScriptExecutionObserver.class);
 		ScriptExecutionFinishListener fl = Mockito.mock(ScriptExecutionFinishListener.class);
-		ScriptExecution execution = new ScriptExecution(null, null, "mock", steps, null, seo, fl);
+		ScriptExecution execution = new ScriptExecution(null, null, null, "mock", steps, null, seo, fl);
 		execution.run();
 		Assert.assertEquals(6, params.size());
 		Assert.assertEquals(1, params.get(0).getA());
@@ -80,7 +81,7 @@ public class ScriptExecutionTest {
 
 			@Override
 			public boolean execute(CameraService cameraService, Object evaluatedValue, JexlEngine engine, JexlMapContext context,
-					CameraConfigEntryBean configEntry) {
+					CameraConfigEntryBean configEntry, File dldFolder) {
 				paramsCollector.add(
 						new Tuple<Object, CameraConfigEntryBean, Map<String, Object>, Void, Void>(evaluatedValue, configEntry, context.toMap(), null, null));
 				return ((Long) context.get("___loopCount")).longValue() == stopAtLoop;

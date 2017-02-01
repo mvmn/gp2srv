@@ -18,18 +18,17 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import x.mvmn.gp2srv.camera.CameraService;
+import x.mvmn.gp2srv.camera.service.impl.CameraServiceImpl;
 import x.mvmn.gp2srv.mock.service.impl.MockCameraServiceImpl;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptsManagementServiceImpl;
-import x.mvmn.gp2srv.camera.CameraService;
-import x.mvmn.gp2srv.camera.service.impl.CameraServiceImpl;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
 import x.mvmn.gp2srv.web.servlets.BasicAuthFilter;
 import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
-import x.mvmn.gp2srv.web.servlets.ImagesServlet;
 import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
 import x.mvmn.gp2srv.web.servlets.ScriptExecWebSocketNotifier;
 import x.mvmn.gp2srv.web.servlets.ScriptExecutionReportingWebSocketServlet;
@@ -56,7 +55,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 	private final File userHome;
 	private final File appHomeFolder;
-	private final File imagesFolder;
+	// private final File imagesFolder;
 	private final File scriptsFolder;
 	private final File favouredCamConfSettingsFile;
 	private final FileBackedProperties favouredCamConfSettings;
@@ -84,14 +83,15 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	}
 
 	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode) {
-		this(contextPath, port, logLevel, mockMode, null);
+		this(contextPath, port, logLevel, mockMode, null, null);
 	}
 
-	public GPhoto2Server(Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials) {
-		this(DEFAULT_CONTEXT_PATH, port, logLevel, mockMode, requireAuthCredentials);
+	public GPhoto2Server(Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials, String imageDldPath) {
+		this(DEFAULT_CONTEXT_PATH, port, logLevel, mockMode, requireAuthCredentials, imageDldPath);
 	}
 
-	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials) {
+	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials,
+			String imageDldPath) {
 		this.logger = makeLogger(logLevel);
 
 		this.camera = mockMode ? null : new GP2Camera();
@@ -117,8 +117,18 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			userHome = new File(System.getProperty("user.home"));
 			appHomeFolder = new File(userHome, ".gp2srv");
 			appHomeFolder.mkdir();
-			imagesFolder = new File(appHomeFolder, "img");
-			imagesFolder.mkdirs();
+			if (imageDldPath == null || imageDldPath.trim().isEmpty()) {
+				imageDldPath = new File(userHome, "gp2srv_images").getAbsolutePath();
+			}
+			File imageDldFolder = new File(imageDldPath);
+			if (!imageDldFolder.exists()) {
+				imageDldFolder.mkdirs();
+			} else if (!imageDldFolder.isDirectory()) {
+				throw new RuntimeException("Not a directory: " + imageDldFolder);
+			}
+
+			// imagesFolder = new File(appHomeFolder, "img");
+			// imagesFolder.mkdirs();
 			scriptsFolder = new File(appHomeFolder, "scripts");
 			scriptsFolder.mkdirs();
 			favouredCamConfSettingsFile = new File(appHomeFolder, "favouredConfs.properties");
@@ -153,12 +163,12 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 			context.addServlet(new ServletHolder(new ScriptExecutionReportingWebSocketServlet(scriptExecService, logger)), "/scriptws");
 			context.addServlet(new ServletHolder(new ScriptingServlet(cameraService, scriptManagementService, scriptExecService, scriptExecWebSocketNotifier,
-					scriptDumpVars, velocityContextService, this, logger)), "/scripts/*");
+					scriptDumpVars, velocityContextService, this, imageDldFolder, logger)), "/scripts/*");
 
-			context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
+			// context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
 			context.addServlet(
-					new ServletHolder(new CameraControlServlet(cameraService, favouredCamConfSettings, velocityContextService, this, imagesFolder, logger)),
+					new ServletHolder(new CameraControlServlet(cameraService, favouredCamConfSettings, velocityContextService, this, imageDldFolder, logger)),
 					"/");
 			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
 			context.addServlet(new ServletHolder(new LiveViewServlet(cameraService)), "/stream.mjpeg");

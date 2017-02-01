@@ -1,7 +1,10 @@
 <div class="pageContent scroll">
 	<div class="siteContentElementContainer">
 		<div class="fullWidth">
-			<input type="button" value="Capture" class="fullWidth" on-click="doCapture" /><br/>
+			<input type="button" value="capture" class="fullWidth" on-click="doCapture" /><br/>
+		</div>
+		<div class="fullWidth">
+			<input type="button" value="capture + download + delete" class="fullWidth" on-click="doCaptureDldDel" /><br/>
 		</div>
 		<div class="fullWidth" style="padding-top: 10px">
 			<input type="checkbox" on-change="setLiveView" />&nbsp;<span class="headline" on-click="toggleLiveView">Live view</span>		

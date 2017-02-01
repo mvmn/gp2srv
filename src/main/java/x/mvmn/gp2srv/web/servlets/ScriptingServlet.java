@@ -1,5 +1,6 @@
 package x.mvmn.gp2srv.web.servlets;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -33,16 +34,18 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 	protected final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
 	protected final CameraService cameraService;
 	protected final AtomicBoolean scriptDumpVars;
+	protected final File imgDownloadPath;
 
 	public ScriptingServlet(final CameraService cameraService, ScriptsManagementServiceImpl scriptManagementService,
 			ScriptExecutionServiceImpl scriptExecService, ScriptExecWebSocketNotifier scriptExecWebSocketNotifier, AtomicBoolean scriptDumpVars,
-			VelocityContextService velocityContextService, Provider<TemplateEngine> templateEngineProvider, Logger logger) {
+			VelocityContextService velocityContextService, Provider<TemplateEngine> templateEngineProvider, final File imgDownloadPath, Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
 		this.cameraService = cameraService;
 		this.scriptManagementService = scriptManagementService;
 		this.scriptExecService = scriptExecService;
 		this.scriptExecWebSocketNotifier = scriptExecWebSocketNotifier;
 		this.scriptDumpVars = scriptDumpVars;
+		this.imgDownloadPath = imgDownloadPath;
 	}
 
 	@Override
@@ -127,7 +130,7 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				List<ScriptStep> scriptContent = scriptManagementService.load(scriptName);
 				String result;
 				if (scriptContent != null) {
-					execution = scriptExecService.execute(cameraService, logger, scriptName, scriptContent, scriptExecWebSocketNotifier);
+					execution = scriptExecService.execute(cameraService, imgDownloadPath, logger, scriptName, scriptContent, scriptExecWebSocketNotifier);
 					if (execution != null) {
 						result = "Script has been run";
 					} else {
