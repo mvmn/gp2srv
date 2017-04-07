@@ -17,7 +17,7 @@ public class GPhoto2ServerLauncher {
 		cliOptions.addOption("gphoto2path", true, "Path to gphoto2 executable.");
 		cliOptions.addOption("logLevel", true, "Log level (TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL).");
 		cliOptions.addOption("auth", true, "Require authentication (login:password).");
-		cliOptions.addOption("imgfolder", false, "Path to store downloaded images at.");
+		cliOptions.addOption("imgfolder", true, "Path to store downloaded images at.");
 
 		String imageDldPath = null;
 		final CommandLine commandLine = new PosixParser().parse(cliOptions, args);

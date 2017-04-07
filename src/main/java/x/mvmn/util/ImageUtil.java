@@ -104,8 +104,6 @@ public class ImageUtil {
 	/*
 	 * public static double calculateAverageBrightnessSlowReliable(BufferedImage image) { long result = 0;
 	 * 
-	 * // TODO: parallelize
-	 * 
 	 * int argbs[] = image.getRGB(0, 0, image.getWidth(), image.getHeight(), new int[image.getWidth() * image.getHeight()], 0, image.getWidth()); for (int i =
 	 * 0; i < argbs.length; i++) { int argb = argbs[i]; result += argbToRed(argb); result += argbToGreen(argb); result += argbToBlue(argb); }
 	 * 

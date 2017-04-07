@@ -121,6 +121,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 				imageDldPath = new File(userHome, "gp2srv_images").getAbsolutePath();
 			}
 			File imageDldFolder = new File(imageDldPath);
+			System.out.println("Images download folder: " + imageDldFolder.getCanonicalPath());
 			if (!imageDldFolder.exists()) {
 				imageDldFolder.mkdirs();
 			} else if (!imageDldFolder.isDirectory()) {
