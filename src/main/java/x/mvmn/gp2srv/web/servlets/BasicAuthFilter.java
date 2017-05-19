@@ -1,7 +1,6 @@
 package x.mvmn.gp2srv.web.servlets;
 
 import java.io.IOException;
-import java.util.Base64;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -11,6 +10,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
 
 public final class BasicAuthFilter implements Filter {
 	private final String username;
@@ -36,7 +37,7 @@ public final class BasicAuthFilter implements Filter {
 					String basic = splits[0];
 
 					if (basic.equalsIgnoreCase("Basic")) {
-						String credentials = new String(Base64.getDecoder().decode(splits[1]), "UTF-8");
+						String credentials = new String(Base64.decodeBase64(splits[1]), "UTF-8");
 						int separatorIndex = credentials.indexOf(":");
 						if (separatorIndex > 0) {
 							final String username = credentials.substring(0, separatorIndex);
