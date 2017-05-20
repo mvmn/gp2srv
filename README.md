@@ -19,8 +19,13 @@ The library path depends on your platform and method of installation (e.g. on OS
 Build dependencies:
 - LibGPhoto2 - http://www.gphoto.org
 - https://github.com/mvmn/jlibgphoto2 with transitive dependency https://github.com/mvmn/gphoto2-jna
-- Java 1.8 and above
-- Maven
+- JDK 8+
+- Maven 3.3+
+
+Runtime dependencies:
+- LibGPhoto2 - http://www.gphoto.org
+- Java 8+ (use Java5 compatibility builds if you need to run on earlier java versions - see in releases).
+
 
 Known issues: 
 On Canon (and possibly other) cameras browsing files requires viewfinder to be closed. Thus one has to close viewfinder (which gets opened by LiveView) before going to browse page.
@@ -43,9 +48,9 @@ Optional. Default is INFO.
 - usemocks - do not execute gphoto2 but use in-built mock gphoto2 responses (which cover around 10% of available action).
 Optional. Used for development purpopses only.
 
-Runtime dependencies:
+Dependencies:
 - GPhoto2 - http://www.gphoto.org
-- Java 1.8 and above (use Java5 compatibility builds if you need to run on earlier java versions - see in releases).
+- Java version 1.5 or above
 
 Video demonstration using Raspberry Pi: https://www.youtube.com/watch?v=_aXn34VpjB8
 
