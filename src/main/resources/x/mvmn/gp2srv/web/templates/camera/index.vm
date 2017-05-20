@@ -413,23 +413,6 @@
 				});
 			};
 			
-			function startTraceWebSocket(handler, ractive){
-			    var webSocket = new WebSocket("ws://"+window.location.hostname+":"+window.location.port+"$!{request.contextPath}/scriptws");
-				ractive.set("traceWebSocket", webSocket);
-			    webSocket.onmessage = handler;
-			    webSocket.onclose = function() {
-			        setTimeout(function(){
-			        	if(webSocket.readyState != 1) {
-			        		if(!ractive.get("traceWebSocketDontReconnect")) {
-			        			webSocket.close();
-				        		startTraceWebSocket(handler, ractive);
-				        	}
-			        	}
-			        }, 1000);
-			    };
-			}
-
-			
 			scriptingRactive.on({
 				setAfterStepDelay: function(event) {
 					var afterStepDelay = prompt("Input after-step delay value in miliseconds", "1000");
@@ -457,31 +440,6 @@
 					scriptingRactive.set("activeScriptStepIndex", null);
 					$("#btnStartTracing").show();
 					$("#btnStoptTracing").hide();				
-				},
-				startTracing: function(event) {
-					scriptingRactive.set("traceWebSocketDontReconnect", false);
-					checkSaveRequired(scriptingRactive, function() {
-						getJson("$!{request.contextPath}/scripts/exec/current/steps", function(scriptSteps) {
-							scriptingRactive.set("scriptSteps", scriptSteps);
-							scriptingRactive.set("isDirty", false);
-							$("#btnStartTracing").hide();
-							$("#btnStoptTracing").show();
-						
-							startTraceWebSocket(function(event) {
-								var eventData = JSON.parse(event.data);
-								scriptingRactive.set("scriptName", eventData.___scriptName);
-								scriptingRactive.set("scriptExecutionStatusInfo", eventData);
-								if(eventData.___eventType == 'preStep') {
-									scriptingRactive.set("activeScriptStepIndex", eventData.___currentStep);
-								} else if(eventData.___eventType == 'postStep') {
-									scriptingRactive.set("activeScriptStepIndex", null);
-								}
-							}, scriptingRactive);
-						
-						}, function(jqXHR, textStatus) {
-							alert("Error loading currently running script steps: "+textStatus);
-						});
-					});
 				},
 				setCurrentScriptStatusAutoUpdate: function(event) {
 					var interval = parseInt($("#setCurrentScriptStatusAutoUpdateIntervalInput").val());

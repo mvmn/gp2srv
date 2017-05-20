@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,19 +32,20 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 
 	protected final ScriptsManagementServiceImpl scriptManagementService;
 	protected final ScriptExecutionServiceImpl scriptExecService;
-	protected final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
+	// protected final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
 	protected final CameraService cameraService;
 	protected final AtomicBoolean scriptDumpVars;
 	protected final File imgDownloadPath;
 
 	public ScriptingServlet(final CameraService cameraService, ScriptsManagementServiceImpl scriptManagementService,
-			ScriptExecutionServiceImpl scriptExecService, ScriptExecWebSocketNotifier scriptExecWebSocketNotifier, AtomicBoolean scriptDumpVars,
-			VelocityContextService velocityContextService, Provider<TemplateEngine> templateEngineProvider, final File imgDownloadPath, Logger logger) {
+			ScriptExecutionServiceImpl scriptExecService, // ScriptExecWebSocketNotifier scriptExecWebSocketNotifier,
+			AtomicBoolean scriptDumpVars, VelocityContextService velocityContextService, Provider<TemplateEngine> templateEngineProvider,
+			final File imgDownloadPath, Logger logger) {
 		super(velocityContextService, templateEngineProvider, logger);
 		this.cameraService = cameraService;
 		this.scriptManagementService = scriptManagementService;
 		this.scriptExecService = scriptExecService;
-		this.scriptExecWebSocketNotifier = scriptExecWebSocketNotifier;
+		// this.scriptExecWebSocketNotifier = scriptExecWebSocketNotifier;
 		this.scriptDumpVars = scriptDumpVars;
 		this.imgDownloadPath = imgDownloadPath;
 	}
@@ -60,7 +62,7 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				ScriptExecution currentExecution = scriptExecService.getCurrentExecution();
 				Map<String, Object> result = Collections.emptyMap();
 				if (currentExecution != null) {
-					result = ScriptExecWebSocketNotifier.toExecutionInfoDTO(currentExecution, "___", null, scriptDumpVars.get(), true);
+					result = toExecutionInfoDTO(currentExecution, "___", null, scriptDumpVars.get(), true);
 				}
 				serveJson(result, response);
 			} else if ("/scripts/exec/current/steps".equals(path)) {
@@ -76,7 +78,7 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				ScriptExecution finishedExecution = scriptExecService.getLatestFinishedExecution();
 				Map<String, Object> result = Collections.emptyMap();
 				if (finishedExecution != null) {
-					result = ScriptExecWebSocketNotifier.toExecutionInfoDTO(finishedExecution, "___", null, scriptDumpVars.get(), true);
+					result = toExecutionInfoDTO(finishedExecution, "___", null, scriptDumpVars.get(), true);
 				}
 				serveJson(result, response);
 			}
@@ -130,7 +132,7 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 				List<ScriptStep> scriptContent = scriptManagementService.load(scriptName);
 				String result;
 				if (scriptContent != null) {
-					execution = scriptExecService.execute(cameraService, imgDownloadPath, logger, scriptName, scriptContent, scriptExecWebSocketNotifier);
+					execution = scriptExecService.execute(cameraService, imgDownloadPath, logger, scriptName, scriptContent, null);
 					if (execution != null) {
 						result = "Script has been run";
 					} else {
@@ -148,4 +150,27 @@ public class ScriptingServlet extends AbstractGP2Servlet {
 			serveGenericErrorPage(request, response, -1, e.getMessage());
 		}
 	}
+
+	public static Map<String, Object> toExecutionInfoDTO(final ScriptExecution execution, final String keyPrefix, final String eventType,
+			final boolean dumpVariables, final boolean dumpAllErrors) {
+		Map<String, Object> result = new TreeMap<String, Object>();
+		if (dumpVariables) {
+			result.putAll(execution.dumpVariables(true));
+		}
+
+		result.put(keyPrefix + "eventType", eventType);
+		result.put(keyPrefix + "scriptName", execution.getScriptName());
+		result.put(keyPrefix + "currentStep", execution.getCurrentStep());
+		result.put(keyPrefix + "totalStepsPassed", execution.getTotalStepsPassed());
+		result.put(keyPrefix + "loopCount", execution.getLoopCount());
+		result.put(keyPrefix + "latestError", execution.getLatestError());
+		result.put(keyPrefix + "stopOnError", execution.isStopOnError());
+		result.put(keyPrefix + "afterStepDelay", execution.getAfterStepDelay());
+		if (dumpAllErrors) {
+			result.put(keyPrefix + "errors", execution.getErrors());
+		}
+
+		return result;
+	}
+
 }

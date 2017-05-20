@@ -9,14 +9,14 @@
 
 	<properties>
 		<mainClass>x.mvmn.gp2srv.GPhoto2ServerLauncher</mainClass>
-		<jetty-version>9.3.12.v20160915</jetty-version>
+		<jetty-version>7.6.21.v20160908</jetty-version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>x.mvmn.jlibgphoto2</groupId>
 			<artifactId>jlibgphoto2</artifactId>
-			<version>1.7</version>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -31,16 +31,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>${jetty-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-servlet</artifactId>
-			<version>${jetty-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-server</artifactId>
 			<version>${jetty-version}</version>
 		</dependency>
 		<dependency>

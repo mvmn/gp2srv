@@ -31,10 +31,6 @@
 		<span id="runStopStatusText" class="small"></span>
 	</div>
 	<div class="siteContentElementContainer">
-		<div>
-			<input type="button" value="Trace running script" id="btnStartTracing" on-click="startTracing" />
-			<input type="button" value="Stop tracing" id="btnStoptTracing" style="display: none" on-click="stopTracing" />
-		</div>
 		<div class="small">
 			Set stop on error:
 			<input type="button" value="no" on-click="@this.fire('setScriptStopOnError', event, false)" /> 

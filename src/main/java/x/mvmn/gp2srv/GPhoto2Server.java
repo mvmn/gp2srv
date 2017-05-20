@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -30,8 +30,6 @@ import x.mvmn.gp2srv.web.servlets.BasicAuthFilter;
 import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
-import x.mvmn.gp2srv.web.servlets.ScriptExecWebSocketNotifier;
-import x.mvmn.gp2srv.web.servlets.ScriptExecutionReportingWebSocketServlet;
 import x.mvmn.gp2srv.web.servlets.ScriptingServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
 import x.mvmn.jlibgphoto2.GP2Camera;
@@ -61,7 +59,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final FileBackedProperties favouredCamConfSettings;
 	private final ScriptsManagementServiceImpl scriptManagementService;
 	private final ScriptExecutionServiceImpl scriptExecService;
-	private final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
+	// private final ScriptExecWebSocketNotifier scriptExecWebSocketNotifier;
 
 	public static final AtomicBoolean liveViewEnabled = new AtomicBoolean(true);
 	public static final AtomicBoolean liveViewInProgress = new AtomicBoolean(false);
@@ -160,11 +158,11 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 			AtomicBoolean scriptDumpVars = new AtomicBoolean(true);
 			scriptManagementService = new ScriptsManagementServiceImpl(scriptsFolder, logger);
 			scriptExecService = new ScriptExecutionServiceImpl(logger);
-			scriptExecWebSocketNotifier = new ScriptExecWebSocketNotifier(logger, scriptDumpVars);
+			// scriptExecWebSocketNotifier = new ScriptExecWebSocketNotifier(logger, scriptDumpVars);
 
-			context.addServlet(new ServletHolder(new ScriptExecutionReportingWebSocketServlet(scriptExecService, logger)), "/scriptws");
-			context.addServlet(new ServletHolder(new ScriptingServlet(cameraService, scriptManagementService, scriptExecService, scriptExecWebSocketNotifier,
-					scriptDumpVars, velocityContextService, this, imageDldFolder, logger)), "/scripts/*");
+			// context.addServlet(new ServletHolder(new ScriptExecutionReportingWebSocketServlet(scriptExecService, logger)), "/scriptws");
+			context.addServlet(new ServletHolder(new ScriptingServlet(cameraService, scriptManagementService, scriptExecService, scriptDumpVars,
+					velocityContextService, this, imageDldFolder, logger)), "/scripts/*");
 
 			// context.addServlet(new ServletHolder(new ImagesServlet(this, imagesFolder, logger)), "/img/*");
 			context.addServlet(new ServletHolder(new StaticsResourcesServlet(this, logger)), "/static/*");
