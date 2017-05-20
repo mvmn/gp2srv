@@ -16,10 +16,11 @@ Java System properties:
 - -Djna.library.path=/path/to/folder/with/libgphoto2.dylib/or/such - in case you get errors like "Unable to load library 'gphoto2': Native library (darwin/libgphoto2.dylib) not found in resource path" you can specify a path to folder that contains gphoto2 library folder. 
 The library path depends on your platform and method of installation (e.g. on OS X you can install gphoto2 library via Homebrew, and use custom folder for all Homebrew installations - then you would have to provide a path like ~/homebrew/lib, given that ~/homebrew is your custom folder for Homebrew installations).
 
-Dependencies:
+Build dependencies:
 - LibGPhoto2 - http://www.gphoto.org
-- Java 1.5 and above
-- https://github.com/mvmn/jlibgphoto2
+- https://github.com/mvmn/jlibgphoto2 with transitive dependency https://github.com/mvmn/gphoto2-jna
+- Java 1.8 and above
+- Maven
 
 Known issues: 
 On Canon (and possibly other) cameras browsing files requires viewfinder to be closed. Thus one has to close viewfinder (which gets opened by LiveView) before going to browse page.
@@ -42,9 +43,9 @@ Optional. Default is INFO.
 - usemocks - do not execute gphoto2 but use in-built mock gphoto2 responses (which cover around 10% of available action).
 Optional. Used for development purpopses only.
 
-Dependencies:
+Runtime dependencies:
 - GPhoto2 - http://www.gphoto.org
-- Java 1.8 and above
+- Java 1.8 and above (use Java5 compatibility builds if you need to run on earlier java versions - see in releases).
 
 Video demonstration using Raspberry Pi: https://www.youtube.com/watch?v=_aXn34VpjB8
 
