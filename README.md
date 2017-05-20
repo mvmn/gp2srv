@@ -44,7 +44,7 @@ Optional. Used for development purpopses only.
 
 Dependencies:
 - GPhoto2 - http://www.gphoto.org
-- Java 1.5 and above
+- Java 1.8 and above
 
 Video demonstration using Raspberry Pi: https://www.youtube.com/watch?v=_aXn34VpjB8
 
