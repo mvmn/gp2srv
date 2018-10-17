@@ -41,4 +41,6 @@ public interface CameraService {
 	public byte[] fileGetThumb(final String filePath, final String fileName);
 
 	public String downloadFile(final String cameraFilePath, final String cameraFileName, final File downloadFolder);
+
+	public CameraProvider getCameraProvider();
 }

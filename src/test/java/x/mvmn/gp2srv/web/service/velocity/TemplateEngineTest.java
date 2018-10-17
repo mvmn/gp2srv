@@ -2,9 +2,15 @@ package x.mvmn.gp2srv.web.service.velocity;
 
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import x.mvmn.jlibgphoto2.GP2AutodetectCameraHelper;
+import x.mvmn.jlibgphoto2.GP2Context;
+import x.mvmn.jlibgphoto2.GP2PortInfoList;
+import x.mvmn.jlibgphoto2.GP2PortInfoList.GP2PortInfo;
+import x.mvmn.jlibgphoto2.GP2AutodetectCameraHelper.CameraListItemBean;
 
 import org.apache.velocity.VelocityContext;
 import org.junit.Test;
@@ -21,5 +27,19 @@ public class TemplateEngineTest {
 		final StringWriter stringWriter = new StringWriter();
 		engine.renderTemplate("test.vm", "UTF-8", new VelocityContext(context), stringWriter);
 		TestCase.assertEquals("Test template.\nTest variable: Yeah, some text here\n	Hi there from testGlobalMacro.", stringWriter.toString().trim());
+	}
+
+	public static void main(String args[]) {
+		GP2Context context = new GP2Context();
+		List<CameraListItemBean> detectedCameras = GP2AutodetectCameraHelper.autodetectCameras(context);
+		System.out.println(String.format("Detecred cameras (%s):", detectedCameras.size()));
+		for (CameraListItemBean clb : detectedCameras) {
+			System.out.println(String.format(" - %s :: %s", clb.getPortName(), clb.getCameraModel()));
+		}
+		GP2PortInfoList portList = new GP2PortInfoList();
+		System.out.println(String.format("Detecred ports (%s):", portList.size()));
+		for (GP2PortInfo pinf : portList) {
+			System.out.println(String.format(" - %s :: %s [%s]", pinf.getPath(), pinf.getName(), pinf.getTypeName()));
+		}
 	}
 }

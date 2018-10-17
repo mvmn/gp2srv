@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gphoto2.jna.Gphoto2Library;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
@@ -228,5 +229,9 @@ public class MockCameraServiceImpl implements CameraService {
 
 	public String downloadFile(String cameraFilePath, String cameraFileName, File downloadFolderPath) {
 		return "Ok";
+	}
+
+	public CameraProvider getCameraProvider() {
+		return null;
 	}
 }

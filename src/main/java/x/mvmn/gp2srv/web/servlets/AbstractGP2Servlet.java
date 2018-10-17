@@ -14,16 +14,18 @@ import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
 
 /**
- * @author Mykola Makhin This type of servlets adds shared global context to template engine + inherits from {@link AbstractErrorHandlingServlet} error handling
- *         with error pages rendered from properly templates + {@link AbstractErrorHandlingServlet} itself inherits from {@link HttpServletWithTemplates} a
- *         template engine + methods for outputting render of templates.<br/>
- *         <br/>
- *         Thus we get templating in general, default error handing with proper templates and global context in templates.
+ * This type of servlets adds shared global context to template engine + inherits from {@link AbstractErrorHandlingServlet} error handling with error pages
+ * rendered from properly templates + {@link AbstractErrorHandlingServlet} itself inherits from {@link HttpServletWithTemplates} a template engine + methods for
+ * outputting render of templates.<br/>
+ * <br/>
+ * Thus we get templating in general, default error handing with proper templates and global context in templates.
+ * 
+ * @author Mykola Makhin
  */
 public class AbstractGP2Servlet extends AbstractErrorHandlingServlet {
 	private static final long serialVersionUID = 7210482012835862732L;
 
-	protected VelocityContextService velocityContextService;
+	protected final VelocityContextService velocityContextService;
 
 	public AbstractGP2Servlet(final VelocityContextService velocityContextService, final Provider<TemplateEngine> templateEngineProvider, final Logger logger) {
 		super(templateEngineProvider, logger);

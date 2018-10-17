@@ -18,6 +18,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.camera.service.impl.CameraServiceImpl;
 import x.mvmn.gp2srv.mock.service.impl.MockCameraServiceImpl;
@@ -27,6 +28,7 @@ import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
 import x.mvmn.gp2srv.web.servlets.AbstractErrorHandlingServlet;
 import x.mvmn.gp2srv.web.servlets.BasicAuthFilter;
+import x.mvmn.gp2srv.web.servlets.CameraChoiceFilter;
 import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
@@ -42,7 +44,7 @@ import x.mvmn.log.api.Logger;
 import x.mvmn.log.api.Logger.LogLevel;
 import x.mvmn.util.FileBackedProperties;
 
-public class GPhoto2Server implements Provider<TemplateEngine> {
+public class GPhoto2Server implements Provider<TemplateEngine>, CameraProvider {
 
 	private static final String DEFAULT_CONTEXT_PATH = "/";
 	private static final int DEFAULT_PORT = 8080;
@@ -51,8 +53,7 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	private final Logger logger;
 	private volatile TemplateEngine templateEngine;
 	private final VelocityContextService velocityContextService;
-	private final GP2Camera camera;
-
+	private volatile GP2Camera camera;
 	private final File userHome;
 	private final File appHomeFolder;
 	// private final File imagesFolder;
@@ -93,8 +94,6 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials,
 			String imageDldPath) {
 		this.logger = makeLogger(logLevel);
-
-		this.camera = mockMode ? null : new GP2Camera();
 
 		logger.info("Initializing...");
 
@@ -156,7 +155,10 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 						EnumSet.of(DispatcherType.REQUEST));
 			}
 
-			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(camera);
+			context.addFilter(new FilterHolder(new CameraChoiceFilter(this, velocityContextService, this, logger)), "/*",
+					EnumSet.of(DispatcherType.REQUEST));
+
+			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(this);
 			AtomicBoolean scriptDumpVars = new AtomicBoolean(true);
 			scriptManagementService = new ScriptsManagementServiceImpl(scriptsFolder, logger);
 			scriptExecService = new ScriptExecutionServiceImpl(logger);
@@ -240,5 +242,13 @@ public class GPhoto2Server implements Provider<TemplateEngine> {
 
 	public GP2Camera getCamera() {
 		return camera;
+	}
+
+	public void setCamera(GP2Camera camera) {
+		this.camera = camera;
+	}
+
+	public boolean hasCamera() {
+		return camera != null;
 	}
 }

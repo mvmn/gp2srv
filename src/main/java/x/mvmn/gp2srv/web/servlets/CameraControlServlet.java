@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.context.Context;
 
 import x.mvmn.gp2srv.GPhoto2Server;
+import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
@@ -136,13 +137,20 @@ public class CameraControlServlet extends AbstractGP2Servlet {
 		try {
 			if (requestPath.equals("/") || requestPath.equals("") || requestPath.equals("/index") || requestPath.equals("/index.html")) {
 				serveTempalteUTF8Safely("camera/index.vm", velocityContext, response, logger);
-			} else if (requestPath.equals("/cameraConfig.json")) {
+			} else if ("/camdisconnect".equals(requestPath)) {
+				final CameraProvider camProvider = cameraService.getCameraProvider();
+				synchronized (camProvider) {
+					camProvider.getCamera().close();
+					camProvider.setCamera(null);
+				}
+				response.sendRedirect("/");
+			} else if ("/cameraConfig.json".equals(requestPath)) {
 				final boolean reRead = Boolean.parseBoolean(request.getParameter("reRead"));
 				final Map<String, CameraConfigEntryBean> cameraConfig = getConfigAsMap(!reRead);
 				serveJson(cameraConfig, response);
-			} else if (requestPath.equals("/favedConfigs.json")) {
+			} else if ("/favedConfigs.json".equals(requestPath)) {
 				serveJson(favouredCamConfSettings, response);
-			} else if (requestPath.equals("/browse.json")) {
+			} else if ("/browse.json".equals(requestPath)) {
 				Map<String, Object> result = new HashMap<String, Object>();
 				String path = request.getParameter("path");
 				if (path == null || path.trim().isEmpty()) {

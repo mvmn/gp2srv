@@ -8,10 +8,10 @@ import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 
+import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
 import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraCaptureType;
 import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
 import x.mvmn.jlibgphoto2.GP2CameraFilesHelper;
@@ -19,61 +19,65 @@ import x.mvmn.jlibgphoto2.GP2ConfigHelper;
 
 public class CameraServiceImpl implements CameraService, Closeable {
 
-	private GP2Camera camera;
+	private final CameraProvider cameraProvider;
 
-	public CameraServiceImpl(final GP2Camera camera) {
-		this.camera = camera;
+	public CameraServiceImpl(final CameraProvider camera) {
+		this.cameraProvider = camera;
 	}
 
 	public void close() {
-		camera.close();
+		cameraProvider.getCamera().close();
 	}
 
 	public synchronized byte[] capturePreview() {
-		return camera.capturePreview();
+		return cameraProvider.getCamera().capturePreview();
 	}
 
 	public synchronized CameraServiceImpl releaseCamera() {
-		camera.release();
+		cameraProvider.getCamera().release();
 		return this;
 	}
 
 	public synchronized CameraFileSystemEntryBean capture() {
-		return camera.capture();
+		return cameraProvider.getCamera().capture();
 	}
 
 	public synchronized CameraFileSystemEntryBean capture(final GP2CameraCaptureType captureType) {
-		return camera.capture(captureType);
+		return cameraProvider.getCamera().capture(captureType);
 	}
 
 	public synchronized String getSummary() {
-		return camera.getSummary();
+		return cameraProvider.getCamera().getSummary();
 	}
 
 	public GP2CameraEventType waitForSpecificEvent(int timeout, GP2CameraEventType expectedEventType) {
-		return camera.waitForSpecificEvent(timeout, expectedEventType);
+		return cameraProvider.getCamera().waitForSpecificEvent(timeout, expectedEventType);
 	}
 
 	public GP2CameraEventType waitForEvent(int timeout) {
-		return camera.waitForEvent(timeout);
+		return cameraProvider.getCamera().waitForEvent(timeout);
 	}
 
 	public synchronized List<CameraConfigEntryBean> getConfig() {
-		return GP2ConfigHelper.getConfig(camera);
+		return GP2ConfigHelper.getConfig(cameraProvider.getCamera());
 	}
 
 	public synchronized CameraServiceImpl setConfig(CameraConfigEntryBean configEntry) {
-		GP2ConfigHelper.setConfig(camera, configEntry);
+		GP2ConfigHelper.setConfig(cameraProvider.getCamera(), configEntry);
 		return this;
 	}
 
 	public synchronized List<CameraFileSystemEntryBean> filesList(final String path, boolean includeFiles, boolean includeFolders, boolean recursive) {
-		return GP2CameraFilesHelper.list(camera, path, includeFiles, includeFolders, recursive);
+		return GP2CameraFilesHelper.list(cameraProvider.getCamera(), path, includeFiles, includeFolders, recursive);
 	}
 
 	public synchronized CameraServiceImpl fileDelete(final String filePath, final String fileName) {
-		GP2CameraFilesHelper.deleteCameraFile(camera, filePath, fileName);
+		GP2CameraFilesHelper.deleteCameraFile(cameraProvider.getCamera(), filePath, fileName);
 		return this;
+	}
+
+	public CameraProvider getCameraProvider() {
+		return cameraProvider;
 	}
 
 	public String downloadFile(final String cameraFilePath, final String cameraFileName, final File downloadFolder) {
@@ -99,11 +103,11 @@ public class CameraServiceImpl implements CameraService, Closeable {
 	}
 
 	public synchronized byte[] fileGetContents(final String filePath, final String fileName) {
-		return GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName);
+		return GP2CameraFilesHelper.getCameraFileContents(cameraProvider.getCamera(), filePath, fileName);
 	}
 
 	public synchronized byte[] fileGetThumb(final String filePath, final String fileName) {
-		return GP2CameraFilesHelper.getCameraFileContents(camera, filePath, fileName, true);
+		return GP2CameraFilesHelper.getCameraFileContents(cameraProvider.getCamera(), filePath, fileName, true);
 	}
 
 	public Map<String, CameraConfigEntryBean> getConfigAsMap() {

@@ -1,0 +1,17 @@
+#parse("camera/head.vm")
+<div class="fullWidth">
+	<div class="pageHead">GPhoto2Server</div>
+	<div>Choose camera:</div>
+	<div>
+		<form method="POST">
+			<select name="cameraPort">
+				#foreach($cam in $cameras)
+					<option value="$cam.portName">$cam.cameraModel</option>
+				#end
+			</select>
+			<br/>
+			<input type="submit" value="select" />
+		</form>
+	</div>
+</div>
+#parse("camera/foot.vm")
