@@ -154,11 +154,12 @@ public class GPhoto2Server implements Provider<TemplateEngine>, CameraProvider {
 				context.addFilter(new FilterHolder(new BasicAuthFilter(requireAuthCredentials[0], requireAuthCredentials[1])), "/*",
 						EnumSet.of(DispatcherType.REQUEST));
 			}
+			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(this);
+			final CameraProvider camProvider = cameraService.getCameraProvider();
 
-			context.addFilter(new FilterHolder(new CameraChoiceFilter(this, velocityContextService, this, logger)), "/*",
+			context.addFilter(new FilterHolder(new CameraChoiceFilter(camProvider, velocityContextService, this, logger)), "/*",
 					EnumSet.of(DispatcherType.REQUEST));
 
-			final CameraService cameraService = mockMode ? new MockCameraServiceImpl() : new CameraServiceImpl(this);
 			AtomicBoolean scriptDumpVars = new AtomicBoolean(true);
 			scriptManagementService = new ScriptsManagementServiceImpl(scriptsFolder, logger);
 			scriptExecService = new ScriptExecutionServiceImpl(logger);
