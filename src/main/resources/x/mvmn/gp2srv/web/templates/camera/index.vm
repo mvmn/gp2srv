@@ -736,7 +736,7 @@
 				#if($foreach.count>1) | #end
 				<span><a href="#$!navopt" onclick="javascript:nav('$!navopt');return false">$!navopt</a></span>
 			#end
-			| <span><a href="/camdisconnect">X</a></span>
+			| <span><a href="/camdisconnect">x</a></span>
 		</div>
 	</div>
 	<div class="sitesection" id="section_camera">
