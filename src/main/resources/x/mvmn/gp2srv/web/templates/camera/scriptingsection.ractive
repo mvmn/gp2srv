@@ -26,6 +26,16 @@
 	</div>
 	<div class="siteContentElementContainer">
 		<input type="button" value="Save" on-click="saveScript" id="btnScriptSave" />
+		<input type="button" value="Save as..." on-click="saveScriptAs" id="btnScriptSaveAs" />
+		<input type="button" value="Export" on-click="scriptExport" id="btnScriptExport" />
+		<input type="button" value="Import..." on-click="scriptImport" id="btnScriptImport" />
+	</div>
+	<div class="siteContentElementContainer" id="exportImportForm" style="display: none">
+		<input type="button" value="x" on-click="closeExportImportForm" id="btnCloseExportImportForm"><br/>
+		<textarea id="exportImportFormContents" class="scriptContentTextarea"></textarea><br/>
+		<input type="button" value="Read as script" on-click="scriptRead" id="btnScriptRead" />
+	</div>
+	<div class="siteContentElementContainer">
 		<input type="button" value="Run"  on-click="runScript" id="btnScriptRun" />
 		<input type="button" value="Stop" on-click="stopScript" id="btnScriptStop" />
 		<span id="runStopStatusText" class="small"></span>

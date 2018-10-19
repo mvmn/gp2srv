@@ -349,8 +349,8 @@
 				}
 			});
 
-			var saveCurrentScript = function(ractive, successCallback, errorCallback) {
-				var scriptName = ractive.get("scriptName");
+			var saveScript = function(ractive, nameOverride, successCallback, errorCallback) {
+				var scriptName = nameOverride? nameOverride : ractive.get("scriptName");
 				var scriptSteps = ractive.get("scriptSteps");
 	
 				var loadingIndicator = $("#scriptEditor .loadingIndicator");
@@ -390,7 +390,7 @@
 				if(dirty) {
 					var scriptName = ractive.get("scriptName");
 					if(confirm("Save current changes to "+scriptName+"?")) {
-						saveCurrentScript(ractive, successCallback);
+						saveScript(ractive, null, successCallback);
 					} else {
 						successCallback();
 					}
@@ -596,7 +596,29 @@
 					});
 				},
 				saveScript: function() {
-					saveCurrentScript(scriptingRactive);
+					saveScript(scriptingRactive);
+				},
+				saveScriptAs: function() {
+					var newScriptName = prompt("Input script name", "new.gp2srv_script");
+					if(newScriptName) {
+						saveScript(scriptingRactive, newScriptName);
+					}
+				},
+				closeExportImportForm: function() {
+					$("#exportImportForm").hide();
+					$("#exportImportFormContents").val("");
+				},
+				scriptExport: function() {
+					var contents = JSON.stringify(scriptingRactive.get("scriptSteps"), null, "  ");
+					$("#exportImportFormContents").val(contents);
+					$("#exportImportForm").show();
+				},
+				scriptImport: function() {
+					$("#exportImportFormContents").val("");
+					$("#exportImportForm").show();					
+				},
+				scriptRead: function() {
+					scriptingRactive.set("scriptSteps", JSON.parse($("#exportImportFormContents").val()));
 				},
 				scriptStepPropertyChanged: function(event, field, stepIndex, newValue) {
 					scriptingRactive.set("isDirty", true);
