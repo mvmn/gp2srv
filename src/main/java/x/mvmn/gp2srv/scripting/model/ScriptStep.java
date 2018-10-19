@@ -7,9 +7,9 @@ import org.apache.commons.jexl3.JexlExpression;
 
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
-import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
-import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
+import x.mvmn.jlibgphoto2.api.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.api.CameraFileSystemEntryBean;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraEventType;
 import x.mvmn.lang.util.WaitUtil;
 
 public class ScriptStep {

@@ -1,6 +1,6 @@
 package x.mvmn.gp2srv.camera;
 
-import x.mvmn.jlibgphoto2.GP2Camera;
+import x.mvmn.jlibgphoto2.api.GP2Camera;
 
 public interface CameraProvider {
 

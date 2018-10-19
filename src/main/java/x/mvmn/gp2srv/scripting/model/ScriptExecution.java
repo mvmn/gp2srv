@@ -16,7 +16,7 @@ import x.mvmn.gp2srv.camera.service.impl.LightMeterImpl;
 import x.mvmn.gp2srv.camera.service.impl.ScriptHelper;
 import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecutionObserver;
-import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.api.CameraConfigEntryBean;
 import x.mvmn.lang.util.WaitUtil;
 import x.mvmn.log.api.Logger;
 

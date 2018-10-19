@@ -36,7 +36,7 @@ import x.mvmn.gp2srv.web.servlets.ScriptExecWebSocketNotifier;
 import x.mvmn.gp2srv.web.servlets.ScriptExecutionReportingWebSocketServlet;
 import x.mvmn.gp2srv.web.servlets.ScriptingServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
-import x.mvmn.jlibgphoto2.GP2Camera;
+import x.mvmn.jlibgphoto2.api.GP2Camera;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.lang.util.WaitUtil;
 import x.mvmn.log.PrintStreamLogger;

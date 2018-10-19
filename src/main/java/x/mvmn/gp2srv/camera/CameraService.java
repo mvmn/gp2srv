@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
-import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraCaptureType;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
+import x.mvmn.jlibgphoto2.api.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.api.CameraFileSystemEntryBean;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraCaptureType;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraEventType;
 
 public interface CameraService {
 	public void close();

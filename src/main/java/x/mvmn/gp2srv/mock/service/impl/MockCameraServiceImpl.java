@@ -26,11 +26,11 @@ import com.google.gson.reflect.TypeToken;
 import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.camera.CameraService;
 import x.mvmn.gphoto2.jna.Gphoto2Library;
-import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
-import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraCaptureType;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
+import x.mvmn.jlibgphoto2.api.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.api.CameraFileSystemEntryBean;
+import x.mvmn.jlibgphoto2.api.GP2Camera;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraCaptureType;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraEventType;
 import x.mvmn.jlibgphoto2.exception.GP2Exception;
 
 public class MockCameraServiceImpl implements CameraService {

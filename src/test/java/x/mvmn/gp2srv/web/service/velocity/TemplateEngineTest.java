@@ -5,15 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-import x.mvmn.jlibgphoto2.GP2AutodetectCameraHelper;
-import x.mvmn.jlibgphoto2.GP2Context;
-import x.mvmn.jlibgphoto2.GP2PortInfoList;
-import x.mvmn.jlibgphoto2.GP2PortInfoList.GP2PortInfo;
-import x.mvmn.jlibgphoto2.GP2AutodetectCameraHelper.CameraListItemBean;
-
 import org.apache.velocity.VelocityContext;
 import org.junit.Test;
+
+import junit.framework.TestCase;
+import x.mvmn.jlibgphoto2.api.CameraListItemBean;
+import x.mvmn.jlibgphoto2.impl.CameraDetectorImpl;
+import x.mvmn.jlibgphoto2.impl.GP2PortInfoList;
+import x.mvmn.jlibgphoto2.impl.GP2PortInfoList.GP2PortInfo;
 
 public class TemplateEngineTest {
 
@@ -30,8 +29,7 @@ public class TemplateEngineTest {
 	}
 
 	public static void main(String args[]) {
-		GP2Context context = new GP2Context();
-		List<CameraListItemBean> detectedCameras = GP2AutodetectCameraHelper.autodetectCameras(context);
+		List<CameraListItemBean> detectedCameras = new CameraDetectorImpl().detectCameras();
 		System.out.println(String.format("Detecred cameras (%s):", detectedCameras.size()));
 		for (CameraListItemBean clb : detectedCameras) {
 			System.out.println(String.format(" - %s :: %s", clb.getPortName(), clb.getCameraModel()));

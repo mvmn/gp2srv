@@ -16,11 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.web.service.velocity.TemplateEngine;
 import x.mvmn.gp2srv.web.service.velocity.VelocityContextService;
-import x.mvmn.jlibgphoto2.GP2AutodetectCameraHelper;
-import x.mvmn.jlibgphoto2.GP2Camera;
-import x.mvmn.jlibgphoto2.GP2Context;
-import x.mvmn.jlibgphoto2.GP2PortInfoList;
-import x.mvmn.jlibgphoto2.GP2PortInfoList.GP2PortInfo;
+import x.mvmn.jlibgphoto2.impl.CameraDetectorImpl;
+import x.mvmn.jlibgphoto2.impl.GP2CameraImpl;
+import x.mvmn.jlibgphoto2.impl.GP2PortInfoList;
+import x.mvmn.jlibgphoto2.impl.GP2PortInfoList.GP2PortInfo;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.log.api.Logger;
 
@@ -53,7 +52,7 @@ public class CameraChoiceFilter extends AbstractGP2Servlet implements Filter {
 							GP2PortInfoList portList = new GP2PortInfoList();
 							GP2PortInfo gp2PortInfo = portList.getByPath(cameraPortParam);
 							if (gp2PortInfo != null) {
-								camProvider.setCamera(new GP2Camera(gp2PortInfo));
+								camProvider.setCamera(new GP2CameraImpl(gp2PortInfo));
 								httpResponse.sendRedirect("/");
 							} else {
 								httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -61,7 +60,7 @@ public class CameraChoiceFilter extends AbstractGP2Servlet implements Filter {
 						} else {
 							// Show camera choice
 							Map<String, Object> tempalteModel = new HashMap<String, Object>();
-							tempalteModel.put("cameras", GP2AutodetectCameraHelper.autodetectCameras(new GP2Context()));
+							tempalteModel.put("cameras", new CameraDetectorImpl().detectCameras());
 							serveTempalteUTF8Safely("camera/choice.vm", createContext(httpRequest, httpResponse, tempalteModel), httpResponse, logger);
 						}
 					}

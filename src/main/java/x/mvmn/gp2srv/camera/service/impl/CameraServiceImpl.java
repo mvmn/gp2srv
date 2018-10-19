@@ -10,12 +10,10 @@ import org.apache.commons.io.FileUtils;
 
 import x.mvmn.gp2srv.camera.CameraProvider;
 import x.mvmn.gp2srv.camera.CameraService;
-import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
-import x.mvmn.jlibgphoto2.CameraFileSystemEntryBean;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraCaptureType;
-import x.mvmn.jlibgphoto2.GP2Camera.GP2CameraEventType;
-import x.mvmn.jlibgphoto2.GP2CameraFilesHelper;
-import x.mvmn.jlibgphoto2.GP2ConfigHelper;
+import x.mvmn.jlibgphoto2.api.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.api.CameraFileSystemEntryBean;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraCaptureType;
+import x.mvmn.jlibgphoto2.api.GP2Camera.GP2CameraEventType;
 
 public class CameraServiceImpl implements CameraService, Closeable {
 
@@ -39,7 +37,7 @@ public class CameraServiceImpl implements CameraService, Closeable {
 	}
 
 	public synchronized CameraFileSystemEntryBean capture() {
-		return cameraProvider.getCamera().capture();
+		return cameraProvider.getCamera().captureImage();
 	}
 
 	public synchronized CameraFileSystemEntryBean capture(final GP2CameraCaptureType captureType) {
@@ -59,20 +57,20 @@ public class CameraServiceImpl implements CameraService, Closeable {
 	}
 
 	public synchronized List<CameraConfigEntryBean> getConfig() {
-		return GP2ConfigHelper.getConfig(cameraProvider.getCamera());
+		return cameraProvider.getCamera().getConfig();
 	}
 
 	public synchronized CameraServiceImpl setConfig(CameraConfigEntryBean configEntry) {
-		GP2ConfigHelper.setConfig(cameraProvider.getCamera(), configEntry);
+		cameraProvider.getCamera().setConfig(configEntry);
 		return this;
 	}
 
 	public synchronized List<CameraFileSystemEntryBean> filesList(final String path, boolean includeFiles, boolean includeFolders, boolean recursive) {
-		return GP2CameraFilesHelper.list(cameraProvider.getCamera(), path, includeFiles, includeFolders, recursive);
+		return cameraProvider.getCamera().listCameraFiles(path, includeFiles, includeFolders, recursive);
 	}
 
 	public synchronized CameraServiceImpl fileDelete(final String filePath, final String fileName) {
-		GP2CameraFilesHelper.deleteCameraFile(cameraProvider.getCamera(), filePath, fileName);
+		cameraProvider.getCamera().deleteCameraFile(filePath, fileName);
 		return this;
 	}
 
@@ -103,11 +101,11 @@ public class CameraServiceImpl implements CameraService, Closeable {
 	}
 
 	public synchronized byte[] fileGetContents(final String filePath, final String fileName) {
-		return GP2CameraFilesHelper.getCameraFileContents(cameraProvider.getCamera(), filePath, fileName);
+		return cameraProvider.getCamera().getCameraFileContents(filePath, fileName);
 	}
 
 	public synchronized byte[] fileGetThumb(final String filePath, final String fileName) {
-		return GP2CameraFilesHelper.getCameraFileContents(cameraProvider.getCamera(), filePath, fileName, true);
+		return cameraProvider.getCamera().getCameraFileContents(filePath, fileName, true);
 	}
 
 	public Map<String, CameraConfigEntryBean> getConfigAsMap() {

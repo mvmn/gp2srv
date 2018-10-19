@@ -16,7 +16,7 @@ import x.mvmn.gp2srv.scripting.model.ScriptExecution.ScriptExecutionFinishListen
 import x.mvmn.gp2srv.scripting.model.ScriptStep.ScriptStepType;
 import x.mvmn.gp2srv.scripting.service.impl.JexlMapContext;
 import x.mvmn.gp2srv.scripting.service.impl.ScriptExecutionServiceImpl.ScriptExecutionObserver;
-import x.mvmn.jlibgphoto2.CameraConfigEntryBean;
+import x.mvmn.jlibgphoto2.api.CameraConfigEntryBean;
 import x.mvmn.lang.util.Tuple;
 
 public class ScriptExecutionTest {
