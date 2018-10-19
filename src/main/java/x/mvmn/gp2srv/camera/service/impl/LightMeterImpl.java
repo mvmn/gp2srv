@@ -21,17 +21,47 @@ public class LightMeterImpl {
 	}
 
 	public double getForCameraFile(String cameraFilePath) {
-		int lios = cameraFilePath.lastIndexOf("/");
-		return doCalc(cameraService.fileGetContents(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)));
+		String file = getFileName(cameraFilePath);
+		String folder = getFolder(cameraFilePath);
+		try {
+			return doCalc(cameraService.fileGetContents(folder, file));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to get image brightness for camera file '" + file + "' in folder '" + folder + "'", e);
+		}
 	}
 
 	public double getForThumb(String cameraFilePath) {
-		int lios = cameraFilePath.lastIndexOf("/");
-		return doCalc(cameraService.fileGetThumb(cameraFilePath.substring(0, lios), cameraFilePath.substring(lios + 1)));
+		String file = getFileName(cameraFilePath);
+		String folder = getFolder(cameraFilePath);
+		try {
+			return doCalc(cameraService.fileGetThumb(folder, file));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to get image brightness for preview of camera file '" + file + "' in folder '" + folder + "'", e);
+		}
 	}
 
 	public double getForPreview() {
-		return doCalc(cameraService.capturePreview());
+		try {
+			return doCalc(cameraService.capturePreview());
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to get image brightness for preview image.", e);
+		}
+	}
+
+	protected String getFileName(String cameraFilePath) {
+		int lios = cameraFilePath.lastIndexOf("/");
+		return lios > -1 ? cameraFilePath.substring(lios + 1) : cameraFilePath;
+	}
+
+	protected String getFolder(String cameraFilePath) {
+		int lios = cameraFilePath.lastIndexOf("/");
+		if (lios == -1) {
+			return "";
+		} else if (lios == 0) {
+			return "/";
+		} else {
+			return cameraFilePath.substring(0, lios);
+		}
 	}
 
 	protected double doCalc(byte[] image) {
