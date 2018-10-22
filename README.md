@@ -26,6 +26,8 @@ Runtime dependencies:
 - LibGPhoto2 - http://www.gphoto.org
 - Java 8+ (use Java5 compatibility builds if you need to run on earlier java versions - see in releases).
 
+Example GPhoto2Server script for day-to-night timelapse shooting (on Canon 600D)
+- https://gist.github.com/mvmn/e54f0336cfca7de5b24a632266a9f3d6
 
 Known issues: 
 On Canon (and possibly other) cameras browsing files requires viewfinder to be closed. Thus one has to close viewfinder (which gets opened by LiveView) before going to browse page.
