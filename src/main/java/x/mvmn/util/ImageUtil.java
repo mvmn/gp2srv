@@ -13,8 +13,8 @@ public class ImageUtil {
 
 		int imageType = image.getType();
 		if (imageType != BufferedImage.TYPE_INT_ARGB && imageType != BufferedImage.TYPE_INT_RGB && imageType != BufferedImage.TYPE_3BYTE_BGR
-				&& imageType != BufferedImage.TYPE_4BYTE_ABGR && imageType != BufferedImage.TYPE_4BYTE_ABGR_PRE && imageType != BufferedImage.TYPE_INT_ARGB_PRE
-				&& imageType != BufferedImage.TYPE_INT_BGR) {
+				&& imageType != BufferedImage.TYPE_4BYTE_ABGR && imageType != BufferedImage.TYPE_4BYTE_ABGR_PRE
+				&& imageType != BufferedImage.TYPE_INT_ARGB_PRE && imageType != BufferedImage.TYPE_INT_BGR) {
 			throw new RuntimeException("Unsupported image type: " + image.getType());
 		}
 		boolean hasAlpha = image.getAlphaRaster() != null;
@@ -37,8 +37,7 @@ public class ImageUtil {
 		while (!pool.isTerminated()) {
 			try {
 				pool.awaitTermination(5, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-			}
+			} catch (InterruptedException e) {}
 		}
 
 		for (BrightnessCalcTask task : tasks) {
@@ -70,17 +69,21 @@ public class ImageUtil {
 		}
 
 		@Override
-		protected void setRawResult(Double value) {
-		}
+		protected void setRawResult(Double value) {}
 
 		@Override
 		protected boolean exec() {
 			double result = 0.0d;
 			int length = to - from;
 			for (int i = from; i < to; i += pixelSize) {
-				result += ((int) pixels[i + pixelSize - 3] & 0xff) + ((int) pixels[i + pixelSize - 2] & 0xff) + ((int) pixels[i + pixelSize - 1] & 0xff);
+				int r = ((int) pixels[i + pixelSize - 3] & 0xff);
+				int g = ((int) pixels[i + pixelSize - 2] & 0xff);
+				int b = ((int) pixels[i + pixelSize - 1] & 0xff);
+				// result += r + g + b;
+				result += 0.299 * r + 0.587 * g + 0.114 * b;
 			}
-			this.result = (result / (length / pixelSize)) / 7.65d;
+			// this.result = (result / (length / pixelSize)) / 7.65d; // 7.65 = (255 * 3)/100
+			this.result = (result / (length / pixelSize)) / 2.55d; // NTSC formula
 			return true;
 		}
 	}
