@@ -6,6 +6,9 @@
 		<div class="fullWidth">
 			<input type="button" value="capture + download + delete" class="fullWidth" on-click="doCaptureDldDel" /><br/>
 		</div>
+		<div class="fullWidth">
+			<input type="button" value="preview" class="fullWidth" on-click="doPreview" /><br/>
+		</div>
 		<div class="fullWidth" style="padding-top: 10px">
 			<input type="checkbox" on-change="setLiveView" />&nbsp;<span class="headline" on-click="toggleLiveView">Live view</span>		
 		</div>

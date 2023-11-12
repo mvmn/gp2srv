@@ -11,6 +11,11 @@
 		});
 	}
 	
+	function doPreview() {
+		$("#liveViewContainer").html('<img class="fullWidth" style="width: 100%" src="$!{request.contextPath}/preview.jpeg?t=' + Date.now() + '" />');
+		$("#liveViewContainer").show();
+	}
+	
 	function reReadConfig() {
 		getJson("$!{request.contextPath}/cameraConfig.json?reRead=true", function(config) {
 			console.log(config);
@@ -74,6 +79,7 @@
 							$("#liveViewContainer img").attr("src", "");
 						}
 					},
+					doPreview: doPreview,
 					refreshConfig: function(event) {
 						reReadConfig();
 					},

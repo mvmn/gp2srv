@@ -2,9 +2,15 @@ package x.mvmn.util;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 public class ImageUtil {
 
@@ -129,4 +135,16 @@ public class ImageUtil {
 	 * BufferedImage b = r.createScreenCapture(screenRect); if (k % 2 == 0) { calculateAverageBrightness(b); } } long et = System.nanoTime();
 	 * System.out.println(et - st + " " + (k % 2 == 0)); } }
 	 */
+	
+        public static boolean isJPEG(byte[] image) {
+            return image != null && image.length > 3 && image[0] == 0xFF && (image[1] == 0xDF || image[1] == 0x4F)
+                    && image[2] == 0xFF;
+        }
+        
+        public static byte[] convertToJPEG(byte[] imageBytes) throws IOException {
+            BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(img, "jpg", baos);
+            return baos.toByteArray();
+        }
 }
