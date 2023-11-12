@@ -32,6 +32,7 @@ import x.mvmn.gp2srv.web.servlets.CameraChoiceFilter;
 import x.mvmn.gp2srv.web.servlets.CameraControlServlet;
 import x.mvmn.gp2srv.web.servlets.DevModeServlet;
 import x.mvmn.gp2srv.web.servlets.LiveViewServlet;
+import x.mvmn.gp2srv.web.servlets.PreviewServlet;
 import x.mvmn.gp2srv.web.servlets.ScriptExecWebSocketNotifier;
 import x.mvmn.gp2srv.web.servlets.ScriptExecutionReportingWebSocketServlet;
 import x.mvmn.gp2srv.web.servlets.ScriptingServlet;
@@ -175,7 +176,9 @@ public class GPhoto2Server implements Provider<TemplateEngine>, CameraProvider {
 					new ServletHolder(new CameraControlServlet(cameraService, favouredCamConfSettings, velocityContextService, this, imageDldFolder, logger)),
 					"/");
 			context.addServlet(new ServletHolder(new DevModeServlet(this)), "/devmode/*");
-			context.addServlet(new ServletHolder(new LiveViewServlet(cameraService)), "/stream.mjpeg");
+			context.addServlet(new ServletHolder(new LiveViewServlet(this, cameraService)), "/stream.mjpeg");
+                        context.addServlet(new ServletHolder(new PreviewServlet(cameraService, true)), "/preview.jpeg");
+                        context.addServlet(new ServletHolder(new PreviewServlet(cameraService, false)), "/preview");
 
 			server.setHandler(context);
 		} catch (Exception e) {
