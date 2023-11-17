@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,7 +38,12 @@ import x.mvmn.gp2srv.web.servlets.ScriptExecWebSocketNotifier;
 import x.mvmn.gp2srv.web.servlets.ScriptExecutionReportingWebSocketServlet;
 import x.mvmn.gp2srv.web.servlets.ScriptingServlet;
 import x.mvmn.gp2srv.web.servlets.StaticsResourcesServlet;
+import x.mvmn.jlibgphoto2.api.CameraListItemBean;
 import x.mvmn.jlibgphoto2.api.GP2Camera;
+import x.mvmn.jlibgphoto2.impl.CameraDetectorImpl;
+import x.mvmn.jlibgphoto2.impl.GP2CameraImpl;
+import x.mvmn.jlibgphoto2.impl.GP2PortInfoList;
+import x.mvmn.jlibgphoto2.impl.GP2PortInfoList.GP2PortInfo;
 import x.mvmn.lang.util.Provider;
 import x.mvmn.lang.util.WaitUtil;
 import x.mvmn.log.PrintStreamLogger;
@@ -47,7 +53,7 @@ import x.mvmn.util.FileBackedProperties;
 
 public class GPhoto2Server implements Provider<TemplateEngine>, CameraProvider {
 
-	private static final String DEFAULT_CONTEXT_PATH = "/";
+	public static final String DEFAULT_CONTEXT_PATH = "/";
 	private static final int DEFAULT_PORT = 8080;
 
 	private final Server server;
@@ -92,8 +98,13 @@ public class GPhoto2Server implements Provider<TemplateEngine>, CameraProvider {
 		this(DEFAULT_CONTEXT_PATH, port, logLevel, mockMode, requireAuthCredentials, imageDldPath);
 	}
 
+        public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode,
+                final String[] requireAuthCredentials, String imageDldPath) {
+            this(contextPath, port, logLevel, mockMode, requireAuthCredentials, imageDldPath, false);
+        }
+
 	public GPhoto2Server(String contextPath, Integer port, final LogLevel logLevel, final boolean mockMode, final String[] requireAuthCredentials,
-			String imageDldPath) {
+			String imageDldPath, boolean autoConnectFirstCamera) {
 		this.logger = makeLogger(logLevel);
 
 		logger.info("Initializing...");
@@ -181,6 +192,24 @@ public class GPhoto2Server implements Provider<TemplateEngine>, CameraProvider {
                         context.addServlet(new ServletHolder(new PreviewServlet(cameraService, false)), "/preview");
 
 			server.setHandler(context);
+
+                        if (autoConnectFirstCamera) {
+                            logger.info("Auto-connecting first available camera...");
+                            List<CameraListItemBean> cameras = new CameraDetectorImpl().detectCameras();
+                            if (cameras == null || cameras.isEmpty()) {
+                                logger.info("No cameras found.");
+                            } else {
+                                GP2PortInfoList portList = new GP2PortInfoList();
+                                CameraListItemBean firstCamera = cameras.get(0);
+                                GP2PortInfo gp2PortInfo = portList.getByPath(firstCamera.getPortName());
+                                if (gp2PortInfo != null) {
+                                    camProvider.setCamera(new GP2CameraImpl(gp2PortInfo));
+                                    logger.info("Auto-connected to camera " + firstCamera.getCameraModel());
+                                } else {
+                                    logger.error("Failed to auto-connect to camera on " + firstCamera.getPortName());
+                                }
+                            }
+                        }
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

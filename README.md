@@ -5,12 +5,16 @@ This is a Jetty-powered WebApp that serves as a web-interface for GPhoto2 progra
 It can be put on any machine that has libgphoto2 and Java 1.5 or above. The calls to GPhoto2 are done using JNA, via https://github.com/mvmn/jlibgphoto2
 
 Command-line arguments:
-- port - TCP port to listen on. 
+- port <port> - TCP port to listen on. 
 Optional. Default port is 8080.
-- logLevel - logging level (one of TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL). 
+- logLevel <level> - set logging level (one of TRACE, DEBUG, INFO, WARN, ERROR, SEVERE, FATAL). 
 Optional. Default is INFO.
-- auth - username:password
+- auth <username:password>
 Optional. Enables basic HTTP authentication with provided credentials.
+- imgfolder <path>
+Optional. Path to store captured images.
+- autoconnect
+Optional. If present, GPhoto2Server will try to automatically connect to first available camera on startup.
 
 Java System properties:
 - -Djna.library.path=/path/to/folder/with/libgphoto2.dylib/or/such - in case you get errors like "Unable to load library 'gphoto2': Native library (darwin/libgphoto2.dylib) not found in resource path" you can specify a path to folder that contains gphoto2 library folder. 
